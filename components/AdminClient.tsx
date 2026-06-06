@@ -126,7 +126,8 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
         background: '#ffffff',
         borderBottom: '1px solid #e5e5e5',
         padding: '20px 0',
-        stickyTop: 0,
+        position: 'sticky',
+        top: 0,
         zIndex: 100,
       }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
