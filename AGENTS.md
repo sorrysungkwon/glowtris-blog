@@ -31,12 +31,17 @@ curl -X POST https://api.getmoshi.app/api/webhook \
 - Admin editor constrained to 1280px max-width
 - All API changes must maintain backward compatibility
 
-## Repository State
-Before making changes, run:
-```bash
-git log --oneline -3   # See recent work
-git status             # Check uncommitted changes
-```
+## Session Start Protocol
+On EVERY session start, read in order:
+1. **robots.md** (FIRST - universal rules for all agents)
+2. **AGENTS.md** (this file - agent collaboration rules)
+3. **TODO.md** (next tasks)
+4. Run: `git log --oneline -5` (recent work)
+5. Run: `git status` (uncommitted changes)
+
+Then report to user: current state, recent changes, next task
+
+See robots.md for complete rules and universal constraints.
 
 ## Contact Protocol
 If sync issues occur between Claude and other agents:

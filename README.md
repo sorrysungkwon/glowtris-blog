@@ -86,8 +86,10 @@ This will be rendered as MDX.
 
 ## Documentation
 
-- **CLAUDE.md** — Rules and guidelines for Claude agent
-- **AGENTS.md** — Collaboration rules for other AI agents
-- **TODO.md** — Task tracking and next items
+Session start order (ALWAYS):
+1. **robots.md** — Universal rules for all agents (READ FIRST)
+2. **CLAUDE.md** — Claude-specific context
+3. **AGENTS.md** — Other agents' collaboration rules  
+4. **TODO.md** — Task tracking and next items
 
-See CLAUDE.md for complete workflow and rules.
+See robots.md for complete workflow and universal rules.

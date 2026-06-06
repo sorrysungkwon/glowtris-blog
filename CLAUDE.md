@@ -58,12 +58,14 @@ glowtris-blog/
 - No documentation in Korean unless unavoidable
 - Use Moshi webhook, never PushNotification tool
 
-## Session Start
+## Session Start Protocol
 On session start, read in order:
-1. README.md (if exists)
-2. TODO.md (next tasks)
-3. CLAUDE.md (this file)
+1. **robots.md** (FIRST - universal rules for all agents)
+2. **CLAUDE.md** (this file - Claude-specific context)
+3. **TODO.md** (next tasks and current work)
 4. Run: `git log --oneline -5` (recent changes)
 5. Check: `git status` (uncommitted work)
 
-Then report to user what needs attention.
+Then report to user: current branch, what changed, next task from TODO.md
+
+See robots.md for complete sync protocol and universal rules.
