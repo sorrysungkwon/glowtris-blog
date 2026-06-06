@@ -71,67 +71,71 @@ export default function PostEditor() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
       {/* Header */}
-      <div style={{ padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid #e5e5e5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/admin" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
-          ← Back to posts
-        </Link>
+      <div style={{ padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid #e5e5e5' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href="/admin" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
+            ← Back to posts
+          </Link>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {/* Language Toggle */}
-          <div style={{
-            display: 'flex',
-            background: '#f0f0f0',
-            borderRadius: '6px',
-            padding: '2px',
-            gap: '2px',
-          }}>
-            {(['en', 'ko'] as const).map(l => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                style={{
-                  padding: '6px 12px',
-                  background: lang === l ? '#ffffff' : 'transparent',
-                  border: lang === l ? '1px solid #e5e5e5' : 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: lang === l ? '#2563eb' : '#666',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              padding: '8px 20px',
-              background: saving ? '#ccc' : '#0f0f11',
-              color: '#fff',
-              border: 'none',
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {/* Language Toggle */}
+            <div style={{
+              display: 'flex',
+              background: '#f0f0f0',
               borderRadius: '6px',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-            }}
-          >
-            {saving ? '💾 Saving...' : '🚀 Save & Deploy'}
-          </button>
+              padding: '2px',
+              gap: '2px',
+            }}>
+              {(['en', 'ko'] as const).map(l => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  style={{
+                    padding: '6px 12px',
+                    background: lang === l ? '#ffffff' : 'transparent',
+                    border: lang === l ? '1px solid #e5e5e5' : 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: lang === l ? '#2563eb' : '#666',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                padding: '8px 20px',
+                background: saving ? '#ccc' : '#0f0f11',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+              }}
+            >
+              {saving ? '💾 Saving...' : '🚀 Save & Deploy'}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Messages */}
-      {error && <div style={{ padding: '12px 24px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc' }}>{error}</div>}
-      {success && <div style={{ padding: '12px 24px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc' }}>{success}</div>}
+      {error && <div style={{ padding: '12px 24px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{error}</div></div>}
+      {success && <div style={{ padding: '12px 24px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{success}</div></div>}
 
-      {/* Editor */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0' }}>
+      {/* Editor Container */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+        {/* Editor */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0', maxWidth: '1280px', width: '100%' }}>
         {/* Left: Frontmatter + Current Language */}
         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e5e5e5', background: '#ffffff' }}>
           {/* Frontmatter */}
@@ -225,6 +229,7 @@ export default function PostEditor() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
