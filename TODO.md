@@ -1,7 +1,7 @@
 # Glowtris Blog TODO
 
 ## 🔲 Next
-- [ ] Editor preview 언어 동기화: EN 편집 시 EN 프리뷰, KO 편집 시 KO 프리뷰로 변경
+- [ ] Sync editor preview language: show EN preview when editing EN, KO preview when editing KO
   - File: `/app/admin/[slug]/page.tsx` line 203
   - Change: `lang === 'en' ? data.content_ko : data.content_en` → `lang === 'en' ? data.content_en : data.content_ko`
 
