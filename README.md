@@ -18,21 +18,19 @@ Modern tech blog platform for glowtris.com with bilingual (EN/KO) support and we
 - **Deployment**: Vercel with Git auto-deploy
 - **Admin**: React client component with localStorage auth
 
-## Quick Start
-
-### Development
-```bash
-npm install
-npm run dev
-# Open http://localhost:3000
-```
+## Access
 
 ### Admin Editor
 1. Navigate to `/admin`
-2. Enter password: `<ADMIN_PASSWORD>`
+2. Enter password (set via `ADMIN_PASSWORD` environment variable)
 3. Select post to edit
 4. Toggle EN/KO language, edit markdown
 5. Click "Save & Deploy" to publish
+
+### Deployment
+- All changes push directly to main branch
+- Vercel auto-deploys immediately
+- No local development environment required
 
 ## Project Structure
 
