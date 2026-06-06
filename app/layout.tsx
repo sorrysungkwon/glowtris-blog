@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
+import LangToggle from '@/components/LangToggle'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -15,10 +17,22 @@ export const metadata: Metadata = {
   },
 }
 
+const noFlashScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('theme');
+    document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+  } catch(e) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -39,6 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="https://glowtris.com" target="_blank" rel="noopener noreferrer">
                   Play the game ↗
                 </Link>
+                <LangToggle />
+                <ThemeToggle />
               </nav>
             </div>
           </div>

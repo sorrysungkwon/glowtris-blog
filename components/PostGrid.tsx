@@ -6,7 +6,12 @@ import type { PostMeta } from '@/lib/posts'
 
 const ALL_CATEGORIES = ['ALL', 'DEV', 'UPDATE', 'GUIDE', 'NOTICE']
 
-export default function PostGrid({ posts }: { posts: PostMeta[] }) {
+interface Props {
+  posts: PostMeta[]
+  lang?: string
+}
+
+export default function PostGrid({ posts, lang }: Props) {
   const [active, setActive] = useState('ALL')
 
   const available = ALL_CATEGORIES.filter(
@@ -15,7 +20,6 @@ export default function PostGrid({ posts }: { posts: PostMeta[] }) {
 
   const filtered = active === 'ALL' ? posts : posts.filter(p => p.category === active)
 
-  // Featured: first post with featured:true, or just the first post — only on ALL tab
   const featuredPost =
     active === 'ALL' ? (filtered.find(p => p.featured) ?? filtered[0]) : null
   const rest = featuredPost
@@ -37,9 +41,9 @@ export default function PostGrid({ posts }: { posts: PostMeta[] }) {
       </div>
 
       <div className="post-grid">
-        {featuredPost && <PostCard post={featuredPost} featured />}
+        {featuredPost && <PostCard post={featuredPost} featured lang={lang} />}
         {rest.map(post => (
-          <PostCard key={post.slug} post={post} />
+          <PostCard key={post.slug} post={post} lang={lang} />
         ))}
         {filtered.length === 0 && (
           <p className="grid-empty">No posts in this category yet.</p>

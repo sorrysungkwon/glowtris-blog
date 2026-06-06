@@ -9,7 +9,9 @@ const postsDir = path.join(process.cwd(), 'posts')
 export interface PostMeta {
   slug: string
   title: string
+  title_ko?: string
   description: string
+  description_ko?: string
   date: string
   category: string
   author: string
@@ -37,7 +39,14 @@ export function getAllPostMeta(): PostMeta[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-export function getPost(slug: string): Post {
+export function getPost(slug: string, lang?: string): Post {
+  if (lang === 'ko') {
+    const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+    if (fs.existsSync(koFile)) {
+      const { data, content } = matter(fs.readFileSync(koFile, 'utf8'))
+      return { slug, content, ...data } as Post
+    }
+  }
   const file = path.join(postsDir, `${slug}.mdx`)
   const { data, content } = matter(fs.readFileSync(file, 'utf8'))
   return { slug, content, ...data } as Post
@@ -47,4 +56,3 @@ export function getSlugs(): string[] {
   if (!fs.existsSync(postsDir)) return []
   return fs.readdirSync(postsDir).filter(f => f.endsWith('.mdx')).map(f => f.replace(/\.mdx$/, ''))
 }
-

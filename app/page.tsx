@@ -1,7 +1,12 @@
 import { getAllPostMeta } from '@/lib/posts'
 import PostGrid from '@/components/PostGrid'
 
-export default function Home() {
+interface Props {
+  searchParams: Promise<{ lang?: string }>
+}
+
+export default async function Home({ searchParams }: Props) {
+  const { lang = 'en' } = await searchParams
   const posts = getAllPostMeta()
 
   return (
@@ -25,7 +30,7 @@ export default function Home() {
       </section>
 
       <div className="container">
-        <PostGrid posts={posts} />
+        <PostGrid posts={posts} lang={lang} />
       </div>
     </>
   )

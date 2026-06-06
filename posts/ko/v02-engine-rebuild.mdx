@@ -1,0 +1,99 @@
+---
+title: 게임 엔진을 전부 다시 짰는데 게임은 똑같아 보입니다
+description: setTimeout 기반 게임 루프의 함정, 1000Hz 고정 타임스텝으로 수정한 방법, 그리고 서브프레임 입력 처리가 실제로 무슨 의미인지.
+date: 2026-06-01
+category: DEV
+author: sorrysungkwon
+authorEmoji: 🔧
+readingTime: 8
+coverGradient: "linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)"
+coverEmoji: "⚙️"
+---
+
+v0.2는 약 일주일이 걸린 완전한 엔진 재구축이었는데, 플레이어 눈에 보이는 건 사실상 아무것도 바뀌지 않았습니다.
+
+좋은 인프라 작업이란 이런 느낌인가 봅니다.
+
+## setTimeout의 문제
+
+원래 코드는 이런 식이었습니다:
+
+```javascript
+function tick() {
+  updateGame()
+  render()
+  setTimeout(tick, 16) // "60fps"
+}
+tick()
+```
+
+많은 브라우저 게임이 이렇게 시작합니다. 겉으로는 괜찮아 보이지만, 문제가 두 가지 있습니다.
+
+**문제 1: setTimeout의 타이밍은 정확하지 않습니다.** 브라우저는 `setTimeout`을 최소 1~4ms로 제한하고, 부하 상태나 백그라운드 탭에서는 상당히 어긋납니다. "16ms 틱"이 실제로는 18ms, 22ms, 심지어 45ms에 실행될 수 있습니다. 중력, DAS 타이밍, 락 딜레이가 모두 틱 단위로 계산되는 테트리스에서 이 오차는 중요합니다.
+
+**문제 2: 디스플레이 갱신 주기가 아닌 고정 틱 레이트에 묶여 있습니다.** 게임 로직이 `setTimeout`이 실행되는 속도로 돌아가고, 렌더링도 같은 주기로 합니다. 144Hz 모니터에서도 최대 60fps 렌더링만 얻을 수 있고, 나머지 프레임은 낭비됩니다.
+
+잠깐 `requestAnimationFrame`으로 바꿔봤는데, 렌더링 문제는 해결됐지만 새로운 문제가 생겼습니다. 게임 로직이 어떤 화면에서는 144Hz, 어떤 화면에서는 60Hz로 돌아가게 된 것입니다. 144Hz 모니터에서는 중력이 2.4배 빨라지는데, 당연히 잘못된 거죠.
+
+## 해결책: 로직과 렌더링 분리
+
+표준적인 해결책은 누산기(accumulator) 패턴을 사용하는 고정 타임스텝입니다. 아이디어는 간단합니다. 게임 로직은 고정 속도로 실행하고, 렌더링은 디스플레이가 지원하는 속도로 실행합니다.
+
+```javascript
+const TICK_MS = 1 // 초당 1000번 로직 업데이트
+
+let accumulator = 0
+let lastTime = performance.now()
+
+function loop(now) {
+  const dt = Math.min(now - lastTime, 100) // 스파이럴 방지를 위한 상한
+  lastTime = now
+  accumulator += dt
+
+  while (accumulator >= TICK_MS) {
+    gameTick()  // 모니터 관계없이 정확히 1000Hz로 실행
+    accumulator -= TICK_MS
+  }
+
+  render()  // 디스플레이 갱신 주기에 맞춰 실행
+  requestAnimationFrame(loop)
+}
+```
+
+`Math.min(dt, 100)` 상한이 중요합니다. 탭이 10초 동안 백그라운드에 있다가 돌아왔을 때 10,000개의 게임 틱을 한꺼번에 처리하려 하면 안 되니까요.
+
+1000Hz가 과하게 느껴질 수 있습니다. 대부분의 경우 60Hz로도 충분합니다. 하지만 테트리스의 DAS(delayed auto-shift) 타이밍은 경쟁 플레이에서 1ms 단위로 측정됩니다. 60Hz에서는 표현 가능한 최소 지연이 16.67ms여서 DAS 느낌에 눈에 띄는 오차가 생깁니다. 1000Hz에서는 1ms입니다. 추가 CPU 오버헤드는 현대 기기에서 무시할 만한 수준입니다.
+
+## 입력 처리
+
+고정 타임스텝 방식에는 미묘한 버그가 하나 따라옵니다. 입력 이벤트가 틱 사이의 임의의 시점에 발생한다는 것입니다.
+
+`keydown`이 1ms 틱의 t=1.3ms 지점에서 발생했다고 가정해봅시다. 바로 적용하면 게임 시계 기준으로 0.3ms "일찍" 적용하는 셈입니다. 1000Hz 루프에서는 문제없지만, 같은 틱 창 안에 도착한 두 입력이 비결정적인 순서로 적용될 수 있습니다.
+
+해결책은 큐입니다:
+
+```javascript
+const inputQueue = []
+
+document.addEventListener('keydown', e => {
+  inputQueue.push({ key: e.key, t: performance.now() })
+})
+
+function gameTick(tickStart) {
+  // 이 틱이 시작되기 전에 도착한 입력만 처리
+  while (inputQueue.length && inputQueue[0].t <= tickStart) {
+    processInput(inputQueue.shift())
+  }
+  // ... 나머지 게임 로직
+}
+```
+
+이제 입력은 실제로 발생한 시점에 해당하는 틱에서, 올바른 순서로, 올바른 게임 타임 위치에서 적용됩니다.
+
+결과: 입력 지연이 평균 ~4ms(setTimeout 한 프레임)에서 ~0.3ms로 줄었습니다. 의식적으로 느끼기는 어려운 차이지만, 정량화하기 힘든 방식으로 게임이 더 반응적으로 느껴집니다.
+
+---
+
+말했듯이, 이 모든 작업 후에도 게임은 똑같아 보입니다. 하지만 경쟁용 테트리스 클라이언트들이 이 기본 아키텍처를 쓰는 데는 이유가 있습니다. 나중에 근본적인 타이밍 문제를 땜질하는 것보다, 계획한 기능들을 실제로 지원할 수 있는 기반 위에서 만들고 싶었습니다.
+
+그만한 가치가 있었습니다. 아마도.

@@ -7,16 +7,18 @@ import type { Metadata } from 'next'
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ lang?: string }>
 }
 
 export async function generateStaticParams() {
   return getSlugs().map(slug => ({ slug }))
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
+  const { lang = 'en' } = await searchParams
   try {
-    const post = getPost(slug)
+    const post = getPost(slug, lang)
     return {
       title: post.title,
       description: post.description,
@@ -32,19 +34,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function PostPage({ params }: Props) {
+export default async function PostPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const { lang = 'en' } = await searchParams
 
   let post
   try {
-    post = getPost(slug)
+    post = getPost(slug, lang)
   } catch {
     notFound()
   }
 
+  const backHref = lang === 'ko' ? '/?lang=ko' : '/'
+  const readUnit = lang === 'ko' ? '분 읽기' : 'min read'
+
   return (
     <div className="post-page">
-      <Link href="/" className="post-back">← All posts</Link>
+      <Link href={backHref} className="post-back">← All posts</Link>
 
       <div className="post-hero" style={{ background: post.coverGradient }}>
         {post.coverEmoji && (
@@ -60,7 +66,7 @@ export default async function PostPage({ params }: Props) {
           <span className="dot">·</span>
           <span>{formatDate(post.date, true)}</span>
           <span className="dot">·</span>
-          <span>{post.readingTime}분 읽기</span>
+          <span>{post.readingTime} {readUnit}</span>
         </div>
       </header>
 
