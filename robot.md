@@ -75,12 +75,12 @@ Editor container must not expand beyond 1280px:
 
 ---
 
-## Rule 6: Admin Password
+## Rule 6: Admin Authentication
 
-- Environment variable: `ADMIN_PASSWORD`
-- Value: `<ADMIN_PASSWORD>`
-- Path: `/admin`
+- Configured via `ADMIN_PASSWORD` environment variable
+- Admin editor path: `/admin`
 - Purpose: Password-protected editor access (no database needed)
+- Do NOT include password in code, docs, or commits
 
 ---
 

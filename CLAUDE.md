@@ -25,10 +25,11 @@ curl -X POST https://api.getmoshi.app/api/webhook \
   -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary"}'
 ```
 
-### 4. Admin Password
-- `ADMIN_PASSWORD` env var: `<ADMIN_PASSWORD>`
+### 4. Admin Authentication
+- Password protected via `ADMIN_PASSWORD` environment variable
 - Admin editor: `/admin` path
 - Simultaneous EN/KO editing with single save/deploy
+- Do NOT commit password to docs or code
 
 ## File Structure
 ```
