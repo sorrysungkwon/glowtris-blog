@@ -87,9 +87,9 @@ This will be rendered as MDX.
 ## Documentation
 
 Session start order (ALWAYS):
-1. **robots.md** — Universal rules for all agents (READ FIRST)
+1. **robot.md** — Universal rules for all agents (READ FIRST)
 2. **CLAUDE.md** — Claude-specific context
 3. **AGENTS.md** — Other agents' collaboration rules  
 4. **TODO.md** — Task tracking and next items
 
-See robots.md for complete workflow and universal rules.
+See robot.md for complete workflow and universal rules.

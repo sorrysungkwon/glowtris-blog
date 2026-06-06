@@ -33,7 +33,7 @@ curl -X POST https://api.getmoshi.app/api/webhook \
 
 ## Session Start Protocol
 On EVERY session start, read in order:
-1. **robots.md** (FIRST - universal rules for all agents)
+1. **robot.md** (FIRST - universal rules for all agents)
 2. **AGENTS.md** (this file - agent collaboration rules)
 3. **TODO.md** (next tasks)
 4. Run: `git log --oneline -5` (recent work)
@@ -41,7 +41,7 @@ On EVERY session start, read in order:
 
 Then report to user: current state, recent changes, next task
 
-See robots.md for complete rules and universal constraints.
+See robot.md for complete rules and universal constraints.
 
 ## Contact Protocol
 If sync issues occur between Claude and other agents:

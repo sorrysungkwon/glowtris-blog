@@ -60,7 +60,7 @@ glowtris-blog/
 
 ## Session Start Protocol
 On session start, read in order:
-1. **robots.md** (FIRST - universal rules for all agents)
+1. **robot.md** (FIRST - universal rules for all agents)
 2. **CLAUDE.md** (this file - Claude-specific context)
 3. **TODO.md** (next tasks and current work)
 4. Run: `git log --oneline -5` (recent changes)
@@ -68,4 +68,4 @@ On session start, read in order:
 
 Then report to user: current branch, what changed, next task from TODO.md
 
-See robots.md for complete sync protocol and universal rules.
+See robot.md for complete sync protocol and universal rules.
