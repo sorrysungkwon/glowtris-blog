@@ -1,0 +1,75 @@
+---
+title: How the daily leaderboard "resets" without actually deleting anything
+description: The Duolingo trick — using date-keyed Redis buckets to make a leaderboard appear to reset at local midnight, while keeping the old data around.
+date: 2026-06-05
+category: UPDATE
+author: Glowtris Team
+authorEmoji: 📅
+readingTime: 4
+coverGradient: "linear-gradient(135deg, #ff7700 0%, #ff0080 100%)"
+coverEmoji: "🏆"
+---
+
+Glowtris has a daily leaderboard that "resets" at midnight in your local timezone. Same idea as Duolingo's weekly leagues — the board feels fresh every day, which makes it worth checking back.
+
+Here's the thing: the data never actually gets deleted.
+
+## The naive approach and why it doesn't work
+
+The obvious implementation is to run a cron job at UTC midnight that wipes the leaderboard. Simple enough.
+
+But if you do that, players in Seoul see the reset at 9am local time. Players in New York see it at 7pm the previous day. The whole "midnight reset" feeling is lost because the actual reset time is just some arbitrary UTC moment that probably isn't midnight for anyone.
+
+The other naive approach is to run a cron job for every timezone. That's 38 canonical IANA time zones if you're being thorough, and you'd need separate leaderboards for each one. Doable but messy.
+
+## What actually works: date-keyed buckets
+
+Instead of thinking about "resetting" the leaderboard, think about it differently: each day gets its own leaderboard key.
+
+```
+glowtris-daily-2026-06-04  ← yesterday's board
+glowtris-daily-2026-06-05  ← today's board (for someone in UTC-5)
+glowtris-daily-2026-06-06  ← today's board (for someone in UTC+9)
+```
+
+The client sends its local date with every request:
+
+```javascript
+const d = new Date()
+const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+
+fetch(`/api/leaderboard?date=${localDate}`)
+```
+
+The server uses that date as the leaderboard key. At midnight local time, the client's `localDate` increments, and they start seeing (and writing to) a fresh empty bucket. The previous day's bucket still exists in Redis — it just isn't being shown to them anymore.
+
+## Security consideration
+
+The obvious question: can someone submit a score to yesterday's leaderboard by sending an old date?
+
+In theory, yes. In practice, I added a simple server-side check:
+
+```javascript
+function safeClientDate(raw) {
+  const utc = new Date().toISOString().slice(0, 10)
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return utc
+  // reject anything more than 1 day away from UTC today
+  return Math.abs(new Date(raw) - new Date(utc)) <= 86400000 ? raw : utc
+}
+```
+
+The maximum legitimate timezone offset is UTC+14 (parts of Kiribati), which means the maximum difference between a client's local date and UTC today is exactly one day. So this check allows all legitimate timezone-based dates while rejecting anything suspicious.
+
+## TTL math
+
+Old Redis keys need to expire eventually. Originally the daily TTL was 26 hours — enough buffer for UTC-based dates.
+
+With timezone-aware dates, a key for `2026-06-06` might be first written by someone in UTC+14 at 10:00 UTC on June 5th, and last written by someone in UTC-12 at 12:00 UTC on June 8th. That's about 50 hours.
+
+So the TTL is now 52 hours. The old data sticks around long enough for everyone in all timezones to finish their "day," then quietly expires.
+
+---
+
+The result is what I wanted: a leaderboard that feels like it resets at midnight wherever you are, without any scheduled jobs, without timezone databases, and without actually deleting anything. The data's all there — you're just looking at today's bucket.
+
+If you play in the morning and come back after midnight, the board looks empty. That's the whole trick.

@@ -1,0 +1,99 @@
+---
+title: I rewrote the entire game engine and the game looks exactly the same
+description: Why setTimeout-based game loops are a trap, how I fixed it with a 1000Hz fixed timestep, and what sub-frame input handling actually means.
+date: 2026-06-01
+category: DEV
+author: Glowtris Team
+authorEmoji: 🔧
+readingTime: 8
+coverGradient: "linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)"
+coverEmoji: "⚙️"
+---
+
+v0.2 was a full engine rewrite that took about a week and changed essentially nothing visible to the player.
+
+This is what good infrastructure work feels like, I guess.
+
+## The problem with setTimeout
+
+The original code looked like this:
+
+```javascript
+function tick() {
+  updateGame()
+  render()
+  setTimeout(tick, 16) // "60fps"
+}
+tick()
+```
+
+This is how a lot of browser games start. It *seems* fine, but there are two problems:
+
+**Problem 1: setTimeout timing is not accurate.** Browsers clamp `setTimeout` to at minimum ~1-4ms, and under load or in background tabs it drifts significantly. So your "16ms tick" might actually fire at 18ms, 22ms, or 45ms. For a Tetris game where gravity, DAS timing, and lock delay are all counted in ticks, that drift matters.
+
+**Problem 2: It's tied to a fixed tick rate, not the display refresh.** Your game logic runs at whatever rate `setTimeout` fires, and your rendering happens on that same cadence. On a 144Hz monitor, you're getting 60fps rendering at best — the extra frames are wasted.
+
+I switched to `requestAnimationFrame` briefly, which solved the rendering problem but introduced a new one: my game logic was now running at 144Hz on some screens and 60Hz on others. Gravity was 2.4x faster on high refresh rate monitors, which is obviously wrong.
+
+## The fix: decouple logic from rendering
+
+The standard solution is the fixed timestep with accumulator pattern. The idea is simple: run game logic at a fixed rate, run rendering at whatever rate the display supports.
+
+```javascript
+const TICK_MS = 1 // 1000 logic updates per second
+
+let accumulator = 0
+let lastTime = performance.now()
+
+function loop(now) {
+  const dt = Math.min(now - lastTime, 100) // cap to avoid spiral of death
+  lastTime = now
+  accumulator += dt
+
+  while (accumulator >= TICK_MS) {
+    gameTick()  // runs at exactly 1000Hz regardless of monitor
+    accumulator -= TICK_MS
+  }
+
+  render()  // runs at whatever the display refresh rate is
+  requestAnimationFrame(loop)
+}
+```
+
+The `Math.min(dt, 100)` cap is important — if the tab is in the background for 10 seconds and then comes back, you don't want it to try to simulate 10,000 game ticks at once.
+
+1000Hz might sound excessive. 60Hz would work fine for most things. But Tetris has DAS (delayed auto-shift) timings that are measured in 1ms increments in competitive play. At 60Hz, the minimum expressible delay is 16.67ms, which introduces visible rounding errors in DAS feel. At 1000Hz, it's 1ms. The extra CPU overhead is negligible on any modern device.
+
+## Input handling
+
+There's a subtle bug that comes with the fixed timestep approach: input events fire at arbitrary times between ticks.
+
+Say a `keydown` fires at t=1.3ms into a 1ms tick. If you apply it immediately, you're applying it 0.3ms "early" relative to the game clock. On a 1000Hz loop that's fine, but it means two inputs that both arrive within the same tick window get applied in a non-deterministic order.
+
+The fix is a queue:
+
+```javascript
+const inputQueue = []
+
+document.addEventListener('keydown', e => {
+  inputQueue.push({ key: e.key, t: performance.now() })
+})
+
+function gameTick(tickStart) {
+  // Only process inputs that arrived before this tick started
+  while (inputQueue.length && inputQueue[0].t <= tickStart) {
+    processInput(inputQueue.shift())
+  }
+  // ... rest of game logic
+}
+```
+
+Now inputs are applied in the tick that corresponds to when they actually happened, in the correct order, at the correct game-time position.
+
+The result: input lag dropped from ~4ms average (one `setTimeout` frame) to ~0.3ms. You probably can't consciously perceive that difference, but it makes the game feel crisper in a way that's hard to quantify.
+
+---
+
+Like I said — the game looks exactly the same after all of this. But competitive Tetris clients all use this basic architecture for good reason. I wanted to build on a foundation that could actually support the features I'm planning, rather than patching around fundamental timing issues later.
+
+Worth it. Probably.
