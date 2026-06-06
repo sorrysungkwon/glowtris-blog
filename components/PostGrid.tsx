@@ -4,7 +4,7 @@ import { useState } from 'react'
 import PostCard from './PostCard'
 import type { PostMeta } from '@/lib/posts'
 
-const ALL_CATEGORIES = ['ALL', 'DEV', 'UPDATE', 'GUIDE', 'NOTICE']
+const ALL_CATEGORIES = ['ALL', 'DEV', 'DESIGN', 'UPDATE', 'GUIDE', 'NOTICE']
 
 interface Props {
   posts: PostMeta[]
