@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { MDXRemote } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
+
+interface PostData {
+  frontmatter: string
+  content_en: string
+  content_ko: string
+}
 
 export default function PostEditor() {
   const router = useRouter()
   const params = useParams()
   const slug = params.slug as string
 
-  const [content, setContent] = useState('')
-  const [frontmatter, setFrontmatter] = useState('')
-  const [preview, setPreview] = useState('')
+  const [data, setData] = useState<PostData>({ frontmatter: '', content_en: '', content_ko: '' })
+  const [lang, setLang] = useState<'en' | 'ko'>('en')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -22,10 +26,12 @@ export default function PostEditor() {
       try {
         const res = await fetch(`/api/admin/posts/${slug}`)
         if (res.ok) {
-          const data = await res.json()
-          setFrontmatter(data.frontmatter)
-          setContent(data.content)
-          setPreview(data.frontmatter + '---\n\n' + data.content)
+          const loaded = await res.json()
+          setData({
+            frontmatter: loaded.frontmatter,
+            content_en: loaded.content_en || loaded.content,
+            content_ko: loaded.content_ko || '',
+          })
         }
       } catch (err) {
         setError('Failed to load post')
@@ -43,11 +49,11 @@ export default function PostEditor() {
       const res = await fetch(`/api/admin/posts/${slug}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frontmatter, content }),
+        body: JSON.stringify(data),
       })
 
       if (res.ok) {
-        setSuccess('Post saved and deployed!')
+        setSuccess('✅ Saved and deployed!')
         setTimeout(() => router.push('/admin'), 1500)
       } else {
         setError('Failed to save post')
@@ -59,95 +65,160 @@ export default function PostEditor() {
     }
   }
 
-  useEffect(() => {
-    setPreview(frontmatter + '---\n\n' + content)
-  }, [frontmatter, content])
+  const content = lang === 'en' ? data.content_en : data.content_ko
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/admin" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
+      {/* Header */}
+      <div style={{ padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid #e5e5e5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href="/admin" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
           ← Back to posts
         </Link>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: '8px 16px',
-            background: saving ? '#ccc' : '#0f0f11',
-            color: '#fff',
-            border: 'none',
+
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {/* Language Toggle */}
+          <div style={{
+            display: 'flex',
+            background: '#f0f0f0',
             borderRadius: '6px',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            fontSize: '13px',
-            fontWeight: 600,
-          }}
-        >
-          {saving ? 'Saving...' : 'Save & Deploy'}
-        </button>
+            padding: '2px',
+            gap: '2px',
+          }}>
+            {(['en', 'ko'] as const).map(l => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                style={{
+                  padding: '6px 12px',
+                  background: lang === l ? '#ffffff' : 'transparent',
+                  border: lang === l ? '1px solid #e5e5e5' : 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: lang === l ? '#2563eb' : '#666',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              padding: '8px 20px',
+              background: saving ? '#ccc' : '#0f0f11',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              fontSize: '13px',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+            }}
+          >
+            {saving ? '💾 Saving...' : '🚀 Save & Deploy'}
+          </button>
+        </div>
       </div>
 
-      {error && <div style={{ padding: '12px 24px', background: '#ffebee', color: '#d32f2f', fontSize: '13px' }}>{error}</div>}
-      {success && <div style={{ padding: '12px 24px', background: '#e8f5e9', color: '#2e7d32', fontSize: '13px' }}>{success}</div>}
+      {/* Messages */}
+      {error && <div style={{ padding: '12px 24px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc' }}>{error}</div>}
+      {success && <div style={{ padding: '12px 24px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc' }}>{success}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden' }}>
-        {/* Editor */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e0e0e0' }}>
-          <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '12px', fontWeight: 600, color: '#666' }}>
-            Frontmatter
+      {/* Editor */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0' }}>
+        {/* Left: Frontmatter + Current Language */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e5e5e5', background: '#ffffff' }}>
+          {/* Frontmatter */}
+          <div>
+            <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+              📋 Frontmatter (공유 / Shared)
+            </div>
+            <textarea
+              value={data.frontmatter}
+              onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+              style={{
+                width: '100%',
+                height: '180px',
+                padding: '12px',
+                border: 'none',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '12px',
+                resize: 'none',
+                outline: 'none',
+                borderBottom: '1px solid #e5e5e5',
+              }}
+            />
           </div>
-          <textarea
-            value={frontmatter}
-            onChange={(e) => setFrontmatter(e.target.value)}
-            placeholder="---&#10;title: ...&#10;---"
-            style={{
-              flex: 1,
-              padding: '12px',
-              border: 'none',
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: '13px',
-              resize: 'none',
-              outline: 'none',
-            }}
-          />
 
-          <div style={{ padding: '12px 16px', background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', fontSize: '12px', fontWeight: 600, color: '#666' }}>
-            Content (Markdown)
+          {/* Content */}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+              {lang === 'en' ? '🇬🇧 English Content' : '🇰🇷 Korean Content'}
+            </div>
+            <textarea
+              value={content}
+              onChange={(e) => {
+                if (lang === 'en') {
+                  setData({ ...data, content_en: e.target.value })
+                } else {
+                  setData({ ...data, content_ko: e.target.value })
+                }
+              }}
+              style={{
+                flex: 1,
+                width: '100%',
+                padding: '12px',
+                border: 'none',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '12px',
+                resize: 'none',
+                outline: 'none',
+              }}
+            />
           </div>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Write markdown here..."
-            style={{
-              flex: 2,
-              padding: '12px',
-              border: 'none',
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: '13px',
-              resize: 'none',
-              outline: 'none',
-            }}
-          />
         </div>
 
-        {/* Preview */}
-        <div style={{ overflow: 'auto', padding: '24px', background: '#fafafa' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', fontSize: '14px', lineHeight: 1.6 }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Preview</h2>
-            <div style={{ color: '#666', fontSize: '12px', marginBottom: '16px', padding: '12px', background: '#fff', borderRadius: '6px', border: '1px solid #e0e0e0' }}>
-              <code style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {preview.slice(0, 200)}...
-              </code>
+        {/* Right: Other Language / Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f9f9f9' }}>
+          <div style={{ padding: '12px 16px', background: '#f0f0f0', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+            {lang === 'en' ? '🇰🇷 Korean Version' : '🇬🇧 English Version'} (읽기 전용 / Read-only)
+          </div>
+          <textarea
+            value={lang === 'en' ? data.content_ko : data.content_en}
+            readOnly
+            style={{
+              flex: 1,
+              width: '100%',
+              padding: '12px',
+              border: 'none',
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '12px',
+              resize: 'none',
+              outline: 'none',
+              background: '#ffffff',
+              color: '#999',
+            }}
+          />
+
+          {/* Stats */}
+          <div style={{ padding: '16px', background: '#ffffff', borderTop: '1px solid #e5e5e5', fontSize: '12px', color: '#666' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#999', marginBottom: '4px' }}>EN</div>
+                <div style={{ fontWeight: 600 }}>{data.content_en.split(' ').length} words</div>
+                <div style={{ fontSize: '11px', color: '#999' }}>{data.content_en.length} chars</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', color: '#999', marginBottom: '4px' }}>KO</div>
+                <div style={{ fontWeight: 600 }}>{data.content_ko.split(' ').length} words</div>
+                <div style={{ fontSize: '11px', color: '#999' }}>{data.content_ko.length} chars</div>
+              </div>
             </div>
-            {/* Basic markdown rendering */}
-            <article style={{ color: '#0f0f11' }}>
-              {content.split('\n\n').map((para, i) => {
-                if (para.startsWith('# ')) return <h1 key={i} style={{ fontSize: '28px', marginTop: '24px', marginBottom: '16px', fontWeight: 700 }}>{para.slice(2)}</h1>
-                if (para.startsWith('## ')) return <h2 key={i} style={{ fontSize: '20px', marginTop: '20px', marginBottom: '12px', fontWeight: 700 }}>{para.slice(3)}</h2>
-                if (para.startsWith('> ')) return <blockquote key={i} style={{ borderLeft: '3px solid #2563eb', paddingLeft: '12px', color: '#666', fontStyle: 'italic' }}>{para.slice(2)}</blockquote>
-                return <p key={i}>{para}</p>
-              })}
-            </article>
           </div>
         </div>
       </div>
