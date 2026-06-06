@@ -12,13 +12,13 @@ coverGradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%)"
 coverEmoji: "🎨"
 ---
 
-I'm a 7-year designer. I graduated and worked on projects in Korea and New York, learning color theory, visual hierarchy, negative space, typography. But coding is different. I don't understand pointers, async/await, or why `npm install` sometimes just doesn't work. I can only guess.
+I'm a 7-year designer. I graduated and worked on projects in Korea and New York, understanding color theory, visual hierarchy, negative space, typography. But coding is different. I don't understand pointers, async/await, or why `npm install` sometimes just doesn't work. I can only guess.
 
-But I built Glowtris — the game you see on this blog — almost entirely alone. The Reddit community helped. This post is about how a designer actually vibe-codes a real product.
+Yet I built Glowtris — the game you see on this blog — almost entirely alone. With the Reddit community's help. This post is about how a designer actually vibe-codes a real product.
 
-## What "vibe-coding" means in practice
+## What "vibe-coding" actually means
 
-I know what I want. I describe it to the AI. The AI builds it. Then I see what it built, compare it to what I had in mind, and tell it what's wrong and fix it.
+People use the term differently. For me: I know what I want. I describe it to the AI. The AI builds it. Then I see what it built, compare it to what was in my head, and tell it what's wrong and fix it together.
 
 The core is that my eye — trained by years of design work — is still the quality filter. The AI does the work but the judgment is mine. Right or wrong, that's my call.
 
@@ -26,62 +26,62 @@ Not magic. It's like having a very fast developer who needs constant art directi
 
 ## The Glowtris color system
 
-I started with a constraint: it had to feel like a neon arcade game from the future, but also be readable and not exhausting to look at for 20 minutes.
+I started with one constraint: it had to feel like a neon arcade game from the future, but also be readable and not exhausting to look at for 20 minutes.
 
-My first prompt was something like:
+My first prompt went something like:
 
-> *"Make the background very dark navy, almost black. The neon glow colors for the pieces should be cyan, magenta, yellow, and green. The UI should feel like a dark interface from a sci-fi movie — clean, minimal, glowing."*
+"Make the background a very dark navy, almost black. The neon glow colors of the blocks should be cyan, magenta, yellow, and green. This needs to match Tetris guidelines exactly, and the UI should feel like a dark interface from a sci-fi movie — clean, minimal, glowing."
 
-Claude gave me CSS with `#000000` for the background and some rough neon colors. The problem: pure black kills the glow effect. Glow looks best against dark *blue-black*, not neutral black. I had to push on that:
+Claude Code gave me CSS with `#000000` for the background and rough neon colors. But the problem: pure black kills the glow effect. Glow looks best against dark *blue-black*, not neutral black. I had to push again.
 
-> *"The background is too flat. It should be a very dark desaturated navy — think #04041e or similar. The glow on the pieces should look like they're actually emitting light."*
+"The background is too flat. It needs to be a very dark, desaturated navy — something like `#04041e`. The glow on the blocks should look like they're actually emitting light."
 
-That second pass was much closer. The `#04041e` I mentioned off the top of my head ended up being the actual production value. Sometimes you just know.
+The second pass was much closer. The `#04041e` I mentioned offhand became the actual production value. Sometimes you just guess and it works. Lucky me.
 
 ## The typography problem
 
-The logo font is Orbitron — that heavy, geometric sci-fi typeface. It reads as "space game" from a hundred meters away, which is exactly what I wanted.
+The logo font is Orbitron — heavy, geometric, sci-fi. It reads as "space game" from a hundred meters away. Exactly what I wanted.
 
-But Orbitron at body copy sizes is unreadable. So the content needed a completely different voice.
+But Orbitron at body size is unreadable. So the content needed a completely different voice.
 
-I wanted to use Pretendard for Korean text because it's the cleanest system-neutral Korean sans-serif I know. For English body text, I wanted Inter or the system stack. I told Claude:
+I wanted to use Pretendard for Korean text. It's the cleanest, most system-friendly Korean sans-serif I know. For English body text, I wanted Inter or the system stack.
 
-> *"Header and logo: Orbitron. Body and UI: Pretendard for Korean, system-ui for English. Monospace elements like category tags: JetBrains Mono."*
+"Header and logo: Orbitron. Body and UI: Pretendard for Korean, system-ui for English. Monospace elements like category tags: JetBrains Mono."
 
-The three-font system — display / body / mono — is a standard design pattern that creates hierarchy without visual noise. Claude implemented it correctly because the pattern is well-established enough to be in its training data. When I ask for something standard, it usually gets it right.
+The display / body / mono three-font system is a standard design pattern that creates hierarchy without visual noise. The pattern is established enough that Claude had it in its training data, so it got it right. When you ask for something standard, it usually works.
 
-## Light mode was an afterthought that became the default
+I remember my professor saying: we study and work on the paths our predecessors built. Seems like AI does too.
 
-The original Glowtris aesthetic is dark. The whole brand is built around glow-on-dark. So the blog started dark too.
+## Light mode came later but became the default
 
-Then I looked at it on my phone at noon and it was fine, but I felt like the blog deserved to be legible in daylight conditions without the glow-heavy aesthetic getting in the way of reading.
+Original Glowtris is dark. The brand is built around glow-on-dark. So the blog started dark too.
+
+But looking at it on my phone at noon felt wrong — I wanted the blog to be readable in daylight without the glow-heavy aesthetic getting in the way of actually reading.
 
 The prompt was simple:
 
-> *"글로우트리스 블로그는 디폴트가 라이트모드, 그리고 다크모드가 옵션, 선택할수있게해줘. 그리고 톤은 완전 테크블로그느낌으로."*
+"Make the Glowtris blog default to light mode, with dark mode as an option. And make it feel like a tech blog."
 
-("Make the Glowtris blog default to light mode, with dark mode as an option. Make it feel like a tech blog.")
+Making light mode work for a brand built for dark backgrounds was a challenge. My solution: in light mode, the glow colors get replaced by proper blue (`#2563eb`), which reads as confident and techy without needing a dark surface. The dot-grid hero background came from Vercel's site — it's everywhere on modern tech blogs because it implies "infrastructure" without being literal.
 
-The challenge was making light mode work with a brand built for dark backgrounds. My solution: in light mode, the glow colors get replaced by proper blue (`#2563eb`), which is confident and techy without needing a dark surface. The dot-grid hero background came from Vercel's website — that pattern is everywhere on modern tech blogs because it implies "infrastructure" without being literal about it.
-
-Dark mode keeps the original `#00c8ff` cyan and the dark navy. It's the same brand, just the alternate colorway.
+Dark mode keeps the original `#00c8ff` cyan and dark navy. Same brand, different colorway.
 
 ## What I had to fix manually
 
-Not everything comes out right from prompting. The things I consistently have to fix:
+Prompts don't solve everything. There are always things I fix directly.
 
-**Spacing.** AI-generated CSS spacing is usually either too tight or too generous. I almost always tighten the letter-spacing on the logo text, add more breathing room around section dividers, and reduce padding in cards. My mental model for "right" spacing is calibrated from years of looking at designed products.
+**Spacing.** AI-generated CSS spacing is usually either too tight or too generous. I almost always tighten the logo letter-spacing, add more breathing room around section dividers, reduce card padding. My sense of "right" spacing is calibrated from years of looking at designed products.
 
-**Typography scale.** The default type scale suggestions are usually geometrically correct but visually inert. I always push heading sizes up and body sizes down slightly to create more contrast between levels.
+**Typography scale.** Default type scale suggestions are geometrically correct but visually inert. I always bump heading sizes up and body sizes down slightly to create more contrast between levels.
 
-**Color relationships.** The AI can match a single color correctly, but often struggles with how colors *interact* across contexts. The active filter button needing inverted text color in light vs dark mode — that required me to specify it explicitly, twice.
+**Color relationships.** The AI can match a single color correctly but often misses how colors *interact* across contexts. The active filter button needing inverted text color in light vs dark mode — that required me to specify it explicitly, twice.
 
-**Microinteractions.** The hover states and transitions are always too subtle or too flashy by default. I want hover effects that are quick and confident, not slow and dramatic. "0.15s ease, no scale transform" is something I end up writing in almost every project.
+**Microinteractions.** Default hover states and transitions are always too subtle or too dramatic. I wanted hover effects that are quick and confident, not slow and theatrical. `0.15s ease, no scale transform` — I end up writing this in almost every project. It's what I've always used, and what many senior designers use too.
 
 ## The design tool of the future is your mouth
 
-I have an opinion on every pixel. Every decision, every sweat, every thought. Working with Claude means I can express those opinions in plain language and see them rendered immediately. The speed is genuinely unprecedented.
+I have an opinion on every pixel. Every decision, every thought, every effort. Working with Claude means I can express those opinions in plain language and see them rendered immediately. The iteration speed is genuinely unprecedented.
 
-What you can't prompt your way around: good judgment. Knowing that `#04041e` is better than `#000000` for glow effects. Knowing that a dot-grid pattern says "tech blog" without shouting. Knowing that a three-font system needs clear rules about which font goes where — that's experience, not automation.
+What you can't prompt your way around: good judgment. Knowing that `#04041e` is better than `#000000` for glow effects. Knowing that a dot-grid pattern can make a point about "tech blog" without being pushy. Knowing that a three-font system needs clear rules about which font goes where — that's experience, not automation.
 
 The AI builds. The designer still has to know what to build.
