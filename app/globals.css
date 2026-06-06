@@ -577,6 +577,42 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--text-faint);
 }
 
+/* ─── Post nudge (recommended posts) ───────────────────────────────── */
+.post-nudge {
+  margin-top: 80px;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(168, 0, 255, 0.06) 50%, rgba(219, 39, 119, 0.06) 100%);
+  border: 2px solid rgba(37, 99, 235, 0.12);
+  border-radius: var(--r-xl);
+  margin-left: -24px;
+  margin-right: -24px;
+  margin-bottom: -24px;
+}
+.post-nudge h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 60%, var(--pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.3px;
+}
+.nudge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .nudge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+[data-theme="dark"] .post-nudge {
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.08) 0%, rgba(160, 0, 255, 0.08) 50%, rgba(255, 0, 128, 0.08) 100%);
+  border-color: rgba(0, 200, 255, 0.15);
+}
+
 /* ─── Footer ─────────────────────────────────────────────────────────── */
 .site-footer {
   border-top: 1px solid var(--border);

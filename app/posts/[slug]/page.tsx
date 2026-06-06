@@ -1,9 +1,10 @@
-import { getPost, getSlugs } from '@/lib/posts'
+import { getPost, getSlugs, getAllPostMeta } from '@/lib/posts'
 import { formatDate } from '@/lib/utils'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import PostCard from '@/components/PostCard'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -48,6 +49,13 @@ export default async function PostPage({ params, searchParams }: Props) {
   const backHref = lang === 'ko' ? '/?lang=ko' : '/'
   const readUnit = lang === 'ko' ? '분 읽기' : 'min read'
 
+  // Get recommended posts
+  const allPosts = getAllPostMeta()
+  const currentIndex = allPosts.findIndex(p => p.slug === slug)
+  const sameCategoryPosts = allPosts.filter(p => p.category === post.category && p.slug !== slug)
+  const recommendedPosts = sameCategoryPosts.length > 0 ? sameCategoryPosts : allPosts.filter(p => p.slug !== slug)
+  const postsToShow = recommendedPosts.slice(0, 4)
+
   return (
     <div className="post-page">
       <Link href={backHref} className="post-back">← All posts</Link>
@@ -73,6 +81,18 @@ export default async function PostPage({ params, searchParams }: Props) {
       <article className="mdx">
         <MDXRemote source={post.content} />
       </article>
+
+      {/* Recommended posts nudge */}
+      {postsToShow.length > 0 && (
+        <div className="post-nudge">
+          <h2>{lang === 'ko' ? '다음 글을 읽어보세요' : 'Keep reading'}</h2>
+          <div className="nudge-grid">
+            {postsToShow.map(p => (
+              <PostCard key={p.slug} post={p} lang={lang} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
