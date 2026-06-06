@@ -44,18 +44,35 @@ export async function POST(
 
     // Git operations
     const cwd = process.cwd()
-    execSync(`git add "${filePath}"`, { cwd, stdio: 'pipe' })
 
     try {
-      execSync(`git commit -m "edit: update ${slug} via admin editor"`, { cwd, stdio: 'pipe' })
-      execSync('git push', { cwd, stdio: 'pipe' })
+      // Ensure git user is configured
+      execSync('git config user.name', { cwd, stdio: 'pipe' }).toString().trim()
     } catch (e) {
-      // No changes to commit is fine
+      execSync('git config user.name "Blog Editor"', { cwd })
+    }
+
+    try {
+      execSync('git config user.email', { cwd, stdio: 'pipe' }).toString().trim()
+    } catch (e) {
+      execSync('git config user.email "editor@blog.local"', { cwd })
+    }
+
+    try {
+      execSync(`git add "${filePath}"`, { cwd })
+      execSync(`git commit -m "edit: update ${slug} via admin editor"`, { cwd })
+      execSync('git push', { cwd })
+    } catch (e) {
+      console.error('Git error:', e)
+      // Continue anyway - file is saved
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Save error:', error)
-    return NextResponse.json({ error: 'Failed to save post' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Failed to save post',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
   }
 }
