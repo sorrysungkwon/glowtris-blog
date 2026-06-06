@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import { marked } from 'marked'
 
 interface PostData {
   frontmatter: string
@@ -183,41 +184,44 @@ export default function PostEditor() {
           </div>
         </div>
 
-        {/* Right: Other Language / Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f9f9f9' }}>
+        {/* Right: Other Language Preview */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#ffffff' }}>
           <div style={{ padding: '12px 16px', background: '#f0f0f0', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-            {lang === 'en' ? '🇰🇷 Korean Version' : '🇬🇧 English Version'} (읽기 전용 / Read-only)
+            {lang === 'en' ? '🇰🇷 Korean Preview' : '🇬🇧 English Preview'}
           </div>
-          <textarea
-            value={lang === 'en' ? data.content_ko : data.content_en}
-            readOnly
-            style={{
-              flex: 1,
-              width: '100%',
-              padding: '12px',
-              border: 'none',
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: '12px',
-              resize: 'none',
-              outline: 'none',
-              background: '#ffffff',
-              color: '#999',
-            }}
-          />
+          <div style={{
+            flex: 1,
+            overflow: 'auto',
+            padding: '16px 20px',
+            fontSize: '13px',
+            lineHeight: 1.6,
+            color: '#333',
+          }}>
+            <article
+              className="mdx"
+              dangerouslySetInnerHTML={{
+                __html: marked(lang === 'en' ? data.content_ko : data.content_en)
+              }}
+              style={{
+                maxWidth: '100%',
+              }}
+            />
+            {!(lang === 'en' ? data.content_ko : data.content_en).trim() && (
+              <p style={{ color: '#999', fontStyle: 'italic' }}>
+                {lang === 'en' ? 'No Korean content yet' : 'No English content yet'}
+              </p>
+            )}
+          </div>
 
           {/* Stats */}
-          <div style={{ padding: '16px', background: '#ffffff', borderTop: '1px solid #e5e5e5', fontSize: '12px', color: '#666' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <div style={{ fontSize: '10px', color: '#999', marginBottom: '4px' }}>EN</div>
-                <div style={{ fontWeight: 600 }}>{data.content_en.split(' ').length} words</div>
-                <div style={{ fontSize: '11px', color: '#999' }}>{data.content_en.length} chars</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '10px', color: '#999', marginBottom: '4px' }}>KO</div>
-                <div style={{ fontWeight: 600 }}>{data.content_ko.split(' ').length} words</div>
-                <div style={{ fontSize: '11px', color: '#999' }}>{data.content_ko.length} chars</div>
-              </div>
+          <div style={{ padding: '12px 16px', background: '#f9f9f9', borderTop: '1px solid #e5e5e5', fontSize: '11px', color: '#666', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇬🇧 EN</div>
+              <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_en.split(/\s+/).filter(w => w).length} words</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇰🇷 KO</div>
+              <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_ko.split(/\s+/).filter(w => w).length} words</div>
             </div>
           </div>
         </div>
