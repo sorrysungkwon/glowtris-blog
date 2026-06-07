@@ -57,7 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   rel="noopener noreferrer"
                   className="nav-link"
                 >
-                  Play the game ↗
+                  <span className="nav-play-text">Play the game ↗</span>
+                  <span className="nav-play-icon" aria-hidden="true" title="Play Glowtris">🎮</span>
                 </Link>
 
                 {/* Controls grouped together — Gestalt: proximity */}
