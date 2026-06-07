@@ -65,7 +65,7 @@ export default function PostEditor() {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
   const [showMenu, setShowMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)

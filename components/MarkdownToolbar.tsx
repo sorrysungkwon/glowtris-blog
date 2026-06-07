@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 
 interface MarkdownToolbarProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement>
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
   onChange: (content: string) => void
   disabled?: boolean
 }
