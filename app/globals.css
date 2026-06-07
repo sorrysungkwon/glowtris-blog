@@ -126,7 +126,7 @@ img { max-width: 100%; height: auto; display: block; }
 button { font-family: inherit; cursor: pointer; border: none; }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6); }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-6); }
 @media (max-width: 640px) { .container { padding: 0 var(--space-4); } }
 
 /* ─── Header — Gestalt: Figure-Ground + Continuity ───────────────────────── */
@@ -959,8 +959,13 @@ button { font-family: inherit; cursor: pointer; border: none; }
   z-index: 100;
   box-shadow: var(--shadow-xs);
 }
+@media (max-width: 640px) {
+  .admin-header {
+    padding: 0 var(--space-4);
+  }
+}
 .admin-header-inner {
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   height: 56px;
   display: flex;
@@ -985,9 +990,14 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* Posts grid — admin */
 .admin-body {
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6);
+}
+@media (max-width: 640px) {
+  .admin-body {
+    padding: var(--space-8) var(--space-4);
+  }
 }
 .admin-section-title {
   font-size: 11px;
@@ -1084,6 +1094,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
   z-index: 50;
   box-shadow: var(--shadow-xs);
 }
+@media (max-width: 640px) {
+  .editor-header {
+    padding: 0 var(--space-4);
+  }
+}
 .editor-header-inner {
   max-width: 1280px;
   margin: 0 auto;
@@ -1175,6 +1190,12 @@ button { font-family: inherit; cursor: pointer; border: none; }
   display: flex;
   overflow: hidden;
   justify-content: center;
+  padding: 0 var(--space-6);
+}
+@media (max-width: 640px) {
+  .editor-body {
+    padding: 0 var(--space-4);
+  }
 }
 .editor-split {
   display: grid;
