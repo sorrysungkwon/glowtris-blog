@@ -376,14 +376,100 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* ─── Filter bar — Gestalt: Similarity + Proximity ───────────────────────── */
 /* All filter buttons share the same shape/size (similarity); tightly grouped (proximity) */
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
 .filter-section {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
-  padding-bottom: var(--space-8);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: var(--space-8);
+}
+/* Search input wrapper styles */
+.search-section {
+  display: flex;
+  align-items: center;
+}
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 240px;
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color var(--t-fast);
+}
+.search-input {
+  width: 100%;
+  padding: 8px 36px 8px 36px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r-full);
+  outline: none;
+  transition: all var(--t-fast) var(--ease-out);
+}
+.search-input::placeholder {
+  color: var(--text-faint);
+  opacity: 0.8;
+}
+.search-input:focus {
+  border-color: var(--cyan);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.15);
+}
+.search-input:focus + .search-icon {
+  color: var(--cyan);
+}
+[data-theme="light"] .search-input:focus {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  border: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: all var(--t-fast);
+}
+.search-clear-btn:hover {
+  background: var(--border-hi);
+  color: var(--text-primary);
+}
+@media (max-width: 640px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+  .search-input-wrapper {
+    width: 100%;
+  }
 }
 .filter-label {
   font-size: 10px;
