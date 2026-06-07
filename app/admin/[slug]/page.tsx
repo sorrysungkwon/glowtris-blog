@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { marked } from 'marked'
+import MarkdownToolbar from '@/components/MarkdownToolbar'
 
 interface PostData {
   frontmatter: string
@@ -64,6 +65,7 @@ export default function PostEditor() {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
   const [showMenu, setShowMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -494,7 +496,16 @@ export default function PostEditor() {
             <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
             <span>{lang === 'en' ? 'English Content' : 'Korean Content'}</span>
           </div>
+          <MarkdownToolbar
+            textareaRef={contentTextareaRef}
+            onChange={(newContent) => {
+              if (lang === 'en') setData({ ...data, content_en: newContent })
+              else setData({ ...data, content_ko: newContent })
+            }}
+            disabled={saving || deleting}
+          />
           <textarea
+            ref={contentTextareaRef}
             className="editor-textarea"
             value={content}
             onChange={(e) => {
@@ -570,7 +581,16 @@ export default function PostEditor() {
               <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
               <span>{lang === 'en' ? 'English' : 'Korean'}</span>
             </div>
+            <MarkdownToolbar
+              textareaRef={contentTextareaRef}
+              onChange={(newContent) => {
+                if (lang === 'en') setData({ ...data, content_en: newContent })
+                else setData({ ...data, content_ko: newContent })
+              }}
+              disabled={saving || deleting}
+            />
             <textarea
+              ref={contentTextareaRef}
               className="editor-textarea"
               style={{ flex: 1 }}
               value={content}

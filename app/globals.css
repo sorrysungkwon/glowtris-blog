@@ -1648,6 +1648,64 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border-color: transparent;
 }
 
+/* Markdown Toolbar — grouping by function */
+.markdown-toolbar {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.markdown-toolbar-group {
+  display: flex;
+  gap: var(--space-1);
+  padding-right: var(--space-2);
+  border-right: 1px solid var(--border);
+}
+
+.markdown-toolbar-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.markdown-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+}
+
+.markdown-toolbar-btn:hover:not(:disabled) {
+  border-color: var(--cyan);
+  background: var(--surface);
+  color: var(--cyan);
+  transform: translateY(-1px);
+}
+
+.markdown-toolbar-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.markdown-toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ─── 404 Not Found Page ────────────────────────────────────────────────── */
 .not-found-section {
   position: relative;
