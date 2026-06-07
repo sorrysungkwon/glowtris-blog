@@ -34,7 +34,7 @@ function LangToggleInner() {
         onClick={() => setLang('ko')}
         aria-label="한국어"
       >
-        한
+        KO
       </button>
     </div>
   )
@@ -44,7 +44,7 @@ export default function LangToggle() {
   return (
     <Suspense fallback={
       <div className="lang-toggle">
-        <span>EN</span><span>한</span>
+        <span>EN</span><span>KO</span>
       </div>
     }>
       <LangToggleInner />
