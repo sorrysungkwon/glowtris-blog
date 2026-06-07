@@ -2,12 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 
 const tokenSecret = process.env.TOKEN_SECRET || 'default-dev-secret'
-const validTokens = new Set<string>()
-const invalidatedTokens = new Set<string>()
 
 export function validateAuthToken(token: string): boolean {
-  if (!token || !validTokens.has(token)) return false
-  if (invalidatedTokens.has(token)) return false
+  if (!token) return false
 
   const parts = token.split('.')
   if (parts.length !== 3) return false
@@ -24,12 +21,12 @@ export function validateAuthToken(token: string): boolean {
   return tokenAge < maxAge
 }
 
-export function addValidToken(token: string): void {
-  validTokens.add(token)
+export function addValidToken(_token: string): void {
+  // no-op: tokens are stateless, validated by HMAC signature only
 }
 
-export function invalidateToken(token: string): void {
-  invalidatedTokens.add(token)
+export function invalidateToken(_token: string): void {
+  // no-op: logout is handled client-side by clearing localStorage
 }
 
 export function extractToken(req: NextRequest): string | null {
