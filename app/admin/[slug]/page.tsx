@@ -386,8 +386,26 @@ export default function PostEditor() {
             </>
           ) : (
             <>
+              {/* Status pill — visible on mobile header */}
+              <button
+                onClick={toggleDraft}
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '3px 8px',
+                  borderRadius: '99px',
+                  border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
+                  background: isDraft ? 'rgba(255,149,0,0.12)' : 'rgba(34,197,94,0.12)',
+                  color: isDraft ? '#ff9500' : '#22c55e',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  letterSpacing: '0.3px',
+                }}
+              >
+                {isDraft ? 'DRAFT' : 'LIVE'}
+              </button>
               {/* Language toggle shown on mobile directly to the left of the ... menu */}
-              <div className="editor-lang-toggle" style={{ marginRight: '6px' }}>
+              <div className="editor-lang-toggle" style={{ marginLeft: '4px', marginRight: '4px' }}>
                 {(['en', 'ko'] as const).map(l => (
                   <button
                     key={l}
