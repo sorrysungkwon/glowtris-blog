@@ -98,14 +98,17 @@ export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
   let files: string[] = []
   const dir = lang === 'ko' ? 'posts/ko' : 'posts'
 
-  if (isProduction) {
-    // Use GitHub API in production
-    files = await listFilesFromGitHub(dir)
-  } else {
-    // Use local filesystem in development
-    const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
-    if (!fs.existsSync(targetDir)) return []
-    files = fs.readdirSync(targetDir).filter(f => f.endsWith('.mdx'))
+  try {
+    if (isProduction) {
+      files = await listFilesFromGitHub(dir)
+    } else {
+      const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
+      if (!fs.existsSync(targetDir)) return []
+      files = fs.readdirSync(targetDir).filter(f => f.endsWith('.mdx'))
+    }
+  } catch (e) {
+    console.error(`Error listing files in ${dir}:`, e)
+    return []
   }
 
   const posts: PostMeta[] = []
@@ -114,20 +117,36 @@ export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
     const slug = file.replace(/\.mdx$/, '')
     let content: string | null = null
 
-    if (isProduction) {
-      content = await fetchFromGitHub(`${dir}/${file}`)
-    } else {
-      try {
+    try {
+      if (isProduction) {
+        content = await fetchFromGitHub(`${dir}/${file}`)
+      } else {
         const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
         content = fs.readFileSync(path.join(targetDir, file), 'utf8')
-      } catch (e) {
-        content = null
       }
+    } catch (e) {
+      console.error(`Error reading file ${file}:`, e)
+      continue
     }
 
-    if (content) {
+    if (!content) {
+      console.warn(`Empty content for ${slug}`)
+      continue
+    }
+
+    try {
       const { data } = matter(content)
+
+      // Validate essential metadata
+      if (!data.title || !data.date) {
+        console.warn(`Post ${slug} missing required fields (title or date)`)
+        continue
+      }
+
       posts.push({ slug, ...data } as PostMeta)
+    } catch (e) {
+      console.error(`Error parsing frontmatter for ${slug}:`, e)
+      continue
     }
   }
 
@@ -138,35 +157,55 @@ export async function getPost(slug: string, lang?: string): Promise<Post> {
   let content: string | null = null
 
   if (lang === 'ko') {
-    if (isProduction) {
-      content = await fetchFromGitHub(`posts/ko/${slug}.mdx`)
-    } else {
-      const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
-      if (fs.existsSync(koFile)) {
-        content = fs.readFileSync(koFile, 'utf8')
+    try {
+      if (isProduction) {
+        content = await fetchFromGitHub(`posts/ko/${slug}.mdx`)
+      } else {
+        const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+        if (fs.existsSync(koFile)) {
+          content = fs.readFileSync(koFile, 'utf8')
+        }
       }
-    }
 
-    if (content) {
-      const { data, content: postContent } = matter(content)
-      return { slug, content: postContent, ...data } as Post
+      if (content) {
+        const { data, content: postContent } = matter(content)
+        if (!postContent || !data.title) {
+          throw new Error(`Invalid post structure for ${slug}`)
+        }
+        return { slug, content: postContent, ...data } as Post
+      }
+    } catch (e) {
+      console.warn(`Error loading Korean post ${slug}, falling back to English:`, e)
     }
   }
 
   // Fallback to English
-  if (isProduction) {
-    content = await fetchFromGitHub(`posts/${slug}.mdx`)
-  } else {
-    const file = path.join(postsDir, `${slug}.mdx`)
-    content = fs.readFileSync(file, 'utf8')
-  }
-
-  if (!content) {
+  try {
+    if (isProduction) {
+      content = await fetchFromGitHub(`posts/${slug}.mdx`)
+    } else {
+      const file = path.join(postsDir, `${slug}.mdx`)
+      content = fs.readFileSync(file, 'utf8')
+    }
+  } catch (e) {
+    console.error(`Error reading post ${slug}:`, e)
     throw new Error(`Post ${slug} not found`)
   }
 
-  const { data, content: postContent } = matter(content)
-  return { slug, content: postContent, ...data } as Post
+  if (!content) {
+    throw new Error(`Post ${slug} not found or empty`)
+  }
+
+  try {
+    const { data, content: postContent } = matter(content)
+    if (!postContent || !data.title) {
+      throw new Error(`Invalid post structure for ${slug}`)
+    }
+    return { slug, content: postContent, ...data } as Post
+  } catch (e) {
+    console.error(`Error parsing post ${slug}:`, e)
+    throw new Error(`Failed to parse post ${slug}`)
+  }
 }
 
 export async function getSlugs(): Promise<string[]> {

@@ -283,8 +283,13 @@ export async function POST(
       }
     }
 
+    // Invalidate related caches
     revalidatePath(`/posts/${slug}`)
+    revalidatePath(`/posts/[slug]`)
+    revalidatePath('/')
     revalidatePath('/', 'layout')
+
+    console.log(`✅ Cache invalidated for post: ${slug}`)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Save error:', error)
@@ -377,8 +382,13 @@ export async function DELETE(
       }
     }
 
+    // Invalidate related caches
     revalidatePath(`/posts/${slug}`)
+    revalidatePath(`/posts/[slug]`)
+    revalidatePath('/')
     revalidatePath('/', 'layout')
+
+    console.log(`✅ Cache invalidated for post: ${slug}`)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Delete error:', error)
