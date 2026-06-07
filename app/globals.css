@@ -1452,3 +1452,23 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: var(--bg);
   border-color: var(--cyan);
 }
+
+/* Mobile responsive overrides for modals */
+@media (max-width: 768px) {
+  .admin-modal {
+    padding: var(--space-5);
+  }
+  .draft-history-list {
+    max-height: 240px;
+  }
+  .draft-history-item {
+    padding: 8px 10px;
+  }
+  .draft-history-time {
+    font-size: 12px;
+  }
+  .draft-history-stats {
+    font-size: 10px;
+  }
+}
+
