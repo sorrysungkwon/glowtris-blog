@@ -7,7 +7,7 @@ interface Props {
 
 export default async function Home({ searchParams }: Props) {
   const { lang = 'en' } = await searchParams
-  const posts = getAllPostMeta()
+  const posts = await getAllPostMeta()
 
   return (
     <>

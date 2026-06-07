@@ -11,11 +11,6 @@ interface Props {
   searchParams: Promise<{ lang?: string }>
 }
 
-export async function generateStaticParams() {
-  const slugs = await getSlugs()
-  return slugs.map(slug => ({ slug }))
-}
-
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
   const { lang = 'en' } = await searchParams
@@ -51,7 +46,7 @@ export default async function PostPage({ params, searchParams }: Props) {
   const readUnit = lang === 'ko' ? '분 읽기' : 'min read'
 
   // Get recommended posts
-  const allPosts = getAllPostMeta()
+  const allPosts = await getAllPostMeta()
   const currentIndex = allPosts.findIndex(p => p.slug === slug)
   const sameCategoryPosts = allPosts.filter(p => p.category === post.category && p.slug !== slug)
   const recommendedPosts = sameCategoryPosts.length > 0 ? sameCategoryPosts : allPosts.filter(p => p.slug !== slug)
