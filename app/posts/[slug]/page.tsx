@@ -83,7 +83,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       {/* Recommended posts nudge */}
       {postsToShow.length > 0 && (
         <div className="post-nudge">
-          <h2>{lang === 'ko' ? '다음 글을 읽어보세요' : 'Keep reading'}</h2>
+          <h2 className="post-nudge-title">{lang === 'ko' ? '다음 글을 읽어보세요' : 'Keep reading'}</h2>
           <div className="nudge-grid">
             {postsToShow.map(p => (
               <PostCard key={p.slug} post={p} lang={lang} />

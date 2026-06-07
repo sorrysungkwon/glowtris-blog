@@ -16,6 +16,34 @@ interface DraftHistoryItem {
   data: PostData
 }
 
+const CATEGORY_GRADIENTS: Record<string, string[]> = {
+  DEV: [
+    'linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)',
+    'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+    'linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)'
+  ],
+  NOTICE: [
+    'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)',
+    'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)',
+    'linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)'
+  ],
+  DESIGN: [
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)'
+  ],
+  UPDATE: [
+    'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+    'linear-gradient(135deg, #028090 0%, #00a896 100%)',
+    'linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)'
+  ],
+  GUIDE: [
+    'linear-gradient(135deg, #f5af19 0%, #f12711 100%)',
+    'linear-gradient(135deg, #ffe259 0%, #ffa751 100%)',
+    'linear-gradient(135deg, #cac531 0%, #f3f9a7 100%)'
+  ]
+}
+
 export default function PostEditor() {
   const router = useRouter()
   const params = useParams()
@@ -29,6 +57,7 @@ export default function PostEditor() {
   const [success, setSuccess] = useState('')
   const [hasDraft, setHasDraft] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [draftHistory, setDraftHistory] = useState<DraftHistoryItem[]>([])
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
@@ -123,6 +152,18 @@ export default function PostEditor() {
     setHasDraft(false)
   }
 
+  function applySuggestedGradient(gradient: string) {
+    let fm = data.frontmatter
+    if (fm.includes('coverGradient:')) {
+      fm = fm.replace(/coverGradient:\s*["']?.*?["']?(\r?\n|$)/, `coverGradient: "${gradient}"$1`)
+    } else {
+      fm = fm.trim() + `\ncoverGradient: "${gradient}"`
+    }
+    setData({ ...data, frontmatter: fm })
+    setSuccess('Suggested gradient applied')
+    setTimeout(() => setSuccess(''), 2000)
+  }
+
   async function handleDelete() {
     setDeleting(true)
     setError('')
@@ -141,6 +182,7 @@ export default function PostEditor() {
     } finally {
       setDeleting(false)
       setShowDeleteConfirm(false)
+      setDeleteConfirmText('')
     }
   }
 
@@ -249,13 +291,28 @@ export default function PostEditor() {
               </button>
             </>
           ) : (
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="admin-btn admin-btn-secondary"
-              style={{ fontSize: '16px', padding: '6px 12px', lineHeight: 1 }}
-            >
-              ⋯
-            </button>
+            <>
+              {/* Language toggle shown on mobile directly to the left of the ... menu */}
+              <div className="editor-lang-toggle" style={{ marginRight: '6px' }}>
+                {(['en', 'ko'] as const).map(l => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    className={`editor-lang-btn${lang === l ? ' active' : ''}`}
+                    style={{ padding: '4px 8px', fontSize: '11px' }}
+                  >
+                    {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="admin-btn admin-btn-secondary"
+                style={{ fontSize: '16px', padding: '6px 12px', lineHeight: 1 }}
+              >
+                ⋯
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -265,19 +322,7 @@ export default function PostEditor() {
   /* ── Mobile expanded menu ─────────────────────────────────────────── */
   const mobileMenu = isMobile && showMenu && (
     <div className="editor-mobile-menu">
-      {/* Lang toggle */}
-      <div className="editor-lang-toggle" style={{ width: '100%' }}>
-        {(['en', 'ko'] as const).map(l => (
-          <button
-            key={l}
-            onClick={() => { setLang(l); setShowMenu(false) }}
-            className={`editor-lang-btn${lang === l ? ' active' : ''}`}
-            style={{ flex: 1, textAlign: 'center' }}
-          >
-            {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
-          </button>
-        ))}
-      </div>
+
       {hasDraft && (
         <button onClick={() => { setShowHistoryModal(true); setShowMenu(false) }} className="admin-btn admin-btn-warning" style={{ width: '100%' }}>
           📝 Restore Draft
@@ -307,15 +352,26 @@ export default function PostEditor() {
 
   /* ── Delete confirm modal ─────────────────────────────────────────── */
   const deleteModal = showDeleteConfirm && (
-    <div className="admin-modal-backdrop" onClick={() => setShowDeleteConfirm(false)}>
+    <div className="admin-modal-backdrop" onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText('') }}>
       <div className="admin-modal" onClick={e => e.stopPropagation()}>
         <h3 className="admin-modal-title">Delete this post?</h3>
-        <p className="admin-modal-body">
+        <p className="admin-modal-body" style={{ marginBottom: '12px' }}>
           This will permanently delete <strong>{slug}</strong> and all versions. This cannot be undone.
         </p>
+
+        <input
+          type="text"
+          className="admin-input"
+          style={{ width: '100%', marginBottom: '16px', fontFamily: 'var(--font-mono)' }}
+          placeholder={`Type "${slug}" to confirm`}
+          value={deleteConfirmText}
+          onChange={e => setDeleteConfirmText(e.target.value)}
+          disabled={deleting}
+        />
+
         <div className="admin-modal-actions">
           <button
-            onClick={() => setShowDeleteConfirm(false)}
+            onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText('') }}
             disabled={deleting}
             className="admin-btn admin-btn-secondary"
           >
@@ -323,7 +379,7 @@ export default function PostEditor() {
           </button>
           <button
             onClick={handleDelete}
-            disabled={deleting}
+            disabled={deleting || deleteConfirmText !== slug}
             className="admin-btn admin-btn-danger"
           >
             {deleting ? 'Deleting…' : 'Delete permanently'}
@@ -339,6 +395,30 @@ export default function PostEditor() {
       {error && <div className="editor-notify error">⚠ {error}</div>}
       {success && <div className="editor-notify success">✓ {success}</div>}
     </>
+  )
+
+  const currentCategory = (() => {
+    const categoryMatch = data.frontmatter.match(/category:\s*["']?([A-Za-z0-9_-]+)["']?/i)
+    return categoryMatch ? categoryMatch[1].toUpperCase() : 'DEV'
+  })()
+
+  const suggestedGradients = CATEGORY_GRADIENTS[currentCategory] || CATEGORY_GRADIENTS.DEV
+
+  const gradientSuggestions = (
+    <div className="gradient-recommendations">
+      <span className="recommendations-label">🎨 Recommend colors ({currentCategory}):</span>
+      <div className="recommendations-list">
+        {suggestedGradients.map((grad, idx) => (
+          <button
+            key={idx}
+            className="gradient-recommendation-btn"
+            style={{ background: grad }}
+            onClick={() => applySuggestedGradient(grad)}
+            title="Apply cover gradient"
+          />
+        ))}
+      </div>
+    </div>
   )
 
   /* ── Desktop split layout ─────────────────────────────────────────── */
@@ -359,6 +439,7 @@ export default function PostEditor() {
             onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
             placeholder="---&#10;title: Post title&#10;---"
           />
+          {gradientSuggestions}
 
           {/* Content section */}
           <div className="pane-label">
@@ -436,6 +517,7 @@ export default function PostEditor() {
               value={data.frontmatter}
               onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
             />
+            {gradientSuggestions}
             <div className="pane-label">
               <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
               <span>{lang === 'en' ? 'English' : 'Korean'}</span>
