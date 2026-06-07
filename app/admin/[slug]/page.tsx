@@ -56,6 +56,7 @@ export default function PostEditor() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [hasDraft, setHasDraft] = useState(false)
+  const [isDraft, setIsDraft] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [showHistoryModal, setShowHistoryModal] = useState(false)
@@ -83,6 +84,10 @@ export default function PostEditor() {
             content_ko: loaded.content_ko || '',
           }
           setData(freshData)
+
+          const draftMatch = loaded.frontmatter.match(/draft:\s*(true|false)/i)
+          setIsDraft(draftMatch ? draftMatch[1].toLowerCase() === 'true' : false)
+
           const historyKey = `draft_history_${slug}`
           const stored = localStorage.getItem(historyKey)
           if (stored) {
@@ -161,6 +166,19 @@ export default function PostEditor() {
     }
     setData({ ...data, frontmatter: fm })
     setSuccess('Suggested gradient applied')
+    setTimeout(() => setSuccess(''), 2000)
+  }
+
+  function toggleDraft() {
+    let fm = data.frontmatter
+    if (fm.includes('draft:')) {
+      fm = fm.replace(/draft:\s*(true|false)/i, `draft: ${!isDraft}`)
+    } else {
+      fm = fm.trim() + `\ndraft: ${!isDraft}`
+    }
+    setData({ ...data, frontmatter: fm })
+    setIsDraft(!isDraft)
+    setSuccess(isDraft ? 'Post ready to publish' : 'Post marked as draft')
     setTimeout(() => setSuccess(''), 2000)
   }
 
@@ -249,9 +267,17 @@ export default function PostEditor() {
           {slug}
         </span>
 
-        {/* Draft badge — ambient indicator */}
-        {hasDraft && (
-          <span className="editor-draft-badge">● DRAFT</span>
+        {/* Draft status indicator */}
+        {isDraft && (
+          <span style={{
+            fontSize: '11px',
+            fontWeight: 700,
+            color: '#ff9500',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            border: '1px solid #ff9500',
+            display: isMobile ? 'none' : 'inline-block',
+          }}>📝 DRAFT</span>
         )}
 
         {/* Language toggle */}
@@ -278,8 +304,15 @@ export default function PostEditor() {
                   Restore
                 </button>
               )}
+              <button
+                onClick={toggleDraft}
+                className={`admin-btn ${isDraft ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
+                style={{ fontSize: '12px', padding: '6px 12px' }}
+              >
+                {isDraft ? '📝 Draft' : '✔️ Publish'}
+              </button>
               <button onClick={saveDraft} className="admin-btn admin-btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}>
-                💾 Draft
+                💾 Save
               </button>
               <button
                 onClick={handleSave}
@@ -336,8 +369,15 @@ export default function PostEditor() {
           📝 Restore Draft
         </button>
       )}
+      <button
+        onClick={() => { toggleDraft(); setShowMenu(false) }}
+        className={`admin-btn ${isDraft ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
+        style={{ width: '100%' }}
+      >
+        {isDraft ? '📝 Draft' : '✔️ Publish'}
+      </button>
       <button onClick={() => { saveDraft(); setShowMenu(false) }} className="admin-btn admin-btn-secondary" style={{ width: '100%' }}>
-        💾 Save Draft
+        💾 Save
       </button>
       <button
         onClick={() => { handleSave(); setShowMenu(false) }}

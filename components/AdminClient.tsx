@@ -167,10 +167,14 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
               key={post.slug}
               href={`/admin/${post.slug}`}
               className="admin-post-card"
+              style={post.draft ? { opacity: 0.7 } : {}}
             >
-              {/* Top cluster — title + badge */}
+              {/* Top cluster — title + badges */}
               <div className="admin-card-top">
-                <h3 className="admin-card-title">{post.title}</h3>
+                <h3 className="admin-card-title">
+                  {post.title}
+                  {post.draft && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}>📝 DRAFT</span>}
+                </h3>
                 <span className="admin-card-badge">{post.category}</span>
               </div>
 

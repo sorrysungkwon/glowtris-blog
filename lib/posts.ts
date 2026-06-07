@@ -88,13 +88,14 @@ export interface PostMeta {
   coverGradient: string
   coverEmoji?: string
   featured?: boolean
+  draft?: boolean
 }
 
 export interface Post extends PostMeta {
   content: string
 }
 
-export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
+export async function getAllPostMeta(lang?: string, includeDrafts: boolean = false): Promise<PostMeta[]> {
   let files: string[] = []
   const dir = lang === 'ko' ? 'posts/ko' : 'posts'
 
@@ -143,7 +144,14 @@ export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
         continue
       }
 
-      posts.push({ slug, ...data } as PostMeta)
+      const post = { slug, ...data } as PostMeta
+
+      // Filter out draft posts unless explicitly included
+      if (post.draft && !includeDrafts) {
+        continue
+      }
+
+      posts.push(post)
     } catch (e) {
       console.error(`Error parsing frontmatter for ${slug}:`, e)
       continue
@@ -153,7 +161,7 @@ export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
   return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-export async function getPost(slug: string, lang?: string): Promise<Post> {
+export async function getPost(slug: string, lang?: string, includeDraft: boolean = false): Promise<Post> {
   let content: string | null = null
 
   if (lang === 'ko') {
@@ -172,7 +180,11 @@ export async function getPost(slug: string, lang?: string): Promise<Post> {
         if (!postContent || !data.title) {
           throw new Error(`Invalid post structure for ${slug}`)
         }
-        return { slug, content: postContent, ...data } as Post
+        const post = { slug, content: postContent, ...data } as Post
+        if (post.draft && !includeDraft) {
+          throw new Error(`Post ${slug} is in draft`)
+        }
+        return post
       }
     } catch (e) {
       console.warn(`Error loading Korean post ${slug}, falling back to English:`, e)
@@ -201,7 +213,11 @@ export async function getPost(slug: string, lang?: string): Promise<Post> {
     if (!postContent || !data.title) {
       throw new Error(`Invalid post structure for ${slug}`)
     }
-    return { slug, content: postContent, ...data } as Post
+    const post = { slug, content: postContent, ...data } as Post
+    if (post.draft && !includeDraft) {
+      throw new Error(`Post ${slug} is in draft`)
+    }
+    return post
   } catch (e) {
     console.error(`Error parsing post ${slug}:`, e)
     throw new Error(`Failed to parse post ${slug}`)
