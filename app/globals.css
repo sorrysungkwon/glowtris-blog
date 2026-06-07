@@ -180,7 +180,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .header-nav .nav-link:hover { color: var(--text-primary); }
 .nav-play-icon { display: none; }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .nav-play-text { display: none; }
   .nav-play-icon {
     display: inline-flex;
