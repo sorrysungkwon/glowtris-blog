@@ -987,6 +987,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 /* Header actions cluster */
 .admin-header-actions { display: flex; align-items: center; gap: var(--space-2); }
+@media (max-width: 640px) {
+  .admin-back-blog-btn {
+    display: none !important;
+  }
+}
 
 /* Posts grid — admin */
 .admin-body {

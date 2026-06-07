@@ -106,7 +106,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
           </div>
           {/* Actions cluster */}
           <div className="admin-header-actions">
-            <Link href="/" className="admin-btn admin-btn-secondary">
+            <Link href="/" className="admin-btn admin-btn-secondary admin-back-blog-btn">
               ← Blog
             </Link>
             <button onClick={handleLogout} className="admin-btn admin-btn-secondary">
