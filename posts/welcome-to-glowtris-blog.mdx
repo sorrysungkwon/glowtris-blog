@@ -1,35 +1,46 @@
 ---
-title: Welcome to Glowtris Blog
-title_ko: 글로우트리스 블로그에 오신 것을 환영합니다
-description: "Behind the blocks—dev logs, architecture decisions, and the honest story of building a browser Tetris from scratch with AI."
-description_ko: "블록 뒤의 이야기—AI와 함께 게임을 만들며 배운 개발 로그, 아키텍처 결정, 그리고 진솔한 이야기."
+title: Why I'm Writing This (And Why You Should Care)
+title_ko: 왜 이걸 쓰고 있고, 너가 관심 가져야 하는 이유
+description: "Honestly I have no idea what I'm doing. Built a Tetris game with AI, broke it, fixed it, broke it again. This is just me logging wtf happened."
+description_ko: "솔직히 난 뭐 하는 거 자체를 모른다. AI로 테트리스 게임 만들었는데 깼고, 고쳤고, 또 깼다. 그냥 여기 뭐가 일어났는지 기록하는 거다."
 date: 2026-06-07
-category: INTRO
+category: LOGS
 author: sorrysungkwon
-authorEmoji: 👋
-readingTime: 2
+authorEmoji: 😅
+readingTime: 3
 coverGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
 coverEmoji: "🎮"
 featured: true
 ---
 
-Hey, welcome! I'm Sung Kwon, a designer building [Glowtris](https://glowtris.com) — a browser-based Tetris game written entirely with AI assistance.
+So I built a Tetris game called [Glowtris](https://glowtris.com). Am I a game developer? Hell no. I'm a designer. I can't code. Never could.
 
-This blog documents the journey: design decisions, engineering challenges, infrastructure lessons, and unfiltered thoughts about what works (and what doesn't) when you build a game by talking to Claude.
+But I can talk. And Claude can code. So I literally just... talked at Claude for like a month and it built the whole thing. Game, UI, brand identity, blog—all of it.
 
-## What you'll find here
+## This blog is basically my live debugging log
 
-**Architecture & Performance**  
-How we rebuilt the game engine for 60fps stability, optimized rendering with PixiJS, and handled real-time multiplayer leaderboards.
+Ngl, most of this is gonna be me going "oh shit, this is broken, here's why" and then "wait, actually the fix is kinda cool." I'm not some expert explaining best practices. I'm just a guy who discovered that setTimeout-based game loops are a nightmare, that PixiJS on Safari is a special kind of hell, and that redis buckets are pretty clever for leaderboards.
 
-**Design & UX**  
-Building a retro aesthetic with modern interactions, emoji-first visual language, and balancing playfulness with clarity.
+## What's actually in here
 
-**Dev process**  
-Honest logs about prompt engineering, debugging AI-generated code, and the unconventional workflow of designing + developing + deploying without traditional coding.
+**Real code problems**  
+Not tutorials. Just "I was trying to do X, it completely failed, and here's what I learned."
+
+**Random engineering discoveries**  
+Fixed timesteps. Canvas vs WebGL. Why my Vercel builds kept timing out. The stuff nobody blogs about because it's "obvious" but it's not.
+
+**Design shit that worked**  
+Emoji-first UI. Neon gradients that don't suck. Keeping a retro game feeling modern. (Spoiler: it's hard.)
+
+**Honest mistakes**  
+I'll tell you when I was dumb. When I over-engineered something. When I should have just used a simpler solution.
 
 ---
 
-新作ポストは [管理画面](/admin) で編集可能です。
+기본적으로 여기는 내 실시간 디버깅 로그다.
 
-*— Sung*
+전문가도 아니고, 뭘 모르는 디자이너가 AI로 게임을 만들면서 뭐가 일어났는지 기록하는 거다. 테트리스 깬 이야기, 래더보드 고쳤는데 이게 실제로 진짜 쓸 만한 트릭였던 이야기, Vercel에서 빌드가 자꾸 터지는 이야기 이런 거다.
+
+정보를 구하는 거면 이 블로그가 도움이 될 거고, 누군가 똑같은 문제를 겪고 있으면 "어? 이 사람도 같은 거 겪었네?" 하고 웃을 수 있을 거다.
+
+그럼 시작하자.

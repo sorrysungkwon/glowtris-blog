@@ -1,4 +1,48 @@
 ---
-test
+title: Why I'm Writing This (And Why You Should Care)
+title_ko: 왜 이걸 쓰고 있고, 너가 관심 가져야 하는 이유
+description: "Honestly I have no idea what I'm doing. Built a Tetris game with AI, broke it, fixed it, broke it again. This is just me logging wtf happened."
+description_ko: "솔직히 난 뭐 하는 거 자체를 모른다. AI로 테트리스 게임 만들었는데 깼고, 고쳤고, 또 깼다. 그냥 여기 뭐가 일어났는지 기록하는 거다."
+date: 2026-06-07
+category: LOGS
+author: sorrysungkwon
+authorEmoji: 😅
+readingTime: 3
+coverGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+coverEmoji: "🎮"
+featured: true
 ---
-test
+
+솔직히 난 뭐 하는 거 자체를 모른다.
+
+[글로우트리스](https://glowtris.com)라는 테트리스 게임을 만들었는데, 나는 게임 개발자가 아니다. 나는 디자이너다. 코딩을 못 한다. 한 번도 한 적이 없다.
+
+근데 나는 말을 할 수 있다. 그리고 Claude는 코딩을 할 수 있다. 그래서 그냥... Claude한테 한 달 동안 떠들었더니 게임이 완성됐다. 게임도 UI도 브랜드도 블로그도 다 그렇게 만들었다.
+
+## 이 블로그는 그냥 내 실시간 디버깅 로그다
+
+솔직히 말하자면, 여기는 "어 이거 깨졌네, 왜 이렇게 된 거야" 하고는 "어? 근데 이 해결책 나름 괜찮은데?" 하는 게 대부분이다. 나는 뭔가 전문가처럼 best practice를 설명하는 게 아니다. 그냥 setTimeout 기반 게임 루프가 악몽이라는 걸 발견한 사람이고, Safari에서 PixiJS는 별도의 지옥이라는 걸 알아낸 사람이고, Redis 버킷으로 래더보드 만드는 게 꽤 똑똑한 방법이라는 걸 깨달은 사람이다.
+
+## 여기에 뭐가 있나
+
+**실제 코드 문제들**  
+튜토리얼이 아니다. 그냥 "X를 하려고 했는데 완전히 망했고, 여기서 배운 게 뭐냐?"
+
+**엔지니어링 발견들**  
+Fixed timestep. Canvas vs WebGL. Vercel 빌드가 계속 터지는 이유. 아무도 블로그에 안 쓰는데 "당연한 거 아닌가?" 하면서 실제론 당연하지 않은 것들.
+
+**먹혀드는 디자인**  
+이모지 중심 UI. 진짜 못생기지 않은 네온 그래디언트. 레트로 게임을 현대적으로 느껴지게 하기. (스포: 이게 진짜 어렵다.)
+
+**진짜 실수들**  
+언제 내가 멍청했는지 말해줄 거다. 과도하게 엔지니어링한 거. 더 간단한 해결책이 있었는데 안 본 거. 이런 거.
+
+---
+
+기본적으로 여기는 내 실시간 디버깅 로그다.
+
+전문가도 아니고, 뭘 모르는 디자이너가 AI로 게임을 만들면서 뭐가 일어났는지 기록하는 거다. 테트리스 깬 이야기, 래더보드 고쳤는데 이게 실제로 진짜 쓸 만한 트릭였던 이야기, Vercel에서 빌드가 자꾸 터지는 이야기 이런 거다.
+
+정보를 구하는 거면 이 블로그가 도움이 될 거고, 누군가 똑같은 문제를 겪고 있으면 "어? 이 사람도 같은 거 겪었네?" 하고 웃을 수 있을 거다.
+
+그럼 시작하자.
