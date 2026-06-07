@@ -1,7 +1,7 @@
 ---
 title: Why I'm Writing This, and Who It's For
 title_ko: 왜 이걸 쓰고, 이게 누구한테 필요한지
-description: "I am a designer in the military who built a game with AI. This is the honest account of how that happened, what broke, and why it matters."
+description: "I'm a designer in the military who built a game with AI. Here's the honest story of how it happened, what broke, and why it matters."
 description_ko: "군인이면서 디자이너인 저는 AI로 게임을 만들었습니다. 어떻게 됐고, 뭐가 망했으며, 왜 중요한지에 대한 솔직한 이야기입니다."
 date: 2026-06-07
 category: STORIES
@@ -13,34 +13,50 @@ coverEmoji: "📝"
 featured: true
 ---
 
-I am a designer. I have built [Glowtris](https://glowtris.com) — a browser Tetris game — almost entirely by speaking with Claude. I cannot code. I have never been able to.
+I'm a designer. I've worked for 7 years—in Seoul, in New York. I understand color theory, visual hierarchy, typography. But coding? That's different. I don't understand pointers or why `npm install` sometimes just doesn't work. I can only guess.
 
-And yet, I built it.
+Yet I built [Glowtris](https://glowtris.com). A full browser game. Almost entirely by talking to Claude.
 
-This blog is simply my documentation of what happened. The design decisions that worked. The engineering problems I encountered and how we resolved them. The mistakes I made. The fortunate guesses that turned out to be wise.
+I can't code. Never could. And here's the weird part—that turned out to be exactly the skill I needed.
 
-## What you will find here
+## What happened in a month
 
-**The real problems I encountered**
+I asked Claude: "Can we build a Tetris game that runs in a browser?"
 
-This is not a tutorial or a guide to best practices. Rather, it is my honest account: "I attempted X, it failed completely, and here is what I learned." Specific problems with concrete solutions. Sometimes in hindsight, the solution was obvious. Sometimes, I was simply fortunate.
+Claude said yes. So we did. A week for the core engine. Another week fixing the stuff that broke. Another for design, branding, infrastructure. Thirty days, and I had a shipping game.
 
-**Engineering discoveries**
+My job was simple: look at what Claude built. Tell it if it's right or wrong. Describe what needs to change. That's it.
 
-Fixed timesteps. Why setTimeout becomes a trap in game development. Redis date-keyed buckets. Vercel's read-only filesystem. These are the insights you gain when building something without truly understanding what you are doing.
+Claude was the hands. I was the eye.
 
-**The design process**
+## This blog is a record
 
-How I described color systems in my prompts. What made the neon glow actually function. Why an emoji-first UI is not merely aesthetic—it is genuinely clearer. What worked well and what required iteration.
+Not a tutorial. Not best practices. Just: "I tried X, it broke completely, here's what I learned."
 
-**Infrastructure lessons**
+You'll find real problems I hit. The design decisions that actually worked. The engineering disasters and how we got past them. PixiJS on Safari becoming a special kind of hell. Redis buckets becoming surprisingly elegant. Vercel's read-only filesystem becoming a weird blessing in disguise.
 
-CI/CD pipeline mistakes. GitHub Actions challenges. Scaling issues. The problems that surface after launch, not before.
+And mostly—how I had no idea what I was doing, still don't, but built something anyway.
 
-## The sincere part
+## Who this is for
 
-I am not an expert in any of these areas. I am a designer with seven years of visual design experience, but zero years in game development. I do not know TypeScript best practices. I cannot explain async/await without looking it up.
+**Designers who want to code**
 
-What I can do is this: observe what Claude has created, assess whether it is correct or incorrect, and articulate what needs to change. My eye is the filter. The AI provides the hands.
+You feel stuck. You've felt it for years. You think coding is for people who understand recursion. It's not. I don't understand recursion. I asked Claude what it was, he explained it once, and I've been fine. You don't need to understand everything. You need to be able to describe what you want.
 
-That is all. This blog is my account of what that process genuinely looks like.
+**People building things that keep breaking**
+
+There's no magic here. Just specific problems with specific fixes. Problems you probably hit too. Maybe our solutions will help. Maybe they'll just make you feel less alone.
+
+**People who thought they were alone**
+
+I built this in a military barracks. At night, in my bunk, with my laptop. No one around me knew what I was doing. No one checked on my progress. But I kept going anyway. You might be somewhere like that too. This is for you.
+
+## Why I'm writing this
+
+Because building something is hard. And doing it without knowing what you're doing is harder. And doing it alone is the hardest part.
+
+But it's not impossible. I'm living proof that it's not.
+
+Every post here is something I actually built, actually struggled with, actually fixed. I'm writing it down with care because maybe you'll read it and think: "Oh good, I'm not the only one who got stuck there."
+
+That's the whole point of this blog.
