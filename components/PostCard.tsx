@@ -19,20 +19,28 @@ export default function PostCard({ post, featured, lang }: Props) {
 
   return (
     <Link href={href} className={`post-card${featured ? ' featured' : ''}`}>
+      {/* Cover — figure-ground: gradient backdrop makes card float */}
       <div className="post-cover" style={{ background: post.coverGradient }}>
         {post.coverEmoji && (
           <span className="post-cover-emoji" aria-hidden="true">{post.coverEmoji}</span>
         )}
         <span className="post-category">{post.category}</span>
       </div>
+
+      {/* Body — proximity: two clusters */}
       <div className="post-body">
+        {/* Cluster 1: title + description (tightly spaced) */}
         <h2 className="post-title">{title}</h2>
         <p className="post-desc">{desc}</p>
+
+        {/* Cluster 2: meta (separated by border) */}
         <div className="post-footer">
-          <span className="post-author">{post.authorEmoji} {post.author}</span>
-          <div className="post-meta">
+          <span className="post-author">
+            {post.authorEmoji} {post.author}
+          </span>
+          <div className="post-meta-chips">
             <span>{formatDate(post.date)}</span>
-            <span>·</span>
+            <span className="post-meta-dot">·</span>
             <span>{post.readingTime} {readUnit}</span>
           </div>
         </div>

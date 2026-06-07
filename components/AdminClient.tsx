@@ -11,12 +11,9 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   const [logging, setLogging] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Check for stored authentication on mount
   useEffect(() => {
     const stored = localStorage.getItem('admin_auth')
-    if (stored === 'true') {
-      setAuthenticated(true)
-    }
+    if (stored === 'true') setAuthenticated(true)
     setMounted(true)
   }, [])
 
@@ -24,14 +21,12 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     e.preventDefault()
     setError('')
     setLogging(true)
-
     try {
       const res = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       })
-
       if (res.ok) {
         localStorage.setItem('admin_auth', 'true')
         setAuthenticated(true)
@@ -39,7 +34,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
       } else {
         setError('Incorrect password')
       }
-    } catch (err) {
+    } catch {
       setError('Authentication failed')
     } finally {
       setLogging(false)
@@ -52,88 +47,43 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     setPassword('')
   }
 
-  // Don't render until mounted (avoid hydration mismatch)
-  if (!mounted) {
-    return null
-  }
+  if (!mounted) return null
 
+  /* ── Login ──────────────────────────────────────────────────────────── */
   if (!authenticated) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%)',
-        padding: '20px',
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '400px',
-          padding: '40px',
-          background: '#ffffff',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e5e5',
-        }}>
-          <div style={{ marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px' }}>Admin Panel</h1>
-            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Blog Post Editor</p>
-          </div>
+      <div className="admin-login-wrap">
+        <div className="admin-login-card">
+          {/* Brand anchor — continuity from main site */}
+          <span className="admin-login-logo">GLOWTRIS BLOG</span>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Identity cluster — proximity */}
+          <h1 className="admin-login-title">Admin Panel</h1>
+          <p className="admin-login-sub">Blog Post Editor</p>
+
+          {/* Form — closure: contained input unit */}
+          <form onSubmit={handleLogin} className="admin-form">
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: '#333' }}>
-                Password
-              </label>
+              <label className="admin-label">Password</label>
               <input
                 type="password"
                 placeholder="Enter admin password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={logging}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #ddd',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.2s',
-                  opacity: logging ? 0.6 : 1,
-                }}
+                className="admin-input"
               />
             </div>
 
-            {error && (
-              <div style={{
-                padding: '10px 12px',
-                background: '#fee',
-                border: '1px solid #fcc',
-                borderRadius: '6px',
-                fontSize: '13px',
-                color: '#c33',
-              }}>
-                {error}
-              </div>
-            )}
+            {error && <div className="admin-error">{error}</div>}
 
             <button
               type="submit"
               disabled={logging}
-              style={{
-                padding: '10px 16px',
-                background: logging ? '#ccc' : '#0f0f11',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: logging ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                fontWeight: 600,
-                transition: 'all 0.2s',
-              }}
+              className="admin-btn admin-btn-primary"
+              style={{ width: '100%', marginTop: '4px' }}
             >
-              {logging ? 'Logging in...' : 'Login'}
+              {logging ? 'Signing in…' : 'Sign in →'}
             </button>
           </form>
         </div>
@@ -141,100 +91,60 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     )
   }
 
+  /* ── Admin dashboard ─────────────────────────────────────────────────── */
   return (
-    <div style={{ minHeight: '100vh', background: '#f9f9f9' }}>
-      {/* Header */}
-      <div style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e5e5e5',
-        padding: '20px 0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-      }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 800, margin: '0', marginBottom: '4px' }}>✏️ Blog Editor</h1>
-            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Manage all posts with EN/KO simultaneous editing</p>
+    <div className="admin-root">
+      {/* Header — figure-ground: surface above bg */}
+      <div className="admin-header">
+        <div className="admin-header-inner">
+          {/* Info cluster — proximity */}
+          <div className="admin-header-info">
+            <span className="admin-header-title">✏️ Blog Editor</span>
+            <span className="admin-header-sub">
+              {posts.length} post{posts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
+            </span>
           </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '8px 16px',
-              background: '#f0f0f0',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#e0e0e0'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#f0f0f0'
-            }}
-          >
-            Logout
-          </button>
+          {/* Actions cluster */}
+          <div className="admin-header-actions">
+            <Link href="/" className="admin-btn admin-btn-secondary">
+              ← Blog
+            </Link>
+            <button onClick={handleLogout} className="admin-btn admin-btn-secondary">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Posts Grid */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '20px',
-        }}>
+      {/* Posts grid */}
+      <div className="admin-body">
+        <p className="admin-section-title">All posts</p>
+        <div className="admin-posts-grid">
           {posts.map((post) => (
             <Link
               key={post.slug}
               href={`/admin/${post.slug}`}
-              style={{
-                padding: '20px',
-                background: '#ffffff',
-                border: '1px solid #e5e5e5',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                color: 'inherit',
-                transition: 'all 0.25s',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#2563eb'
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(37, 99, 235, 0.12)'
-                e.currentTarget.style.transform = 'translateY(-4px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#e5e5e5'
-                e.currentTarget.style.boxShadow = 'none'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
+              className="admin-post-card"
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, flex: 1 }}>{post.title}</h3>
-                <span style={{
-                  display: 'inline-block',
-                  background: '#f0f0f0',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: '#666',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {post.category}
-                </span>
+              {/* Top cluster — title + badge */}
+              <div className="admin-card-top">
+                <h3 className="admin-card-title">{post.title}</h3>
+                <span className="admin-card-badge">{post.category}</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>{post.description}</p>
-              <div style={{ fontSize: '11px', color: '#999', display: 'flex', gap: '12px', marginTop: '4px' }}>
-                <span>✏️ {post.author}</span>
-                <span>📅 {new Date(post.date).toLocaleDateString()}</span>
+
+              {/* Description */}
+              <p className="admin-card-desc">{post.description}</p>
+
+              {/* Meta cluster — separated from content by border */}
+              <div className="admin-card-meta">
+                <span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  {post.author}
+                </span>
+                <span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  {new Date(post.date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
               </div>
             </Link>
           ))}

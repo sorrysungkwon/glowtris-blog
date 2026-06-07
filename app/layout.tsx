@@ -49,12 +49,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="container">
             <div className="header-inner">
               <Link href="/" className="header-logo">GLOWTRIS BLOG</Link>
+
               <nav className="header-nav">
-                <Link href="https://glowtris.com" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://glowtris.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-link"
+                >
                   Play the game ↗
                 </Link>
-                <LangToggle />
-                <ThemeToggle />
+
+                {/* Controls grouped together — Gestalt: proximity */}
+                <div className="header-controls">
+                  <LangToggle />
+                  <div className="header-divider" />
+                  <ThemeToggle />
+                </div>
               </nav>
             </div>
           </div>
@@ -65,12 +76,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="site-footer">
           <div className="container">
             <div className="footer-inner">
-              <span className="footer-logo">GLOWTRIS</span>
+              {/* Brand cluster — proximity */}
+              <div className="footer-brand">
+                <span className="footer-logo">GLOWTRIS</span>
+                <span className="footer-tagline">Behind the blocks</span>
+              </div>
               <div className="footer-links">
                 <Link href="https://glowtris.com" target="_blank" rel="noopener noreferrer">Game</Link>
                 <Link href="https://glowtris.com/privacy.html" target="_blank" rel="noopener noreferrer">Privacy</Link>
               </div>
-              <span>© 2026 Glowtris</span>
+              <span className="footer-copy">© 2026 Glowtris</span>
             </div>
           </div>
         </footer>

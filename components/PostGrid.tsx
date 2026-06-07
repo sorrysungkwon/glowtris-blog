@@ -28,7 +28,9 @@ export default function PostGrid({ posts, lang }: Props) {
 
   return (
     <>
+      {/* Filter bar — Gestalt: similarity (all buttons identical shape/weight) */}
       <div className="filter-section">
+        <span className="filter-label">Filter</span>
         {available.map(cat => (
           <button
             key={cat}
@@ -40,6 +42,7 @@ export default function PostGrid({ posts, lang }: Props) {
         ))}
       </div>
 
+      {/* Post grid — common fate: all cards share same hover behavior */}
       <div className="post-grid">
         {featuredPost && <PostCard post={featuredPost} featured lang={lang} />}
         {rest.map(post => (

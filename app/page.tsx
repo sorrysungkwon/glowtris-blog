@@ -11,21 +11,30 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <>
+      {/* Hero — Gestalt: continuity, figure-ground */}
       <section className="hero">
         <div className="container">
-          <p className="hero-eyebrow">GLOWTRIS · BLOG</p>
-          <h1 className="hero-title">Behind the blocks</h1>
-          <p className="hero-sub">
-            Dev logs, architecture decisions, and the honest story<br />of building a browser Tetris from scratch.
-          </p>
-          <a
-            href="https://glowtris.com"
-            className="hero-cta"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ⚡ Play Glowtris
-          </a>
+          <div className="hero-inner">
+            <p className="hero-eyebrow">
+              <span>✦</span>
+              GLOWTRIS · BLOG
+            </p>
+            <h1 className="hero-title">
+              <span className="hero-title-text">Behind the blocks</span>
+            </h1>
+            <p className="hero-sub">
+              Dev logs, architecture decisions, and the honest story
+              of building a browser Tetris from scratch.
+            </p>
+            <a
+              href="https://glowtris.com"
+              className="hero-cta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ⚡ Play Glowtris
+            </a>
+          </div>
         </div>
       </section>
 

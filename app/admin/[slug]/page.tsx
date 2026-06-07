@@ -51,7 +51,7 @@ export default function PostEditor() {
           const draft = localStorage.getItem(draftKey)
           if (draft) setHasDraft(true)
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load post')
       }
     }
@@ -59,26 +59,23 @@ export default function PostEditor() {
   }, [slug])
 
   function saveDraft() {
-    const draftKey = `draft_${slug}`
-    localStorage.setItem(draftKey, JSON.stringify(data))
+    localStorage.setItem(`draft_${slug}`, JSON.stringify(data))
     setHasDraft(true)
-    setSuccess('💾 Draft saved')
+    setSuccess('Draft saved')
     setTimeout(() => setSuccess(''), 2000)
   }
 
   function restoreDraft() {
-    const draftKey = `draft_${slug}`
-    const draft = localStorage.getItem(draftKey)
+    const draft = localStorage.getItem(`draft_${slug}`)
     if (draft) {
       setData(JSON.parse(draft))
-      setSuccess('✅ Draft restored')
+      setSuccess('Draft restored')
       setTimeout(() => setSuccess(''), 2000)
     }
   }
 
   function clearDraft() {
-    const draftKey = `draft_${slug}`
-    localStorage.removeItem(draftKey)
+    localStorage.removeItem(`draft_${slug}`)
     setHasDraft(false)
   }
 
@@ -87,13 +84,13 @@ export default function PostEditor() {
     setError('')
     try {
       const res = await fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
-      const data = await res.json()
+      const json = await res.json()
       if (res.ok) {
-        setSuccess('🗑️ Post deleted!')
+        setSuccess('Post deleted')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
-        setError(data.details || 'Failed to delete post')
+        setError(json.details || 'Failed to delete post')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error deleting post')
@@ -115,7 +112,7 @@ export default function PostEditor() {
       })
       const resData = await res.json()
       if (res.ok) {
-        setSuccess('✅ Saved and deployed!')
+        setSuccess('Saved and deployed!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
@@ -129,447 +126,325 @@ export default function PostEditor() {
   }
 
   const content = lang === 'en' ? data.content_en : data.content_ko
-  const buttonStyle = (variant: 'primary' | 'secondary' | 'danger' = 'primary') => ({
-    padding: isMobile ? '10px 14px' : '8px 16px',
-    fontSize: isMobile ? '14px' : '13px',
-    fontWeight: 600,
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    minHeight: isMobile ? '44px' : 'auto',
-    ...(variant === 'primary' ? {
-      background: '#0f0f11',
-      color: '#fff',
-    } : variant === 'secondary' ? {
-      background: '#94a3b8',
-      color: '#fff',
-    } : {
-      background: '#ef4444',
-      color: '#fff',
-    }),
-  })
+  const otherContent = lang === 'en' ? data.content_ko : data.content_en
+  const enWords = data.content_en.split(/\s+/).filter(w => w).length
+  const koWords = data.content_ko.split(/\s+/).filter(w => w).length
 
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
-      {/* Header */}
-      <div style={{
-        padding: isMobile ? '12px 16px' : '16px 24px',
-        background: '#ffffff',
-        borderBottom: '1px solid #e5e5e5',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '12px' : '0' }}>
-            <Link href="/admin" style={{
-              color: '#2563eb',
-              textDecoration: 'none',
-              fontSize: isMobile ? '12px' : '13px',
-              fontWeight: 600
-            }}>
-              ← Back
-            </Link>
+  /* ── Shared header bar ─────────────────────────────────────────────── */
+  const headerBar = (
+    <div className="editor-header">
+      <div className="editor-header-inner">
+        {/* Back link */}
+        <Link href="/admin" className="editor-back">
+          ← Admin
+        </Link>
 
-            {isMobile ? (
+        {/* Slug label */}
+        <span style={{
+          fontSize: '11px',
+          fontWeight: 700,
+          color: 'var(--text-faint)',
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.3px',
+          display: isMobile ? 'none' : 'block',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          maxWidth: '200px',
+        }}>
+          {slug}
+        </span>
+
+        {/* Draft badge — ambient indicator */}
+        {hasDraft && (
+          <span className="editor-draft-badge">● DRAFT</span>
+        )}
+
+        {/* Language toggle */}
+        {!isMobile && (
+          <div className="editor-lang-toggle">
+            {(['en', 'ko'] as const).map(l => (
               <button
-                onClick={() => setShowMenu(!showMenu)}
-                style={{
-                  background: '#f0f0f0',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                }}
+                key={l}
+                onClick={() => setLang(l)}
+                className={`editor-lang-btn${lang === l ? ' active' : ''}`}
               >
-                ⋯
+                {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
               </button>
-            ) : (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                {/* Language Toggle */}
-                <div style={{
-                  display: 'flex',
-                  background: '#f0f0f0',
-                  borderRadius: '6px',
-                  padding: '2px',
-                  gap: '2px',
-                }}>
-                  {(['en', 'ko'] as const).map(l => (
-                    <button
-                      key={l}
-                      onClick={() => setLang(l)}
-                      style={{
-                        padding: '6px 12px',
-                        background: lang === l ? '#ffffff' : 'transparent',
-                        border: lang === l ? '1px solid #e5e5e5' : 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: lang === l ? '#2563eb' : '#666',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {l === 'en' ? '🇬🇧' : '🇰🇷'}
-                    </button>
-                  ))}
-                </div>
-
-                {hasDraft && (
-                  <button
-                    onClick={restoreDraft}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#f59e0b',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    📝 Restore
-                  </button>
-                )}
-
-                <button onClick={saveDraft} style={{ ...buttonStyle('secondary'), padding: '6px 12px' }}>💾</button>
-                <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle('primary'), padding: '6px 16px', opacity: saving ? 0.6 : 1 }}>🚀</button>
-                <button onClick={() => setShowDeleteConfirm(true)} disabled={deleting} style={{ ...buttonStyle('danger'), padding: '6px 12px', opacity: deleting ? 0.6 : 1 }}>🗑️</button>
-              </div>
-            )}
+            ))}
           </div>
+        )}
 
-          {/* Mobile Menu */}
-          {isMobile && showMenu && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              paddingTop: '12px',
-              borderTop: '1px solid #e5e5e5',
-            }}>
-              <div style={{ display: 'flex', gap: '6px', background: '#f0f0f0', borderRadius: '6px', padding: '2px' }}>
-                {(['en', 'ko'] as const).map(l => (
-                  <button
-                    key={l}
-                    onClick={() => { setLang(l); setShowMenu(false) }}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      background: lang === l ? '#fff' : 'transparent',
-                      border: lang === l ? '1px solid #ddd' : 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: lang === l ? '#2563eb' : '#666',
-                    }}
-                  >
-                    {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
-                  </button>
-                ))}
-              </div>
+        {/* Action cluster — similarity: all same shape/weight */}
+        <div className="editor-actions">
+          {!isMobile ? (
+            <>
               {hasDraft && (
-                <button
-                  onClick={() => { restoreDraft(); setShowMenu(false) }}
-                  style={{ ...buttonStyle('secondary'), width: '100%' }}
-                >
-                  📝 Restore Draft
+                <button onClick={restoreDraft} className="admin-btn admin-btn-warning" style={{ fontSize: '12px', padding: '6px 12px' }}>
+                  Restore
                 </button>
               )}
-              <button
-                onClick={() => { saveDraft(); setShowMenu(false) }}
-                style={{ ...buttonStyle('secondary'), width: '100%' }}
-              >
-                💾 Save Draft
+              <button onClick={saveDraft} className="admin-btn admin-btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}>
+                💾 Draft
               </button>
               <button
-                onClick={() => { handleSave(); setShowMenu(false) }}
+                onClick={handleSave}
                 disabled={saving}
-                style={{ ...buttonStyle('primary'), width: '100%', opacity: saving ? 0.6 : 1 }}
+                className="admin-btn admin-btn-primary"
+                style={{ fontSize: '12px', padding: '6px 16px' }}
               >
-                {saving ? '🚀 Deploying...' : '🚀 Deploy'}
+                {saving ? 'Deploying…' : '🚀 Deploy'}
               </button>
               <button
-                onClick={() => { setShowDeleteConfirm(true); setShowMenu(false) }}
+                onClick={() => setShowDeleteConfirm(true)}
                 disabled={deleting}
-                style={{ ...buttonStyle('danger'), width: '100%', opacity: deleting ? 0.6 : 1 }}
+                className="admin-btn admin-btn-danger"
+                style={{ fontSize: '12px', padding: '6px 10px' }}
               >
-                {deleting ? '🗑️ Deleting...' : '🗑️ Delete'}
+                🗑️
               </button>
-            </div>
+            </>
+          ) : (
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="admin-btn admin-btn-secondary"
+              style={{ fontSize: '16px', padding: '6px 12px', lineHeight: 1 }}
+            >
+              ⋯
+            </button>
           )}
         </div>
       </div>
+    </div>
+  )
 
-      {/* Messages */}
-      {error && <div style={{ padding: '12px 16px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc', textAlign: 'center' }}>{error}</div>}
-      {success && <div style={{ padding: '12px 16px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc', textAlign: 'center' }}>{success}</div>}
+  /* ── Mobile expanded menu ─────────────────────────────────────────── */
+  const mobileMenu = isMobile && showMenu && (
+    <div className="editor-mobile-menu">
+      {/* Lang toggle */}
+      <div className="editor-lang-toggle" style={{ width: '100%' }}>
+        {(['en', 'ko'] as const).map(l => (
+          <button
+            key={l}
+            onClick={() => { setLang(l); setShowMenu(false) }}
+            className={`editor-lang-btn${lang === l ? ' active' : ''}`}
+            style={{ flex: 1, textAlign: 'center' }}
+          >
+            {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+          </button>
+        ))}
+      </div>
+      {hasDraft && (
+        <button onClick={() => { restoreDraft(); setShowMenu(false) }} className="admin-btn admin-btn-warning" style={{ width: '100%' }}>
+          📝 Restore Draft
+        </button>
+      )}
+      <button onClick={() => { saveDraft(); setShowMenu(false) }} className="admin-btn admin-btn-secondary" style={{ width: '100%' }}>
+        💾 Save Draft
+      </button>
+      <button
+        onClick={() => { handleSave(); setShowMenu(false) }}
+        disabled={saving}
+        className="admin-btn admin-btn-primary"
+        style={{ width: '100%' }}
+      >
+        {saving ? 'Deploying…' : '🚀 Deploy'}
+      </button>
+      <button
+        onClick={() => { setShowDeleteConfirm(true); setShowMenu(false) }}
+        disabled={deleting}
+        className="admin-btn admin-btn-danger"
+        style={{ width: '100%' }}
+      >
+        🗑️ Delete
+      </button>
+    </div>
+  )
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '16px',
-        }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: '12px',
-            padding: isMobile ? '20px' : '24px',
-            maxWidth: '400px',
-            width: '100%',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-          }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 700 }}>Delete post?</h3>
-            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-              This will permanently delete the post and all versions. This cannot be undone.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-                style={{
-                  ...buttonStyle('secondary'),
-                  flex: isMobile ? 1 : 'auto',
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                style={{
-                  ...buttonStyle('danger'),
-                  flex: isMobile ? 1 : 'auto',
-                  opacity: deleting ? 0.6 : 1,
-                }}
-              >
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
+  /* ── Delete confirm modal ─────────────────────────────────────────── */
+  const deleteModal = showDeleteConfirm && (
+    <div className="admin-modal-backdrop" onClick={() => setShowDeleteConfirm(false)}>
+      <div className="admin-modal" onClick={e => e.stopPropagation()}>
+        <h3 className="admin-modal-title">Delete this post?</h3>
+        <p className="admin-modal-body">
+          This will permanently delete <strong>{slug}</strong> and all versions. This cannot be undone.
+        </p>
+        <div className="admin-modal-actions">
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={deleting}
+            className="admin-btn admin-btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="admin-btn admin-btn-danger"
+          >
+            {deleting ? 'Deleting…' : 'Delete permanently'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Notification bar ─────────────────────────────────────────────── */
+  const notify = (
+    <>
+      {error && <div className="editor-notify error">⚠ {error}</div>}
+      {success && <div className="editor-notify success">✓ {success}</div>}
+    </>
+  )
+
+  /* ── Desktop split layout ─────────────────────────────────────────── */
+  const desktopLayout = (
+    <div className="editor-body">
+      <div className="editor-split">
+        {/* Left pane: editable content */}
+        <div className="editor-pane">
+          {/* Frontmatter section */}
+          <div className="pane-label">
+            <span>📋</span>
+            <span>Frontmatter</span>
+            <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>— shared</span>
+          </div>
+          <textarea
+            className="editor-textarea editor-textarea-frontmatter"
+            value={data.frontmatter}
+            onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+            placeholder="---&#10;title: Post title&#10;---"
+          />
+
+          {/* Content section */}
+          <div className="pane-label">
+            <span className="pane-label-accent">{lang === 'en' ? '🇬🇧' : '🇰🇷'}</span>
+            <span>{lang === 'en' ? 'English Content' : 'Korean Content'}</span>
+          </div>
+          <textarea
+            className="editor-textarea"
+            value={content}
+            onChange={(e) => {
+              if (lang === 'en') setData({ ...data, content_en: e.target.value })
+              else setData({ ...data, content_ko: e.target.value })
+            }}
+            placeholder={`Write ${lang === 'en' ? 'English' : 'Korean'} content in Markdown…`}
+          />
+        </div>
+
+        {/* Right pane: live preview */}
+        <div className="editor-pane-right">
+          <div className="pane-label">
+            <span>{lang === 'en' ? '🇰🇷' : '🇬🇧'}</span>
+            <span>Preview · {lang === 'en' ? 'Korean' : 'English'}</span>
+          </div>
+          <div className="pane-preview">
+            <article
+              className="mdx"
+              dangerouslySetInnerHTML={{ __html: marked(otherContent || '') as string }}
+            />
+            {!otherContent.trim() && (
+              <p className="pane-preview-empty">
+                No {lang === 'en' ? 'Korean' : 'English'} content yet
+              </p>
+            )}
+          </div>
+
+          {/* Stats cluster — proximity: EN + KO stats together */}
+          <div className="pane-stats">
+            <div className="pane-stat">
+              <span className="pane-stat-label">🇬🇧 EN words</span>
+              <span className="pane-stat-value">{enWords.toLocaleString()}</span>
+            </div>
+            <div className="pane-stat">
+              <span className="pane-stat-label">🇰🇷 KO words</span>
+              <span className="pane-stat-value">{koWords.toLocaleString()}</span>
             </div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  )
 
-      {/* Editor Container */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-        {isMobile ? (
-          /* Mobile Tab Layout */
-          <div style={{ flex: 1, width: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid #e5e5e5', background: '#fff', gap: '0' }}>
-              {(['edit', 'preview', 'stats'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    background: activeTab === tab ? '#fff' : '#f9f9f9',
-                    border: 'none',
-                    borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: activeTab === tab ? '#2563eb' : '#666',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {tab === 'edit' ? '✎ Edit' : tab === 'preview' ? '👁 Preview' : '📊 Stats'}
-                </button>
-              ))}
+  /* ── Mobile tab layout ────────────────────────────────────────────── */
+  const mobileLayout = (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Tabs — similarity: all same size/shape */}
+      <div className="editor-tabs">
+        {(['edit', 'preview', 'stats'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`editor-tab${activeTab === tab ? ' active' : ''}`}
+          >
+            {tab === 'edit' ? '✎ Edit' : tab === 'preview' ? '👁 Preview' : '📊 Stats'}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ flex: 1, overflow: 'auto', background: 'var(--surface)' }}>
+        {activeTab === 'edit' && (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div className="pane-label">📋 Frontmatter</div>
+            <textarea
+              className="editor-textarea editor-textarea-frontmatter"
+              style={{ height: '140px' }}
+              value={data.frontmatter}
+              onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+            />
+            <div className="pane-label">
+              <span className="pane-label-accent">{lang === 'en' ? '🇬🇧' : '🇰🇷'}</span>
+              <span>{lang === 'en' ? 'English' : 'Korean'}</span>
             </div>
-
-            {/* Tab Content */}
-            <div style={{ flex: 1, overflow: 'auto', background: '#fff' }}>
-              {activeTab === 'edit' && (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  {/* Frontmatter */}
-                  <div style={{ borderBottom: '1px solid #e5e5e5' }}>
-                    <div style={{ padding: '12px 16px', background: '#f9f9f9', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-                      📋 Frontmatter
-                    </div>
-                    <textarea
-                      value={data.frontmatter}
-                      onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
-                      style={{
-                        width: '100%',
-                        height: '140px',
-                        padding: '12px 16px',
-                        border: 'none',
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        resize: 'none',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '12px 16px', background: '#f9f9f9', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-                      {lang === 'en' ? '🇬🇧 English' : '🇰🇷 Korean'}
-                    </div>
-                    <textarea
-                      value={content}
-                      onChange={(e) => {
-                        if (lang === 'en') {
-                          setData({ ...data, content_en: e.target.value })
-                        } else {
-                          setData({ ...data, content_ko: e.target.value })
-                        }
-                      }}
-                      style={{
-                        flex: 1,
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: 'none',
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        resize: 'none',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'preview' && (
-                <div style={{ padding: '16px', fontSize: '14px', lineHeight: 1.6, color: '#333' }}>
-                  <article
-                    className="mdx"
-                    dangerouslySetInnerHTML={{
-                      __html: marked(lang === 'en' ? data.content_en : data.content_ko)
-                    }}
-                  />
-                  {!content.trim() && (
-                    <p style={{ color: '#999', fontStyle: 'italic' }}>
-                      No {lang === 'en' ? 'English' : 'Korean'} content yet
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'stats' && (
-                <div style={{ padding: '16px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div style={{ padding: '16px', background: '#f9f9f9', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>🇬🇧 English</div>
-                      <div style={{ fontSize: '20px', fontWeight: 700 }}>{data.content_en.split(/\s+/).filter(w => w).length}</div>
-                      <div style={{ fontSize: '11px', color: '#999' }}>words</div>
-                    </div>
-                    <div style={{ padding: '16px', background: '#f9f9f9', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>🇰🇷 Korean</div>
-                      <div style={{ fontSize: '20px', fontWeight: 700 }}>{data.content_ko.split(/\s+/).filter(w => w).length}</div>
-                      <div style={{ fontSize: '11px', color: '#999' }}>words</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <textarea
+              className="editor-textarea"
+              style={{ flex: 1 }}
+              value={content}
+              onChange={(e) => {
+                if (lang === 'en') setData({ ...data, content_en: e.target.value })
+                else setData({ ...data, content_ko: e.target.value })
+              }}
+            />
           </div>
-        ) : (
-          /* Desktop Split Layout */
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0', maxWidth: '1280px', width: '100%' }}>
-            {/* Left: Frontmatter + Current Language */}
-            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e5e5e5', background: '#ffffff' }}>
-              {/* Frontmatter */}
-              <div>
-                <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-                  📋 Frontmatter (Shared)
-                </div>
-                <textarea
-                  value={data.frontmatter}
-                  onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
-                  style={{
-                    width: '100%',
-                    height: '180px',
-                    padding: '12px',
-                    border: 'none',
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
-                    resize: 'none',
-                    outline: 'none',
-                    borderBottom: '1px solid #e5e5e5',
-                  }}
-                />
-              </div>
+        )}
 
-              {/* Content */}
-              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-                  {lang === 'en' ? '🇬🇧 English Content' : '🇰🇷 Korean Content'}
-                </div>
-                <textarea
-                  value={content}
-                  onChange={(e) => {
-                    if (lang === 'en') {
-                      setData({ ...data, content_en: e.target.value })
-                    } else {
-                      setData({ ...data, content_ko: e.target.value })
-                    }
-                  }}
-                  style={{
-                    flex: 1,
-                    width: '100%',
-                    padding: '12px',
-                    border: 'none',
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
-                    resize: 'none',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
+        {activeTab === 'preview' && (
+          <div className="pane-preview" style={{ minHeight: '100%' }}>
+            <article
+              className="mdx"
+              dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
+            />
+            {!content.trim() && (
+              <p className="pane-preview-empty">No {lang === 'en' ? 'English' : 'Korean'} content yet</p>
+            )}
+          </div>
+        )}
 
-            {/* Right: Language Preview */}
-            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#ffffff' }}>
-              <div style={{ padding: '12px 16px', background: '#f0f0f0', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-                {lang === 'en' ? '🇰🇷 Korean Preview' : '🇬🇧 English Preview'}
+        {activeTab === 'stats' && (
+          <div style={{ padding: 'var(--space-5)' }}>
+            <div className="pane-stats" style={{ borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
+              <div className="pane-stat">
+                <span className="pane-stat-label">🇬🇧 EN words</span>
+                <span className="pane-stat-value">{enWords.toLocaleString()}</span>
               </div>
-              <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px', fontSize: '13px', lineHeight: 1.6, color: '#333' }}>
-                <article
-                  className="mdx"
-                  dangerouslySetInnerHTML={{
-                    __html: marked(lang === 'en' ? data.content_en : data.content_ko)
-                  }}
-                  style={{ maxWidth: '100%' }}
-                />
-                {!content.trim() && (
-                  <p style={{ color: '#999', fontStyle: 'italic' }}>
-                    {lang === 'en' ? 'No English content yet' : 'No Korean content yet'}
-                  </p>
-                )}
-              </div>
-
-              {/* Stats */}
-              <div style={{ padding: '12px 16px', background: '#f9f9f9', borderTop: '1px solid #e5e5e5', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇬🇧 EN</div>
-                  <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_en.split(/\s+/).filter(w => w).length} words</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇰🇷 KO</div>
-                  <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_ko.split(/\s+/).filter(w => w).length} words</div>
-                </div>
+              <div className="pane-stat">
+                <span className="pane-stat-label">🇰🇷 KO words</span>
+                <span className="pane-stat-value">{koWords.toLocaleString()}</span>
               </div>
             </div>
           </div>
         )}
       </div>
+    </div>
+  )
+
+  return (
+    <div className="editor-root">
+      {headerBar}
+      {mobileMenu}
+      {notify}
+      {deleteModal}
+      {isMobile ? mobileLayout : desktopLayout}
     </div>
   )
 }
