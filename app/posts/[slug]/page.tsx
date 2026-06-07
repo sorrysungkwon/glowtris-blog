@@ -48,7 +48,7 @@ export default async function PostPage({ params, searchParams }: Props) {
   const readUnit = lang === 'ko' ? '분 읽기' : 'min read'
 
   // Get recommended posts
-  const allPosts = await getAllPostMeta()
+  const allPosts = await getAllPostMeta(lang)
   const currentIndex = allPosts.findIndex(p => p.slug === slug)
   const sameCategoryPosts = allPosts.filter(p => p.category === post.category && p.slug !== slug)
   const recommendedPosts = sameCategoryPosts.length > 0 ? sameCategoryPosts : allPosts.filter(p => p.slug !== slug)

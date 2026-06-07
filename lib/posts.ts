@@ -94,16 +94,18 @@ export interface Post extends PostMeta {
   content: string
 }
 
-export async function getAllPostMeta(): Promise<PostMeta[]> {
+export async function getAllPostMeta(lang?: string): Promise<PostMeta[]> {
   let files: string[] = []
+  const dir = lang === 'ko' ? 'posts/ko' : 'posts'
 
   if (isProduction) {
     // Use GitHub API in production
-    files = await listFilesFromGitHub('posts')
+    files = await listFilesFromGitHub(dir)
   } else {
     // Use local filesystem in development
-    if (!fs.existsSync(postsDir)) return []
-    files = fs.readdirSync(postsDir).filter(f => f.endsWith('.mdx'))
+    const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
+    if (!fs.existsSync(targetDir)) return []
+    files = fs.readdirSync(targetDir).filter(f => f.endsWith('.mdx'))
   }
 
   const posts: PostMeta[] = []
@@ -113,10 +115,11 @@ export async function getAllPostMeta(): Promise<PostMeta[]> {
     let content: string | null = null
 
     if (isProduction) {
-      content = await fetchFromGitHub(`posts/${file}`)
+      content = await fetchFromGitHub(`${dir}/${file}`)
     } else {
       try {
-        content = fs.readFileSync(path.join(postsDir, file), 'utf8')
+        const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
+        content = fs.readFileSync(path.join(targetDir, file), 'utf8')
       } catch (e) {
         content = null
       }
