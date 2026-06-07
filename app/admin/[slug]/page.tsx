@@ -308,10 +308,10 @@ export default function PostEditor() {
               )}
               <button
                 onClick={toggleDraft}
-                className={`admin-btn ${isDraft ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
+                className={`admin-btn ${isDraft ? 'admin-btn-secondary' : 'admin-btn-warning'}`}
                 style={{ fontSize: '12px', padding: '6px 12px' }}
               >
-                {isDraft ? '📝 Draft' : '✔️ Publish'}
+                {isDraft ? '✔️ Publish' : '📝 Draft'}
               </button>
               <button onClick={saveDraft} className="admin-btn admin-btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}>
                 💾 Save

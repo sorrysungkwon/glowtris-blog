@@ -146,7 +146,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
           <div className="admin-header-info">
             <span className="admin-header-title">✏️ Blog Editor</span>
             <span className="admin-header-sub">
-              {filteredPosts.length} post{filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
+              {filteredPosts.length} {tab === 'drafts' ? 'draft' : 'published'}{filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
             </span>
           </div>
           {/* Actions cluster */}
@@ -189,7 +189,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
               paddingBottom: '20px',
             }}
           >
-            All Posts ({allPosts.length})
+            Published ({allPosts.length})
           </button>
           {hasDrafts && (
             <button
