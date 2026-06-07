@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { PostMeta } from '@/lib/posts'
 
@@ -9,6 +9,16 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   const [authenticated, setAuthenticated] = useState(false)
   const [error, setError] = useState('')
   const [logging, setLogging] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Check for stored authentication on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('admin_auth')
+    if (stored === 'true') {
+      setAuthenticated(true)
+    }
+    setMounted(true)
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -23,6 +33,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
       })
 
       if (res.ok) {
+        localStorage.setItem('admin_auth', 'true')
         setAuthenticated(true)
         setPassword('')
       } else {
@@ -33,6 +44,17 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     } finally {
       setLogging(false)
     }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('admin_auth')
+    setAuthenticated(false)
+    setPassword('')
+  }
+
+  // Don't render until mounted (avoid hydration mismatch)
+  if (!mounted) {
+    return null
   }
 
   if (!authenticated) {
@@ -136,7 +158,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
             <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Manage all posts with EN/KO simultaneous editing</p>
           </div>
           <button
-            onClick={() => setAuthenticated(false)}
+            onClick={handleLogout}
             style={{
               padding: '8px 16px',
               background: '#f0f0f0',
