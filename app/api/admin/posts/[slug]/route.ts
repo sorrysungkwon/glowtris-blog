@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { execSync } from 'child_process'
 import { revalidatePath } from 'next/cache'
+import { requireAuth } from '@/lib/auth'
 
 const postsDir = path.join(process.cwd(), 'posts')
 const isProduction = process.env.NODE_ENV === 'production'
@@ -224,6 +225,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const auth = requireAuth(req)
+  if (!auth.valid) return auth.response
+
   const { slug } = await params
   try {
     const { frontmatter, content_en, content_ko } = await req.json()
@@ -304,6 +308,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const auth = requireAuth(req)
+  if (!auth.valid) return auth.response
+
   const { slug } = await params
   try {
     if (isProduction) {

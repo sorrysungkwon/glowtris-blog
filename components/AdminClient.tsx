@@ -12,10 +12,14 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   const [error, setError] = useState('')
   const [logging, setLogging] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('admin_auth')
-    if (stored === 'true') setAuthenticated(true)
+    const stored = localStorage.getItem('admin_token')
+    if (stored) {
+      setToken(stored)
+      setAuthenticated(true)
+    }
     setMounted(true)
   }, [])
 
@@ -47,9 +51,13 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
         body: JSON.stringify({ password }),
       })
       if (res.ok) {
-        localStorage.setItem('admin_auth', 'true')
-        setAuthenticated(true)
-        setPassword('')
+        const data = await res.json()
+        if (data.token) {
+          localStorage.setItem('admin_token', data.token)
+          setToken(data.token)
+          setAuthenticated(true)
+          setPassword('')
+        }
       } else {
         setError('Incorrect password')
       }
@@ -61,7 +69,8 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   }
 
   function handleLogout() {
-    localStorage.removeItem('admin_auth')
+    localStorage.removeItem('admin_token')
+    setToken(null)
     setAuthenticated(false)
     setPassword('')
   }

@@ -168,7 +168,11 @@ export default function PostEditor() {
     setDeleting(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/posts/${slug}`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
       const json = await res.json()
       if (res.ok) {
         setSuccess('Post deleted')
@@ -191,9 +195,13 @@ export default function PostEditor() {
     setError('')
     setSuccess('')
     try {
+      const token = localStorage.getItem('admin_token')
       const res = await fetch(`/api/admin/posts/${slug}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(data),
       })
       const resData = await res.json()
