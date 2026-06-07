@@ -68,7 +68,18 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     }
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    const currentToken = localStorage.getItem('admin_token')
+    if (currentToken) {
+      try {
+        await fetch('/api/admin/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` },
+        })
+      } catch (err) {
+        console.error('Logout request failed:', err)
+      }
+    }
     localStorage.removeItem('admin_token')
     setToken(null)
     setAuthenticated(false)

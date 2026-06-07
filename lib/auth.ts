@@ -3,9 +3,11 @@ import { createHmac } from 'crypto'
 
 const tokenSecret = process.env.TOKEN_SECRET || 'default-dev-secret'
 const validTokens = new Set<string>()
+const invalidatedTokens = new Set<string>()
 
 export function validateAuthToken(token: string): boolean {
   if (!token || !validTokens.has(token)) return false
+  if (invalidatedTokens.has(token)) return false
 
   const parts = token.split('.')
   if (parts.length !== 3) return false
@@ -24,6 +26,10 @@ export function validateAuthToken(token: string): boolean {
 
 export function addValidToken(token: string): void {
   validTokens.add(token)
+}
+
+export function invalidateToken(token: string): void {
+  invalidatedTokens.add(token)
 }
 
 export function extractToken(req: NextRequest): string | null {
