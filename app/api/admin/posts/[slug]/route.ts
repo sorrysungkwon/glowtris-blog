@@ -55,8 +55,7 @@ async function fetchGitHubFile(filePath: string): Promise<{ content: string; sha
 async function updateGitHubFile(
   filePath: string,
   content: string,
-  message: string,
-  sha?: string
+  message: string
 ): Promise<boolean> {
   const token = process.env.GITHUB_TOKEN
   const owner = process.env.GITHUB_OWNER
@@ -67,6 +66,35 @@ async function updateGitHubFile(
   }
 
   try {
+    // Get current SHA if file exists
+    let sha: string | undefined = undefined
+    try {
+      const metaResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+        {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      )
+      if (metaResponse.ok) {
+        const metaData = await metaResponse.json()
+        sha = metaData.sha
+      }
+    } catch {
+      // File doesn't exist, will create new
+    }
+
+    const requestBody: any = {
+      message,
+      content: Buffer.from(content).toString('base64'),
+    }
+
+    if (sha) {
+      requestBody.sha = sha
+    }
+
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
       {
@@ -75,11 +103,7 @@ async function updateGitHubFile(
           Authorization: `token ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message,
-          content: Buffer.from(content).toString('base64'),
-          ...(sha && { sha }),
-        }),
+        body: JSON.stringify(requestBody),
       }
     )
 
@@ -206,20 +230,12 @@ export async function POST(
     if (isProduction) {
       // Use GitHub API in production
       const enContent = `---\n${frontmatter}\n---\n${content_en}`
-      await updateGitHubFile(
-        `posts/${slug}.mdx`,
-        enContent,
-        `edit: update ${slug} (EN/KO) via admin editor`
-      )
+      await updateGitHubFile(`posts/${slug}.mdx`, enContent, `edit: update ${slug} (EN/KO) via admin editor`)
 
       // Update KO file if has content
       if (content_ko && content_ko.trim()) {
         const koContent = `---\n${frontmatter}\n---\n${content_ko}`
-        await updateGitHubFile(
-          `posts/ko/${slug}.mdx`,
-          koContent,
-          `edit: update ${slug} (KO) via admin editor`
-        )
+        await updateGitHubFile(`posts/ko/${slug}.mdx`, koContent, `edit: update ${slug} (KO) via admin editor`)
       }
     } else {
       // Use local filesystem in development
