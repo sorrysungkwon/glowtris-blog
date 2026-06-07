@@ -12,14 +12,15 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getSlugs().map(slug => ({ slug }))
+  const slugs = await getSlugs()
+  return slugs.map(slug => ({ slug }))
 }
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
   const { lang = 'en' } = await searchParams
   try {
-    const post = getPost(slug, lang)
+    const post = await getPost(slug, lang)
     return {
       title: post.title,
       description: post.description,
@@ -41,7 +42,7 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   let post
   try {
-    post = getPost(slug, lang)
+    post = await getPost(slug, lang)
   } catch {
     notFound()
   }
