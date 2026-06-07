@@ -1,8 +1,8 @@
 ---
-title: I rewrote the entire game engine and the game looks exactly the same
-title_ko: 게임 엔진을 전부 다시 짰는데 게임은 똑같아 보입니다
-description: "Why setTimeout-based game loops are a trap, how I fixed it with a 1000Hz fixed timestep, and what sub-frame input handling actually means."
-description_ko: "setTimeout 기반 게임 루프의 함정, 1000Hz 고정 타임스텝으로 수정한 방법, 그리고 서브프레임 입력 처리가 실제로 무슨 의미인지."
+title: "Reddit told me the game felt \"off.\" I spent a week rewriting the engine to prove them right."
+title_ko: "Reddit 사람들이 '뭔가 이상하다'고 했고, 나는 일주일을 써서 맞다는 걸 증명했다"
+description: "When casual players said something felt wrong, I realized they weren't making it up. What took a week to fix in code took a second to feel in play."
+description_ko: "일반 게이머들이 '뭔가 이상해'라고 했을 때 나는 그들이 맞다는 걸 몰랐다. 코드로 고쳐지는데 일주일, 플레이로 느껴지는데 1초."
 date: 2026-06-01
 category: DEV
 author: sorrysungkwon
@@ -12,13 +12,23 @@ coverGradient: "linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)"
 coverEmoji: "⚙️"
 ---
 
-v0.2 was a full engine rewrite that took about a week and changed essentially nothing visible to the player.
+v0.2 was me rewriting the entire game engine in a week. The game looks exactly the same. Nobody would know I did it unless I told them.
 
-This is what good infrastructure work feels like, I guess.
+But on Reddit, someone said it felt "crisper." That's when I knew the old engine was actually broken.
 
-## The problem with setTimeout
+## The Reddit complaints that changed everything
 
-The original code looked like this:
+People on r/vibecoding started leaving comments:
+
+> "The game feels... off. Like input lag or something. idk"
+
+> "Why does holding right sometimes feel slow, sometimes feel instant?"
+
+> "Rotation doesn't feel snappy. Compared to Tetr.io it's kinda mushy."
+
+I wasn't trying to build a "feels good" game. I was trying to build *a* game. But Tetris is muscle memory. Your fingers know what "right" feels like, and I'd built "wrong."
+
+So I opened up the original code:
 
 ```javascript
 function tick() {
@@ -29,17 +39,34 @@ function tick() {
 tick()
 ```
 
-This is how a lot of browser games start. It *seems* fine, but there are two problems:
+This was the problem. It seemed fine, but:
 
-**Problem 1: setTimeout timing is not accurate.** Browsers clamp `setTimeout` to at minimum ~1-4ms, and under load or in background tabs it drifts significantly. So your "16ms tick" might actually fire at 18ms, 22ms, or 45ms. For a Tetris game where gravity, DAS timing, and lock delay are all counted in ticks, that drift matters.
+**Problem 1: setTimeout lies about timing.** Browsers clamp it to ~1-4ms minimum, and under load it drifts badly. Your "16ms tick" might fire at 18ms, 22ms, or 45ms. For Tetris — where gravity, DAS timing, and lock delay are measured in single-digit milliseconds — that drift destroys consistency.
 
-**Problem 2: It's tied to a fixed tick rate, not the display refresh.** Your game logic runs at whatever rate `setTimeout` fires, and your rendering happens on that same cadence. On a 144Hz monitor, you're getting 60fps rendering at best — the extra frames are wasted.
+**Problem 2: It's chained to the wrong thing.** Logic and rendering happen on the same `setTimeout` cadence. On a 144Hz monitor, you're still getting 60fps — the monitor's extra refresh rate is just ignored. All those extra frames wasted.
 
-I switched to `requestAnimationFrame` briefly, which solved the rendering problem but introduced a new one: my game logic was now running at 144Hz on some screens and 60Hz on others. Gravity was 2.4x faster on high refresh rate monitors, which is obviously wrong.
+I tried a quick fix: switch to `requestAnimationFrame`:
 
-## The fix: decouple logic from rendering
+```javascript
+function loop(now) {
+  updateGame()
+  render()
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+```
 
-The standard solution is the fixed timestep with accumulator pattern. The idea is simple: run game logic at a fixed rate, run rendering at whatever rate the display supports.
+This made rendering silky smooth on 144Hz monitors. Good.
+
+But now game logic ran at 144Hz on gaming rigs and 60Hz on laptops. Gravity was 2.4x faster on high refresh rate monitors. The whole game felt different depending on your screen. That's worse than before.
+
+## The fix: fixed timestep with an accumulator
+
+The solution is called the **fixed timestep with accumulator pattern**. It's boring but it works: 
+
+- Run game logic at a **fixed, consistent rate** (mine: 1000Hz)
+- Run rendering at **whatever the monitor can do** (60Hz, 144Hz, whatever)
+- Decouple them completely
 
 ```javascript
 const TICK_MS = 1 // 1000 logic updates per second
@@ -62,17 +89,19 @@ function loop(now) {
 }
 ```
 
-The `Math.min(dt, 100)` cap is important — if the tab is in the background for 10 seconds and then comes back, you don't want it to try to simulate 10,000 game ticks at once.
+Why 1000Hz? Because Tetris DAS (delayed auto-shift) timings are measured in **1ms increments** in competitive play. At 60Hz, the minimum expressible delay is 16.67ms — invisible rounding errors that add up. At 1000Hz, it's exactly 1ms.
 
-1000Hz might sound excessive. 60Hz would work fine for most things. But Tetris has DAS (delayed auto-shift) timings that are measured in 1ms increments in competitive play. At 60Hz, the minimum expressible delay is 16.67ms, which introduces visible rounding errors in DAS feel. At 1000Hz, it's 1ms. The extra CPU overhead is negligible on any modern device.
+Does it cost CPU? Negligibly. My logic loop is simple.
 
-## Input handling
+The `Math.min(dt, 100)` cap matters: if your tab backgrounded for 10 seconds, you don't simulate 10,000 ticks at once. You skip to "now" and resume.
 
-There's a subtle bug that comes with the fixed timestep approach: input events fire at arbitrary times between ticks.
+## Input handling: the invisible problem
 
-Say a `keydown` fires at t=1.3ms into a 1ms tick. If you apply it immediately, you're applying it 0.3ms "early" relative to the game clock. On a 1000Hz loop that's fine, but it means two inputs that both arrive within the same tick window get applied in a non-deterministic order.
+Here's the problem Reddit was actually complaining about: input events fire whenever the OS feels like it, not synchronized with your game ticks.
 
-The fix is a queue:
+Say a `keydown` fires at t=1.3ms into a 1ms tick. If you process it immediately, you've applied it 0.3ms "early" relative to the game clock. Two inputs arriving in the same tick get processed in random order depending on when the OS fired the events.
+
+The fix is a **timestamp queue**:
 
 ```javascript
 const inputQueue = []
@@ -90,12 +119,22 @@ function gameTick(tickStart) {
 }
 ```
 
-Now inputs are applied in the tick that corresponds to when they actually happened, in the correct order, at the correct game-time position.
+Now inputs are processed in the tick when they **actually happened**, in the right order, at the right time.
 
-The result: input lag dropped from ~4ms average (one `setTimeout` frame) to ~0.3ms. You probably can't consciously perceive that difference, but it makes the game feel crisper in a way that's hard to quantify.
+Result: input lag dropped from ~4ms average (one setTimeout frame) to ~0.3ms. You can't consciously feel the difference, but your fingers do. That's why people said the new version felt "crisper."
+
+They weren't making it up. The old engine actually had 4ms of invisible delay baked in.
 
 ---
 
-Like I said — the game looks exactly the same after all of this. But competitive Tetris clients all use this basic architecture for good reason. I wanted to build on a foundation that could actually support the features I'm planning, rather than patching around fundamental timing issues later.
+## Why this matters (even if nobody notices)
 
-Worth it. Probably.
+The game looks identical. Your score is the same. The pieces fall at the same speed. But someone on Reddit said it felt "crisper," and they were right — 4ms of latency is gone.
+
+Competitive Tetris engines all work like this. Not because they're trying to be fancy. Because once you've played 100 games with a broken input loop, you can feel it. Your fingers remember.
+
+I could've shipped the game as-is. It would've worked. But it would've felt slightly "off" forever, and I'd have to rewrite it later when someone complained.
+
+Instead I spent a week rebuilding the foundation so I'd never have to touch it again.
+
+The game looks the same. But it feels different. And sometimes that's all that matters.

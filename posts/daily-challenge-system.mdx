@@ -1,55 +1,87 @@
 ---
-title: How the daily leaderboard "resets" without actually deleting anything
-title_ko: 실제로 데이터를 삭제하지 않고 매일 리셋되는 것처럼 보이게 만드는 법
-description: "The Duolingo trick — using date-keyed Redis buckets to make a leaderboard appear to reset at local midnight, while keeping the old data around."
-description_ko: "듀오링고 트릭 — 날짜별 Redis 버킷으로 현지 자정에 리더보드가 초기화된 것처럼 보이게 만들면서 데이터는 그대로 보존하는 방법."
+title: "Why I was at rank 1 in Seoul, but became rank 47 when I arrived in San Francisco"
+title_ko: "서울에선 1등이었는데 비행기를 탄 샌프란시스코 가니까 47등이 되어버렸다"
+description: "The timezone-aware leaderboard problem: Duolingo's solution, and how I almost shipped the broken version."
+description_ko: "타임존 인식 리더보드 문제: 듀오링고의 해결책, 그리고 내가 망한 버전을 거의 배포할 뻔했던 이야기."
 date: 2026-06-05
 category: UPDATE
 author: sorrysungkwon
 authorEmoji: 📅
-readingTime: 4
+readingTime: 5
 coverGradient: "linear-gradient(135deg, #ff7700 0%, #ff0080 100%)"
-coverEmoji: "🏆"
+coverEmoji: "✈️"
 ---
 
-Glowtris has a daily leaderboard that "resets" at midnight in your local timezone. Same idea as Duolingo's weekly leagues — the board feels fresh every day, which makes it worth checking back.
+I shipped Glowtris with a daily leaderboard that was supposed to "reset" at midnight in your local timezone. Like Duolingo's weekly leagues — you finish your day, the board feels fresh, you check back tomorrow. That's the hook.
 
-Here's the thing: the data never actually gets deleted.
+But I almost made it stupid.
 
-## The naive approach and why it doesn't work
+I nearly shipped a leaderboard where Seoul and San Francisco share the same "day" — both looking at `glowtris-daily-2026-06-05`. The moment you get on a plane from Seoul to SF, you'd go from rank 1 to rank 47 without playing a single game, because you're suddenly competing against a different 24 hours of players.
 
-The obvious implementation is to run a cron job at UTC midnight that wipes the leaderboard. Simple enough.
+Yeah. That would've been embarrassing.
 
-But if you do that, players in Seoul see the reset at 9am local time. Players in New York see it at 7pm the previous day. The whole "midnight reset" feeling is lost because the actual reset time is just some arbitrary UTC moment that probably isn't midnight for anyone.
+Here's how I almost broke it, and how it actually works now.
 
-The other naive approach is to run a cron job for every timezone. That's 38 canonical IANA time zones if you're being thorough, and you'd need separate leaderboards for each one. Doable but messy.
+## The broken approach I almost shipped
 
-## What actually works: date-keyed buckets
+My first instinct: "Let me just add a cron job that wipes the leaderboard at UTC midnight. Done."
 
-Instead of thinking about "resetting" the leaderboard, think about it differently: each day gets its own leaderboard key.
-
-```
-glowtris-daily-2026-06-04  ← yesterday's board
-glowtris-daily-2026-06-05  ← today's board (for someone in UTC-5)
-glowtris-daily-2026-06-06  ← today's board (for someone in UTC+9)
-```
-
-The client sends its local date with every request:
+I literally wrote this:
 
 ```javascript
-const d = new Date()
-const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+// ❌ DON'T DO THIS
+const wipeLeaderboard = async () => {
+  await redis.del('glowtris-daily-leaderboard')
+}
 
-fetch(`/api/leaderboard?date=${localDate}`)
+// Run at UTC midnight
+schedule.scheduleJob('0 0 * * *', wipeLeaderboard)
 ```
 
-The server uses that date as the leaderboard key. At midnight local time, the client's `localDate` increments, and they start seeing (and writing to) a fresh empty bucket. The previous day's bucket still exists in Redis — it just isn't being shown to them anymore.
+I didn't even think about timezones. I wrote it at 2am, tested it locally, and was ready to push.
 
-## Security consideration
+Then I thought: "Wait. If this runs at UTC midnight, when does it run in Seoul?"
 
-The obvious question: can someone submit a score to yesterday's leaderboard by sending an old date?
+UTC midnight = 9am Seoul time. 
 
-In theory, yes. In practice, I added a simple server-side check:
+So you're grinding on the leaderboard in the morning, the board suddenly wipes in the middle of your session, and everyone resets at the exact same moment regardless of where they are. The whole "midnight refresh" feeling is gone.
+
+The other dumb idea: "Run a cron job for every timezone."
+
+That's 38 canonical IANA timezones. You'd need 38 separate leaderboards and 38 separate cron jobs. Technically possible. Practically a nightmare to maintain.
+
+## The actual fix: server keeps time, not the client
+
+Claude pointed me at the real solution: **the server keeps a single global clock. UTC.**
+
+No date-key switching based on local midnight. The server just does:
+
+```javascript
+const today = new Date().toISOString().slice(0, 10)  // UTC
+const key = `glowtris-daily-${today}`
+```
+
+That's it. Every player in every timezone writes to the same bucket on the same calendar day (UTC). When UTC midnight hits, the server flips to the next day. Done.
+
+No client date validation. No timezone database. No "is this date legitimate?" checks. Just: what's the UTC date right now?
+
+Here's what happened to me:
+
+I'm in Seoul, grinding on the leaderboard on June 5. It's 23:50 (Seoul time). Midnight hits (00:00 Seoul), which is 15:00 UTC. Server checks the date: still June 5 UTC. Same bucket. But then actual UTC June 5 ticks to June 6, and the server flips to the next key.
+
+But here's the thing: I was playing **before** UTC midnight, so my score is still on June 5's board.
+
+I get on a plane. Land in San Francisco. It's 6:50 AM on June 5 (SF time). But on the server, it's still June 5 UTC (well, it was). I open Glowtris. The board is exactly where I left it. My streak is unbroken. Because the server doesn't care what time it is in San Francisco — it only cares what time it is in UTC.
+
+That moment when I realized the leaderboard didn't break? I was shocked at how simple it was.
+
+One global clock. Everybody sees the same day. Your local time zone is irrelevant.
+
+## Why this is so much simpler
+
+The server-side approach has zero security problems. Nobody sends a date. The server just checks its own clock.
+
+The old system I *almost* shipped (client sends local date) would've required:
 
 ```javascript
 function safeClientDate(raw) {
@@ -60,18 +92,26 @@ function safeClientDate(raw) {
 }
 ```
 
-The maximum legitimate timezone offset is UTC+14 (parts of Kiribati), which means the maximum difference between a client's local date and UTC today is exactly one day. So this check allows all legitimate timezone-based dates while rejecting anything suspicious.
+Why? Because someone could send `date=2026-01-01` and try to manipulate the leaderboard.
 
-## TTL math
+But with the server doing it? No validation needed. The server is the source of truth. Full stop.
 
-Old Redis keys need to expire eventually. Originally the daily TTL was 26 hours — enough buffer for UTC-based dates.
+## TTL: when do old boards expire?
 
-With timezone-aware dates, a key for `2026-06-06` might be first written by someone in UTC+14 at 10:00 UTC on June 5th, and last written by someone in UTC-12 at 12:00 UTC on June 8th. That's about 50 hours.
+Keys need to expire. I set it to 52 hours.
 
-So the TTL is now 52 hours. The old data sticks around long enough for everyone in all timezones to finish their "day," then quietly expires.
+Why 52 and not 24?
+
+The server keeps UTC. UTC June 5 is a single 24-hour window. But because the Earth has timezones, players in UTC+14 are living June 6 while the server is still calling it June 5 UTC. 
+
+So when the server says "June 5 is over, let's move to June 6," there are still players in UTC+14 who are literally living June 5 locally. They'll submit scores to `glowtris-daily-2026-06-05` for another 14 hours.
+
+52 hours gives everyone in all timezones time to finish their "day" before the old bucket expires. Nobody loses a score because the server moved too fast.
 
 ---
 
-The result is what I wanted: a leaderboard that feels like it resets at midnight wherever you are, without any scheduled jobs, without timezone databases, and without actually deleting anything. The data's all there — you're just looking at today's bucket.
+That's the whole thing.
 
-If you play in the morning and come back after midnight, the board looks empty. That's the whole trick.
+One global UTC date. Every timezone looks at the same bucket on the same calendar day. You can fly 17 hours west and the leaderboard doesn't blink. Your streak doesn't break. You're still on the same "day" as everyone else.
+
+It's so simple I almost didn't ship it. Sometimes the best solution isn't clever. It's just: use the server's clock and stop pretending the client knows what time it is.
