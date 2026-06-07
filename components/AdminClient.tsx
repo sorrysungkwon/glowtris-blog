@@ -13,7 +13,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   const [logging, setLogging] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [token, setToken] = useState<string | null>(null)
-  const [showDrafts, setShowDrafts] = useState(false)
+  const [tab, setTab] = useState<'all' | 'drafts'>('all')
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_token')
@@ -89,7 +89,10 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
 
   if (!mounted) return null
 
-  const filteredPosts = showDrafts ? posts : posts.filter(p => !p.draft)
+  const allPosts = posts.filter(p => !p.draft)
+  const draftPosts = posts.filter(p => p.draft)
+  const filteredPosts = tab === 'all' ? allPosts : draftPosts
+  const hasDrafts = draftPosts.length > 0
 
   /* ── Login ──────────────────────────────────────────────────────────── */
   if (!authenticated) {
@@ -148,14 +151,6 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
           </div>
           {/* Actions cluster */}
           <div className="admin-header-actions">
-            {posts.some(p => p.draft) && (
-              <button
-                onClick={() => setShowDrafts(!showDrafts)}
-                className={`admin-btn ${showDrafts ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
-              >
-                {showDrafts ? '📝 Hide Drafts' : '📝 Show Drafts'}
-              </button>
-            )}
             <button onClick={handleNewPost} className="admin-btn admin-btn-primary">
               ➕ New Post
             </button>
@@ -171,9 +166,52 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
 
       {/* Posts grid */}
       <div className="admin-body">
-        <p className="admin-section-title">
-          {showDrafts ? 'All posts (including drafts)' : 'Published posts'}
-        </p>
+        {/* Tab divider */}
+        <div style={{
+          display: 'flex',
+          gap: '1px',
+          marginBottom: '24px',
+          borderBottom: '1px solid var(--border)',
+          paddingBottom: '12px',
+        }}>
+          <button
+            onClick={() => setTab('all')}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: tab === 'all' ? 700 : 400,
+              color: tab === 'all' ? 'var(--text-primary)' : 'var(--text-faint)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              borderBottom: tab === 'all' ? '2px solid var(--text-primary)' : 'none',
+              marginBottom: '-12px',
+              paddingBottom: '20px',
+            }}
+          >
+            All Posts ({allPosts.length})
+          </button>
+          {hasDrafts && (
+            <button
+              onClick={() => setTab('drafts')}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: tab === 'drafts' ? 700 : 400,
+                color: tab === 'drafts' ? 'var(--text-primary)' : 'var(--text-faint)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                borderBottom: tab === 'drafts' ? '2px solid var(--text-primary)' : 'none',
+                marginBottom: '-12px',
+                paddingBottom: '20px',
+              }}
+            >
+              📝 Drafts ({draftPosts.length})
+            </button>
+          )}
+        </div>
+
         <div className="admin-posts-grid">
           {filteredPosts.map((post) => (
             <Link
