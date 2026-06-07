@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { execSync } from 'child_process'
+import { revalidatePath } from 'next/cache'
 
 const postsDir = path.join(process.cwd(), 'posts')
 const isProduction = process.env.NODE_ENV === 'production'
@@ -282,6 +283,8 @@ export async function POST(
       }
     }
 
+    revalidatePath(`/posts/${slug}`)
+    revalidatePath('/', 'layout')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Save error:', error)
@@ -374,6 +377,8 @@ export async function DELETE(
       }
     }
 
+    revalidatePath(`/posts/${slug}`)
+    revalidatePath('/', 'layout')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Delete error:', error)
