@@ -1,5 +1,6 @@
 import { getAllPostMeta } from '@/lib/posts'
 import PostGrid from '@/components/PostGrid'
+import HeroNodes from '@/components/HeroNodes'
 
 interface Props {
   searchParams: Promise<{ lang?: string }>
@@ -13,6 +14,7 @@ export default async function Home({ searchParams }: Props) {
     <>
       {/* Hero — Gestalt: continuity, figure-ground */}
       <section className="hero">
+        <HeroNodes />
         <div className="container">
           <div className="hero-inner">
             <p className="hero-eyebrow">

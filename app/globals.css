@@ -246,6 +246,15 @@ button { font-family: inherit; cursor: pointer; border: none; }
   overflow: hidden;
 }
 
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
 /* Dot grid background — figure-ground texture */
 .hero::before {
   content: '';
