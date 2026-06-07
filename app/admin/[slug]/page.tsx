@@ -24,6 +24,16 @@ export default function PostEditor() {
   const [success, setSuccess] = useState('')
   const [hasDraft, setHasDraft] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
+  const [showMenu, setShowMenu] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     async function loadPost() {
@@ -37,13 +47,9 @@ export default function PostEditor() {
             content_ko: loaded.content_ko || '',
           }
           setData(freshData)
-
-          // Check for draft
           const draftKey = `draft_${slug}`
           const draft = localStorage.getItem(draftKey)
-          if (draft) {
-            setHasDraft(true)
-          }
+          if (draft) setHasDraft(true)
         }
       } catch (err) {
         setError('Failed to load post')
@@ -56,7 +62,7 @@ export default function PostEditor() {
     const draftKey = `draft_${slug}`
     localStorage.setItem(draftKey, JSON.stringify(data))
     setHasDraft(true)
-    setSuccess('💾 Draft saved locally')
+    setSuccess('💾 Draft saved')
     setTimeout(() => setSuccess(''), 2000)
   }
 
@@ -80,10 +86,7 @@ export default function PostEditor() {
     setDeleting(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/posts/${slug}`, {
-        method: 'DELETE',
-      })
-
+      const res = await fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
       if (res.ok) {
         setSuccess('🗑️ Post deleted!')
         clearDraft()
@@ -103,16 +106,15 @@ export default function PostEditor() {
     setSaving(true)
     setError('')
     setSuccess('')
-
     try {
       const res = await fetch(`/api/admin/posts/${slug}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (res.ok) {
         setSuccess('✅ Saved and deployed!')
+        clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
         setError('Failed to save post')
@@ -125,131 +127,185 @@ export default function PostEditor() {
   }
 
   const content = lang === 'en' ? data.content_en : data.content_ko
+  const buttonStyle = (variant: 'primary' | 'secondary' | 'danger' = 'primary') => ({
+    padding: isMobile ? '10px 14px' : '8px 16px',
+    fontSize: isMobile ? '14px' : '13px',
+    fontWeight: 600,
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    minHeight: isMobile ? '44px' : 'auto',
+    ...(variant === 'primary' ? {
+      background: '#0f0f11',
+      color: '#fff',
+    } : variant === 'secondary' ? {
+      background: '#94a3b8',
+      color: '#fff',
+    } : {
+      background: '#ef4444',
+      color: '#fff',
+    }),
+  })
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
       {/* Header */}
-      <div style={{ padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid #e5e5e5' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link href="/admin" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
-            ← Back to posts
-          </Link>
-
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Language Toggle */}
-            <div style={{
-              display: 'flex',
-              background: '#f0f0f0',
-              borderRadius: '6px',
-              padding: '2px',
-              gap: '2px',
+      <div style={{
+        padding: isMobile ? '12px 16px' : '16px 24px',
+        background: '#ffffff',
+        borderBottom: '1px solid #e5e5e5',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+      }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '12px' : '0' }}>
+            <Link href="/admin" style={{
+              color: '#2563eb',
+              textDecoration: 'none',
+              fontSize: isMobile ? '12px' : '13px',
+              fontWeight: 600
             }}>
-              {(['en', 'ko'] as const).map(l => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  style={{
-                    padding: '6px 12px',
-                    background: lang === l ? '#ffffff' : 'transparent',
-                    border: lang === l ? '1px solid #e5e5e5' : 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: lang === l ? '#2563eb' : '#666',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
-                </button>
-              ))}
-            </div>
+              ← Back
+            </Link>
 
-            {/* Draft Actions */}
-            {hasDraft && (
+            {isMobile ? (
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                style={{
+                  background: '#f0f0f0',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                }}
+              >
+                ⋯
+              </button>
+            ) : (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>📝 Draft</span>
-                <button
-                  onClick={restoreDraft}
-                  style={{
-                    padding: '6px 12px',
-                    background: '#f59e0b',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  Restore
-                </button>
+                {/* Language Toggle */}
+                <div style={{
+                  display: 'flex',
+                  background: '#f0f0f0',
+                  borderRadius: '6px',
+                  padding: '2px',
+                  gap: '2px',
+                }}>
+                  {(['en', 'ko'] as const).map(l => (
+                    <button
+                      key={l}
+                      onClick={() => setLang(l)}
+                      style={{
+                        padding: '6px 12px',
+                        background: lang === l ? '#ffffff' : 'transparent',
+                        border: lang === l ? '1px solid #e5e5e5' : 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: lang === l ? '#2563eb' : '#666',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {l === 'en' ? '🇬🇧' : '🇰🇷'}
+                    </button>
+                  ))}
+                </div>
+
+                {hasDraft && (
+                  <button
+                    onClick={restoreDraft}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#f59e0b',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    📝 Restore
+                  </button>
+                )}
+
+                <button onClick={saveDraft} style={{ ...buttonStyle('secondary'), padding: '6px 12px' }}>💾</button>
+                <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle('primary'), padding: '6px 16px', opacity: saving ? 0.6 : 1 }}>🚀</button>
+                <button onClick={() => setShowDeleteConfirm(true)} disabled={deleting} style={{ ...buttonStyle('danger'), padding: '6px 12px', opacity: deleting ? 0.6 : 1 }}>🗑️</button>
               </div>
             )}
+          </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '8px' }}>
+          {/* Mobile Menu */}
+          {isMobile && showMenu && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              paddingTop: '12px',
+              borderTop: '1px solid #e5e5e5',
+            }}>
+              <div style={{ display: 'flex', gap: '6px', background: '#f0f0f0', borderRadius: '6px', padding: '2px' }}>
+                {(['en', 'ko'] as const).map(l => (
+                  <button
+                    key={l}
+                    onClick={() => { setLang(l); setShowMenu(false) }}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      background: lang === l ? '#fff' : 'transparent',
+                      border: lang === l ? '1px solid #ddd' : 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: lang === l ? '#2563eb' : '#666',
+                    }}
+                  >
+                    {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+                  </button>
+                ))}
+              </div>
+              {hasDraft && (
+                <button
+                  onClick={() => { restoreDraft(); setShowMenu(false) }}
+                  style={{ ...buttonStyle('secondary'), width: '100%' }}
+                >
+                  📝 Restore Draft
+                </button>
+              )}
               <button
-                onClick={saveDraft}
-                style={{
-                  padding: '8px 16px',
-                  background: '#94a3b8',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
+                onClick={() => { saveDraft(); setShowMenu(false) }}
+                style={{ ...buttonStyle('secondary'), width: '100%' }}
               >
-                💾 Draft
+                💾 Save Draft
               </button>
-
               <button
-                onClick={handleSave}
+                onClick={() => { handleSave(); setShowMenu(false) }}
                 disabled={saving}
-                style={{
-                  padding: '8px 20px',
-                  background: saving ? '#ccc' : '#0f0f11',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
+                style={{ ...buttonStyle('primary'), width: '100%', opacity: saving ? 0.6 : 1 }}
               >
-                {saving ? '💾 Saving...' : '🚀 Deploy'}
+                {saving ? '🚀 Deploying...' : '🚀 Deploy'}
               </button>
-
               <button
-                onClick={() => setShowDeleteConfirm(true)}
+                onClick={() => { setShowDeleteConfirm(true); setShowMenu(false) }}
                 disabled={deleting}
-                style={{
-                  padding: '8px 16px',
-                  background: deleting ? '#ccc' : '#ef4444',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: deleting ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
+                style={{ ...buttonStyle('danger'), width: '100%', opacity: deleting ? 0.6 : 1 }}
               >
                 {deleting ? '🗑️ Deleting...' : '🗑️ Delete'}
               </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Messages */}
-      {error && <div style={{ padding: '12px 24px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{error}</div></div>}
-      {success && <div style={{ padding: '12px 24px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{success}</div></div>}
+      {error && <div style={{ padding: '12px 16px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc', textAlign: 'center' }}>{error}</div>}
+      {success && <div style={{ padding: '12px 16px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc', textAlign: 'center' }}>{success}</div>}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
@@ -264,34 +320,27 @@ export default function PostEditor() {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
+          padding: '16px',
         }}>
           <div style={{
             background: '#fff',
-            borderRadius: '8px',
-            padding: '24px',
+            borderRadius: '12px',
+            padding: isMobile ? '20px' : '24px',
             maxWidth: '400px',
+            width: '100%',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
           }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 700 }}>
-              Delete post?
-            </h3>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 700 }}>Delete post?</h3>
             <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
-              This will permanently delete the post and all its versions (EN/KO). This action cannot be undone.
+              This will permanently delete the post and all versions. This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
                 style={{
-                  padding: '8px 16px',
-                  background: '#e5e5e5',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: deleting ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
+                  ...buttonStyle('secondary'),
+                  flex: isMobile ? 1 : 'auto',
                 }}
               >
                 Cancel
@@ -300,18 +349,12 @@ export default function PostEditor() {
                 onClick={handleDelete}
                 disabled={deleting}
                 style={{
-                  padding: '8px 16px',
-                  background: deleting ? '#ccc' : '#ef4444',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: deleting ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
+                  ...buttonStyle('danger'),
+                  flex: isMobile ? 1 : 'auto',
+                  opacity: deleting ? 0.6 : 1,
                 }}
               >
-                {deleting ? 'Deleting...' : 'Delete Forever'}
+                {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
@@ -320,102 +363,210 @@ export default function PostEditor() {
 
       {/* Editor Container */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-        {/* Editor */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0', maxWidth: '1280px', width: '100%' }}>
-        {/* Left: Frontmatter + Current Language */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e5e5e5', background: '#ffffff' }}>
-          {/* Frontmatter */}
-          <div>
-            <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-              📋 Frontmatter (공유 / Shared)
+        {isMobile ? (
+          /* Mobile Tab Layout */
+          <div style={{ flex: 1, width: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {/* Tabs */}
+            <div style={{ display: 'flex', borderBottom: '1px solid #e5e5e5', background: '#fff', gap: '0' }}>
+              {(['edit', 'preview', 'stats'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    flex: 1,
+                    padding: '12px 16px',
+                    background: activeTab === tab ? '#fff' : '#f9f9f9',
+                    border: 'none',
+                    borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: activeTab === tab ? '#2563eb' : '#666',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {tab === 'edit' ? '✎ Edit' : tab === 'preview' ? '👁 Preview' : '📊 Stats'}
+                </button>
+              ))}
             </div>
-            <textarea
-              value={data.frontmatter}
-              onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
-              style={{
-                width: '100%',
-                height: '180px',
-                padding: '12px',
-                border: 'none',
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: '12px',
-                resize: 'none',
-                outline: 'none',
-                borderBottom: '1px solid #e5e5e5',
-              }}
-            />
-          </div>
 
-          {/* Content */}
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-              {lang === 'en' ? '🇬🇧 English Content' : '🇰🇷 Korean Content'}
-            </div>
-            <textarea
-              value={content}
-              onChange={(e) => {
-                if (lang === 'en') {
-                  setData({ ...data, content_en: e.target.value })
-                } else {
-                  setData({ ...data, content_ko: e.target.value })
-                }
-              }}
-              style={{
-                flex: 1,
-                width: '100%',
-                padding: '12px',
-                border: 'none',
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: '12px',
-                resize: 'none',
-                outline: 'none',
-              }}
-            />
-          </div>
-        </div>
+            {/* Tab Content */}
+            <div style={{ flex: 1, overflow: 'auto', background: '#fff' }}>
+              {activeTab === 'edit' && (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                  {/* Frontmatter */}
+                  <div style={{ borderBottom: '1px solid #e5e5e5' }}>
+                    <div style={{ padding: '12px 16px', background: '#f9f9f9', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+                      📋 Frontmatter
+                    </div>
+                    <textarea
+                      value={data.frontmatter}
+                      onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '140px',
+                        padding: '12px 16px',
+                        border: 'none',
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        resize: 'none',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
 
-        {/* Right: Other Language Preview */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#ffffff' }}>
-          <div style={{ padding: '12px 16px', background: '#f0f0f0', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
-            {lang === 'en' ? '🇰🇷 Korean Preview' : '🇬🇧 English Preview'}
-          </div>
-          <div style={{
-            flex: 1,
-            overflow: 'auto',
-            padding: '16px 20px',
-            fontSize: '13px',
-            lineHeight: 1.6,
-            color: '#333',
-          }}>
-            <article
-              className="mdx"
-              dangerouslySetInnerHTML={{
-                __html: marked(lang === 'en' ? data.content_en : data.content_ko)
-              }}
-              style={{
-                maxWidth: '100%',
-              }}
-            />
-            {!(lang === 'en' ? data.content_en : data.content_ko).trim() && (
-              <p style={{ color: '#999', fontStyle: 'italic' }}>
-                {lang === 'en' ? 'No English content yet' : 'No Korean content yet'}
-              </p>
-            )}
-          </div>
+                  {/* Content */}
+                  <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '12px 16px', background: '#f9f9f9', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+                      {lang === 'en' ? '🇬🇧 English' : '🇰🇷 Korean'}
+                    </div>
+                    <textarea
+                      value={content}
+                      onChange={(e) => {
+                        if (lang === 'en') {
+                          setData({ ...data, content_en: e.target.value })
+                        } else {
+                          setData({ ...data, content_ko: e.target.value })
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: 'none',
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        resize: 'none',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
-          {/* Stats */}
-          <div style={{ padding: '12px 16px', background: '#f9f9f9', borderTop: '1px solid #e5e5e5', fontSize: '11px', color: '#666', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇬🇧 EN</div>
-              <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_en.split(/\s+/).filter(w => w).length} words</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇰🇷 KO</div>
-              <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_ko.split(/\s+/).filter(w => w).length} words</div>
+              {activeTab === 'preview' && (
+                <div style={{ padding: '16px', fontSize: '14px', lineHeight: 1.6, color: '#333' }}>
+                  <article
+                    className="mdx"
+                    dangerouslySetInnerHTML={{
+                      __html: marked(lang === 'en' ? data.content_en : data.content_ko)
+                    }}
+                  />
+                  {!content.trim() && (
+                    <p style={{ color: '#999', fontStyle: 'italic' }}>
+                      No {lang === 'en' ? 'English' : 'Korean'} content yet
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'stats' && (
+                <div style={{ padding: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ padding: '16px', background: '#f9f9f9', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>🇬🇧 English</div>
+                      <div style={{ fontSize: '20px', fontWeight: 700 }}>{data.content_en.split(/\s+/).filter(w => w).length}</div>
+                      <div style={{ fontSize: '11px', color: '#999' }}>words</div>
+                    </div>
+                    <div style={{ padding: '16px', background: '#f9f9f9', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>🇰🇷 Korean</div>
+                      <div style={{ fontSize: '20px', fontWeight: 700 }}>{data.content_ko.split(/\s+/).filter(w => w).length}</div>
+                      <div style={{ fontSize: '11px', color: '#999' }}>words</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </div>
+        ) : (
+          /* Desktop Split Layout */
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, overflow: 'hidden', gap: '0', maxWidth: '1280px', width: '100%' }}>
+            {/* Left: Frontmatter + Current Language */}
+            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e5e5e5', background: '#ffffff' }}>
+              {/* Frontmatter */}
+              <div>
+                <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+                  📋 Frontmatter (Shared)
+                </div>
+                <textarea
+                  value={data.frontmatter}
+                  onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+                  style={{
+                    width: '100%',
+                    height: '180px',
+                    padding: '12px',
+                    border: 'none',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    resize: 'none',
+                    outline: 'none',
+                    borderBottom: '1px solid #e5e5e5',
+                  }}
+                />
+              </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '12px 16px', background: '#f9f9f9', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+                  {lang === 'en' ? '🇬🇧 English Content' : '🇰🇷 Korean Content'}
+                </div>
+                <textarea
+                  value={content}
+                  onChange={(e) => {
+                    if (lang === 'en') {
+                      setData({ ...data, content_en: e.target.value })
+                    } else {
+                      setData({ ...data, content_ko: e.target.value })
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    width: '100%',
+                    padding: '12px',
+                    border: 'none',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    resize: 'none',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Right: Language Preview */}
+            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#ffffff' }}>
+              <div style={{ padding: '12px 16px', background: '#f0f0f0', borderBottom: '1px solid #e5e5e5', fontSize: '11px', fontWeight: 600, color: '#666' }}>
+                {lang === 'en' ? '🇰🇷 Korean Preview' : '🇬🇧 English Preview'}
+              </div>
+              <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px', fontSize: '13px', lineHeight: 1.6, color: '#333' }}>
+                <article
+                  className="mdx"
+                  dangerouslySetInnerHTML={{
+                    __html: marked(lang === 'en' ? data.content_en : data.content_ko)
+                  }}
+                  style={{ maxWidth: '100%' }}
+                />
+                {!content.trim() && (
+                  <p style={{ color: '#999', fontStyle: 'italic' }}>
+                    {lang === 'en' ? 'No English content yet' : 'No Korean content yet'}
+                  </p>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div style={{ padding: '12px 16px', background: '#f9f9f9', borderTop: '1px solid #e5e5e5', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇬🇧 EN</div>
+                  <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_en.split(/\s+/).filter(w => w).length} words</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#999', marginBottom: '2px' }}>🇰🇷 KO</div>
+                  <div style={{ fontWeight: 600, fontSize: '12px' }}>{data.content_ko.split(/\s+/).filter(w => w).length} words</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
