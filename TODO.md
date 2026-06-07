@@ -1,6 +1,10 @@
 # Glowtris Blog TODO
 
-## Current Phase: Engine Complete ✅
+## Current Phase: Editor Overhaul Complete ✅
+
+### 🚨 Pending Deploy (blocked by Vercel 100/day limit — auto-deploys UTC midnight)
+- [ ] `8b19872` fix: auth Unauthorized bug (in-memory token whitelist removed)
+- [ ] `9a99a2a` feat: mobile draft/live status pill in header
 
 ### 🔲 Next (Phase 2 — Content & Discovery)
 - [ ] Blog posts: write initial posts for launch
