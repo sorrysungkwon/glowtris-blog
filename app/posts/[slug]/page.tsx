@@ -16,12 +16,14 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const { lang = 'en' } = await searchParams
   try {
     const post = await getPost(slug, lang)
+    const title = lang === 'ko' ? (post.title_ko || post.title) : post.title
+    const description = lang === 'ko' ? (post.description_ko || post.description) : post.description
     return {
-      title: post.title,
-      description: post.description,
+      title,
+      description,
       openGraph: {
-        title: post.title,
-        description: post.description,
+        title,
+        description,
         type: 'article',
         publishedTime: post.date,
       },
@@ -64,7 +66,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       </div>
 
       <header className="post-header">
-        <h1>{post.title}</h1>
+        <h1>{lang === 'ko' ? (post.title_ko || post.title) : post.title}</h1>
         <div className="post-meta-row">
           <span>{post.authorEmoji} {post.author}</span>
           <span className="dot">·</span>
