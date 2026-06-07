@@ -1,10 +1,153 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPost } from '@/lib/posts'
 import fs from 'fs'
 import path from 'path'
 import { execSync } from 'child_process'
 
 const postsDir = path.join(process.cwd(), 'posts')
+const isProduction = process.env.NODE_ENV === 'production'
+
+async function fetchGitHubFile(filePath: string): Promise<{ content: string; sha: string } | null> {
+  const token = process.env.GITHUB_TOKEN
+  const owner = process.env.GITHUB_OWNER
+  const repo = process.env.GITHUB_REPO
+
+  if (!token || !owner || !repo) {
+    return null
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3.raw',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      if (response.status === 404) return null
+      throw new Error(`GitHub API error: ${response.status}`)
+    }
+
+    const content = await response.text()
+
+    // Get SHA for update operations
+    const metaResponse = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    )
+
+    const metaData = await metaResponse.json()
+    return { content, sha: metaData.sha }
+  } catch (error) {
+    console.error('GitHub fetch error:', error)
+    return null
+  }
+}
+
+async function updateGitHubFile(
+  filePath: string,
+  content: string,
+  message: string,
+  sha?: string
+): Promise<boolean> {
+  const token = process.env.GITHUB_TOKEN
+  const owner = process.env.GITHUB_OWNER
+  const repo = process.env.GITHUB_REPO
+
+  if (!token || !owner || !repo) {
+    throw new Error('GitHub credentials not configured')
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          content: Buffer.from(content).toString('base64'),
+          ...(sha && { sha }),
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`GitHub API error: ${response.status} - ${error}`)
+    }
+
+    return true
+  } catch (error) {
+    throw new Error(`Failed to update GitHub file: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+async function deleteGitHubFile(filePath: string, message: string): Promise<boolean> {
+  const token = process.env.GITHUB_TOKEN
+  const owner = process.env.GITHUB_OWNER
+  const repo = process.env.GITHUB_REPO
+
+  if (!token || !owner || !repo) {
+    throw new Error('GitHub credentials not configured')
+  }
+
+  try {
+    // Get SHA first
+    const metaResponse = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    )
+
+    if (!metaResponse.ok) {
+      if (metaResponse.status === 404) return true // Already deleted
+      throw new Error(`Failed to get file SHA: ${metaResponse.status}`)
+    }
+
+    const metaData = await metaResponse.json()
+
+    // Delete file
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          sha: metaData.sha,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`GitHub API error: ${response.status} - ${error}`)
+    }
+
+    return true
+  } catch (error) {
+    throw new Error(`Failed to delete GitHub file: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
 
 export async function GET(
   req: NextRequest,
@@ -12,24 +155,41 @@ export async function GET(
 ) {
   const { slug } = await params
   try {
-    // Load EN version
-    const enFile = path.join(postsDir, `${slug}.mdx`)
-    const enRaw = fs.readFileSync(enFile, 'utf8')
-    const enMatch = enRaw.match(/^---\n([\s\S]*?)\n---/)
-    const frontmatter = enMatch ? enMatch[1] : ''
-    const content_en = enRaw.replace(/^---\n[\s\S]*?\n---\n/, '')
+    if (isProduction) {
+      // Use GitHub API in production
+      const enFile = await fetchGitHubFile(`posts/${slug}.mdx`)
+      if (!enFile) {
+        return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      }
 
-    // Try to load KO version
-    let content_ko = ''
-    const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
-    try {
-      const koRaw = fs.readFileSync(koFile, 'utf8')
-      content_ko = koRaw.replace(/^---\n[\s\S]*?\n---\n/, '')
-    } catch (e) {
-      content_ko = ''
+      const enMatch = enFile.content.match(/^---\n([\s\S]*?)\n---/)
+      const frontmatter = enMatch ? enMatch[1] : ''
+      const content_en = enFile.content.replace(/^---\n[\s\S]*?\n---\n/, '')
+
+      // Try to load KO version
+      const koFile = await fetchGitHubFile(`posts/ko/${slug}.mdx`)
+      const content_ko = koFile ? koFile.content.replace(/^---\n[\s\S]*?\n---\n/, '') : ''
+
+      return NextResponse.json({ frontmatter, content_en, content_ko })
+    } else {
+      // Use local filesystem in development
+      const enFile = path.join(postsDir, `${slug}.mdx`)
+      const enRaw = fs.readFileSync(enFile, 'utf8')
+      const enMatch = enRaw.match(/^---\n([\s\S]*?)\n---/)
+      const frontmatter = enMatch ? enMatch[1] : ''
+      const content_en = enRaw.replace(/^---\n[\s\S]*?\n---\n/, '')
+
+      let content_ko = ''
+      const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+      try {
+        const koRaw = fs.readFileSync(koFile, 'utf8')
+        content_ko = koRaw.replace(/^---\n[\s\S]*?\n---\n/, '')
+      } catch (e) {
+        content_ko = ''
+      }
+
+      return NextResponse.json({ frontmatter, content_en, content_ko })
     }
-
-    return NextResponse.json({ frontmatter, content_en, content_ko })
   } catch (error) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 })
   }
@@ -43,53 +203,67 @@ export async function POST(
   try {
     const { frontmatter, content_en, content_ko } = await req.json()
 
-    // Paths
-    const enFile = path.join(postsDir, `${slug}.mdx`)
-    const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+    if (isProduction) {
+      // Use GitHub API in production
+      const enContent = `---\n${frontmatter}\n---\n${content_en}`
+      await updateGitHubFile(
+        `posts/${slug}.mdx`,
+        enContent,
+        `edit: update ${slug} (EN/KO) via admin editor`
+      )
 
-    // Write EN file
-    const enContent = `---\n${frontmatter}\n---\n${content_en}`
-    fs.writeFileSync(enFile, enContent, 'utf8')
-
-    // Write KO file if it has content
-    if (content_ko && content_ko.trim()) {
-      fs.mkdirSync(path.dirname(koFile), { recursive: true })
-      const koContent = `---\n${frontmatter}\n---\n${content_ko}`
-      fs.writeFileSync(koFile, koContent, 'utf8')
-    }
-
-    // Git operations
-    const cwd = process.cwd()
-
-    try {
-      // Check and set git config
-      try {
-        execSync('git config user.name', { cwd, stdio: 'pipe' })
-      } catch {
-        execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
-      }
-
-      try {
-        execSync('git config user.email', { cwd, stdio: 'pipe' })
-      } catch {
-        execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
-      }
-
-      // Stage files
-      execSync(`git add "${enFile}"`, { cwd, stdio: 'pipe' })
+      // Update KO file if has content
       if (content_ko && content_ko.trim()) {
-        execSync(`git add "${koFile}"`, { cwd, stdio: 'pipe' })
+        const koContent = `---\n${frontmatter}\n---\n${content_ko}`
+        await updateGitHubFile(
+          `posts/ko/${slug}.mdx`,
+          koContent,
+          `edit: update ${slug} (KO) via admin editor`
+        )
+      }
+    } else {
+      // Use local filesystem in development
+      const enFile = path.join(postsDir, `${slug}.mdx`)
+      const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+
+      const enContent = `---\n${frontmatter}\n---\n${content_en}`
+      fs.writeFileSync(enFile, enContent, 'utf8')
+
+      if (content_ko && content_ko.trim()) {
+        fs.mkdirSync(path.dirname(koFile), { recursive: true })
+        const koContent = `---\n${frontmatter}\n---\n${content_ko}`
+        fs.writeFileSync(koFile, koContent, 'utf8')
       }
 
-      // Check if there are changes to commit
-      const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
-      if (status.trim()) {
-        execSync(`git commit -m "edit: update ${slug} (EN/KO) via admin editor"`, { cwd, stdio: 'pipe' })
-        execSync('git push origin main', { cwd, stdio: 'pipe' })
+      // Git operations (local only)
+      const cwd = process.cwd()
+      try {
+        try {
+          execSync('git config user.name', { cwd, stdio: 'pipe' })
+        } catch {
+          execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
+        }
+
+        try {
+          execSync('git config user.email', { cwd, stdio: 'pipe' })
+        } catch {
+          execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
+        }
+
+        execSync(`git add "${enFile}"`, { cwd, stdio: 'pipe' })
+        if (content_ko && content_ko.trim()) {
+          execSync(`git add "${koFile}"`, { cwd, stdio: 'pipe' })
+        }
+
+        const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
+        if (status.trim()) {
+          execSync(`git commit -m "edit: update ${slug} (EN/KO) via admin editor"`, { cwd, stdio: 'pipe' })
+          execSync('git push origin main', { cwd, stdio: 'pipe' })
+        }
+      } catch (gitError) {
+        console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
+        throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
       }
-    } catch (gitError) {
-      console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
-      throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
     }
 
     return NextResponse.json({ success: true })
@@ -108,61 +282,80 @@ export async function DELETE(
 ) {
   const { slug } = await params
   try {
-    const enFile = path.join(postsDir, `${slug}.mdx`)
-    const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+    if (isProduction) {
+      // Use GitHub API in production
+      let enDeleted = false
+      let koDeleted = false
 
-    // Delete EN file
-    let enDeleted = false
-    try {
-      fs.unlinkSync(enFile)
-      enDeleted = true
-    } catch (e) {
-      // File may not exist
-    }
-
-    // Delete KO file
-    let koDeleted = false
-    try {
-      fs.unlinkSync(koFile)
-      koDeleted = true
-    } catch (e) {
-      // File may not exist
-    }
-
-    // If no files were deleted, throw error
-    if (!enDeleted && !koDeleted) {
-      throw new Error('Post not found')
-    }
-
-    // Git operations
-    const cwd = process.cwd()
-
-    try {
-      // Check and set git config
       try {
-        execSync('git config user.name', { cwd, stdio: 'pipe' })
-      } catch {
-        execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
+        await deleteGitHubFile(`posts/${slug}.mdx`, `delete: remove ${slug} post`)
+        enDeleted = true
+      } catch (e) {
+        // File may not exist
       }
 
       try {
-        execSync('git config user.email', { cwd, stdio: 'pipe' })
-      } catch {
-        execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
+        await deleteGitHubFile(`posts/ko/${slug}.mdx`, `delete: remove ${slug} (KO) post`)
+        koDeleted = true
+      } catch (e) {
+        // File may not exist
       }
 
-      // Stage deleted files
-      execSync(`git add -A`, { cwd, stdio: 'pipe' })
-
-      // Check if there are changes to commit
-      const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
-      if (status.trim()) {
-        execSync(`git commit -m "delete: remove ${slug} post"`, { cwd, stdio: 'pipe' })
-        execSync('git push origin main', { cwd, stdio: 'pipe' })
+      if (!enDeleted && !koDeleted) {
+        throw new Error('Post not found')
       }
-    } catch (gitError) {
-      console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
-      throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
+    } else {
+      // Use local filesystem in development
+      const enFile = path.join(postsDir, `${slug}.mdx`)
+      const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+
+      let enDeleted = false
+      let koDeleted = false
+
+      try {
+        fs.unlinkSync(enFile)
+        enDeleted = true
+      } catch (e) {
+        // File may not exist
+      }
+
+      try {
+        fs.unlinkSync(koFile)
+        koDeleted = true
+      } catch (e) {
+        // File may not exist
+      }
+
+      if (!enDeleted && !koDeleted) {
+        throw new Error('Post not found')
+      }
+
+      // Git operations (local only)
+      const cwd = process.cwd()
+      try {
+        try {
+          execSync('git config user.name', { cwd, stdio: 'pipe' })
+        } catch {
+          execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
+        }
+
+        try {
+          execSync('git config user.email', { cwd, stdio: 'pipe' })
+        } catch {
+          execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
+        }
+
+        execSync(`git add -A`, { cwd, stdio: 'pipe' })
+
+        const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
+        if (status.trim()) {
+          execSync(`git commit -m "delete: remove ${slug} post"`, { cwd, stdio: 'pipe' })
+          execSync('git push origin main', { cwd, stdio: 'pipe' })
+        }
+      } catch (gitError) {
+        console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
+        throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
+      }
     }
 
     return NextResponse.json({ success: true })
