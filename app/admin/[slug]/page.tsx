@@ -210,30 +210,73 @@ export default function PostEditor() {
     }
   }
 
-  async function handleSave() {
+  function withDraftFlag(frontmatter: string, draft: boolean): string {
+    if (draft) {
+      if (frontmatter.includes('draft:')) {
+        return frontmatter.replace(/draft:\s*(true|false)/i, 'draft: true')
+      }
+      return frontmatter.trim() + '\ndraft: true'
+    } else {
+      return frontmatter.replace(/\ndraft:\s*(true|false)[^\n]*/i, '').replace(/^draft:\s*(true|false)[^\n]*\n?/im, '')
+    }
+  }
+
+  async function handleSaveDraft() {
     setSaving(true)
     setError('')
     setSuccess('')
     try {
       const token = localStorage.getItem('admin_token')
+      const draftData = { ...data, frontmatter: withDraftFlag(data.frontmatter, true) }
       const res = await fetch(`/api/admin/posts/${slug}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(draftData),
       })
       const resData = await res.json()
       if (res.ok) {
-        setSuccess('Saved and deployed!')
+        setData(draftData)
+        setIsDraft(true)
+        setSuccess('Saved as draft')
+        setTimeout(() => setSuccess(''), 3000)
+      } else {
+        setError(resData.details || resData.error || 'Failed to save draft')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error saving draft')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    setSuccess('')
+    try {
+      const token = localStorage.getItem('admin_token')
+      const liveData = { ...data, frontmatter: withDraftFlag(data.frontmatter, false) }
+      const res = await fetch(`/api/admin/posts/${slug}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(liveData),
+      })
+      const resData = await res.json()
+      if (res.ok) {
+        setSuccess('Deployed!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
-        setError(resData.details || resData.error || 'Failed to save post')
+        setError(resData.details || resData.error || 'Failed to deploy post')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving post')
+      setError(err instanceof Error ? err.message : 'Error deploying post')
     } finally {
       setSaving(false)
     }
@@ -269,17 +312,27 @@ export default function PostEditor() {
           {slug}
         </span>
 
-        {/* Draft status indicator */}
-        {isDraft && (
-          <span style={{
-            fontSize: '11px',
-            fontWeight: 700,
-            color: '#ff9500',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            border: '1px solid #ff9500',
-            display: isMobile ? 'none' : 'inline-block',
-          }}>📝 DRAFT</span>
+        {/* Status pill — clickable, always visible on desktop */}
+        {!isMobile && (
+          <button
+            onClick={toggleDraft}
+            title={isDraft ? 'Click to mark as Live' : 'Click to mark as Draft'}
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: '99px',
+              border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
+              background: isDraft ? 'rgba(255,149,0,0.10)' : 'rgba(34,197,94,0.10)',
+              color: isDraft ? '#ff9500' : '#22c55e',
+              cursor: 'pointer',
+              letterSpacing: '0.3px',
+              transition: 'all 120ms',
+              flexShrink: 0,
+            }}
+          >
+            {isDraft ? '📝 DRAFT' : '✅ LIVE'}
+          </button>
         )}
 
         {/* Language toggle */}
@@ -307,14 +360,12 @@ export default function PostEditor() {
                 </button>
               )}
               <button
-                onClick={toggleDraft}
-                className={`admin-btn ${isDraft ? 'admin-btn-secondary' : 'admin-btn-warning'}`}
+                onClick={handleSaveDraft}
+                disabled={saving}
+                className="admin-btn admin-btn-secondary"
                 style={{ fontSize: '12px', padding: '6px 12px' }}
               >
-                {isDraft ? '✔️ Publish' : '📝 Draft'}
-              </button>
-              <button onClick={saveDraft} className="admin-btn admin-btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}>
-                💾 Save
+                {saving ? '…' : '💾 Save Draft'}
               </button>
               <button
                 onClick={handleSave}
@@ -371,15 +422,30 @@ export default function PostEditor() {
           📝 Restore Draft
         </button>
       )}
+      {/* Status toggle in mobile menu */}
       <button
         onClick={() => { toggleDraft(); setShowMenu(false) }}
-        className={`admin-btn ${isDraft ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
+        style={{
+          width: '100%',
+          padding: '10px',
+          borderRadius: '8px',
+          border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
+          background: isDraft ? 'rgba(255,149,0,0.10)' : 'rgba(34,197,94,0.10)',
+          color: isDraft ? '#ff9500' : '#22c55e',
+          fontWeight: 700,
+          fontSize: '13px',
+          cursor: 'pointer',
+        }}
+      >
+        {isDraft ? '📝 DRAFT — tap to mark as Live' : '✅ LIVE — tap to mark as Draft'}
+      </button>
+      <button
+        onClick={() => { handleSaveDraft(); setShowMenu(false) }}
+        disabled={saving}
+        className="admin-btn admin-btn-secondary"
         style={{ width: '100%' }}
       >
-        {isDraft ? '📝 Draft' : '✔️ Publish'}
-      </button>
-      <button onClick={() => { saveDraft(); setShowMenu(false) }} className="admin-btn admin-btn-secondary" style={{ width: '100%' }}>
-        💾 Save
+        {saving ? '…' : '💾 Save Draft'}
       </button>
       <button
         onClick={() => { handleSave(); setShowMenu(false) }}
