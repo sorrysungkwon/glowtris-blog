@@ -1,48 +1,46 @@
 ---
-title: Why I'm Writing This (And Why You Should Care)
-title_ko: 왜 이걸 쓰고 있고, 너가 관심 가져야 하는 이유
-description: "Honestly I have no idea what I'm doing. Built a Tetris game with AI, broke it, fixed it, broke it again. This is just me logging wtf happened."
-description_ko: "솔직히 난 뭐 하는 거 자체를 모른다. AI로 테트리스 게임 만들었는데 깼고, 고쳤고, 또 깼다. 그냥 여기 뭐가 일어났는지 기록하는 거다."
+title: How This Blog Exists (And Why You Might Care)
+title_ko: 이 블로그가 어떻게 생겼고, 넌 왜 봐야 할까
+description: "Built a Tetris game with AI. This blog is basically me documenting what actually worked and what didn't. No fluff, just real problems and fixes."
+description_ko: "AI로 테트리스 게임을 만들었다. 이 블로그는 실제로 먹혀드린 것들과 망한 것들을 기록하는 곳이다. 군더더기 없이, 그냥 진짜 문제와 해결책만."
 date: 2026-06-07
 category: LOGS
 author: sorrysungkwon
-authorEmoji: 😅
-readingTime: 3
+authorEmoji: 👋
+readingTime: 2
 coverGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
 coverEmoji: "🎮"
 featured: true
 ---
 
-솔직히 난 뭐 하는 거 자체를 모른다.
+나는 디자이너다. AI와 대화해서 테트리스 게임을 만들었다. 코딩을 못 한다. 한 번도 못 했다.
 
-[글로우트리스](https://glowtris.com)라는 테트리스 게임을 만들었는데, 나는 게임 개발자가 아니다. 나는 디자이너다. 코딩을 못 한다. 한 번도 한 적이 없다.
+그런데 만들어졌다.
 
-근데 나는 말을 할 수 있다. 그리고 Claude는 코딩을 할 수 있다. 그래서 그냥... Claude한테 한 달 동안 떠들었더니 게임이 완성됐다. 게임도 UI도 브랜드도 블로그도 다 그렇게 만들었다.
+이 블로그는 그냥 그 과정을 기록하는 거다. 먹혀드린 디자인 결정들. 부딪힌 엔지니어링 문제들과 해결책. 멍청한 실수들. 운이 좋아서 맞아떨어진 것들.
 
-## 이 블로그는 그냥 내 실시간 디버깅 로그다
+## 여기 뭐가 있나
 
-솔직히 말하자면, 여기는 "어 이거 깨졌네, 왜 이렇게 된 거야" 하고는 "어? 근데 이 해결책 나름 괜찮은데?" 하는 게 대부분이다. 나는 뭔가 전문가처럼 best practice를 설명하는 게 아니다. 그냥 setTimeout 기반 게임 루프가 악몽이라는 걸 발견한 사람이고, Safari에서 PixiJS는 별도의 지옥이라는 걸 알아낸 사람이고, Redis 버킷으로 래더보드 만드는 게 꽤 똑똑한 방법이라는 걸 깨달은 사람이다.
+**실제로 부딪힌 문제들**
 
-## 여기에 뭐가 있나
+튜토리얼 아니다. 그냥 "X를 하려고 했는데 존나 깨졌고, 여기서 배운 게 뭐냐?" 구체적인 문제. 구체적인 해결책. 가끔은 나중에 보면 "어? 이게 당연한 거네?" 싶은 해결책. 가끔은 운이 좋아서 잘 됨.
 
-**실제 코드 문제들**  
-튜토리얼이 아니다. 그냥 "X를 하려고 했는데 완전히 망했고, 여기서 배운 게 뭐냐?"
+**엔지니어링 발견들**
 
-**엔지니어링 발견들**  
-Fixed timestep. Canvas vs WebGL. Vercel 빌드가 계속 터지는 이유. 아무도 블로그에 안 쓰는데 "당연한 거 아닌가?" 하면서 실제론 당연하지 않은 것들.
+Fixed timestep. setTimeout이 게임 루프로는 왜 비지떡인지. Redis의 date-keyed bucket. Vercel의 read-only 파일시스템. 아무것도 모르고 만들다가 발견하는 것들.
 
-**먹혀드는 디자인**  
-이모지 중심 UI. 진짜 못생기지 않은 네온 그래디언트. 레트로 게임을 현대적으로 느껴지게 하기. (스포: 이게 진짜 어렵다.)
+**디자인 프로세스**
 
-**진짜 실수들**  
-언제 내가 멍청했는지 말해줄 거다. 과도하게 엔지니어링한 거. 더 간단한 해결책이 있었는데 안 본 거. 이런 거.
+색상 시스템을 어떤 프롬프트로 설명했는지. 네온 글로우가 실제로 먹혀드린 방법. 이모지-중심 UI가 왜 귀엽기만 한 게 아니라 실제로 더 명확한지. 뭐가 먹혀드렸고 뭐를 다시 고쳤는지.
 
----
+**인프라 교훈들**
 
-기본적으로 여기는 내 실시간 디버깅 로그다.
+CI/CD 파이프라인 실수. GitHub Actions. 스케일 문제. 출시 후에야 터지는 것들.
 
-전문가도 아니고, 뭘 모르는 디자이너가 AI로 게임을 만들면서 뭐가 일어났는지 기록하는 거다. 테트리스 깬 이야기, 래더보드 고쳤는데 이게 실제로 진짜 쓸 만한 트릭였던 이야기, Vercel에서 빌드가 자꾸 터지는 이야기 이런 거다.
+## 솔직한 부분
 
-정보를 구하는 거면 이 블로그가 도움이 될 거고, 누군가 똑같은 문제를 겪고 있으면 "어? 이 사람도 같은 거 겪었네?" 하고 웃을 수 있을 거다.
+나는 이 중에 어느 것도 전문가가 아니다. 7년간 시각 디자인을 했지만, 게임 개발은 0년. TypeScript best practice도 모른다. async/await를 찾아봐야 설명할 수 있다.
 
-그럼 시작하자.
+내가 할 수 있는 건: Claude가 만든 걸 보고, 맞는지 틀렸는지 판단하고, 뭘 바꿔야 하는지 설명하기. 내 눈이 필터다. AI가 손이다.
+
+그게 다다. 이 블로그는 그 과정이 실제로 어떻게 생겼는지 보여주는 거다.
