@@ -87,15 +87,16 @@ export default function PostEditor() {
     setError('')
     try {
       const res = await fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
+      const data = await res.json()
       if (res.ok) {
         setSuccess('🗑️ Post deleted!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
-        setError('Failed to delete post')
+        setError(data.details || 'Failed to delete post')
       }
     } catch (err) {
-      setError('Error deleting post')
+      setError(err instanceof Error ? err.message : 'Error deleting post')
     } finally {
       setDeleting(false)
       setShowDeleteConfirm(false)
@@ -112,15 +113,16 @@ export default function PostEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
+      const resData = await res.json()
       if (res.ok) {
         setSuccess('✅ Saved and deployed!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
-        setError('Failed to save post')
+        setError(resData.details || resData.error || 'Failed to save post')
       }
     } catch (err) {
-      setError('Error saving post')
+      setError(err instanceof Error ? err.message : 'Error saving post')
     } finally {
       setSaving(false)
     }
