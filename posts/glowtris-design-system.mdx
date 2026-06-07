@@ -1,8 +1,9 @@
 ---
 title: Designing Glowtris in the barracks
 title_ko: 군대 연등 시간에 AI랑 대화하면서 글로우트리스 디자인하기
-description: I'm a 7-year designer. I can't code. Here's how I built a game, brand, and blog by talking to Claude — the actual design process, every decision, every fix.
-description_ko: 저는 7년차 디자이너입니다. 코딩을 못 합니다. Claude에게 프롬프트를 주고 잘못된 부분을 고치면서 게임 UI, 브랜드 아이덴티티, 블로그를 어떻게 만들었는지에 대한 이야기입니다.
+description: I'm a 7-year designer. and now, I’m serving in the military.
+I can't code. Here's how I built a game, brand, and blog by talking to Claude — the actual design process, every decision, every fix.
+description_ko: 저는 7년차 디자이너입니다. 그리고 지금은 군복무 중이죠. 아 참! 코딩은 못 합니다. Claude에게 프롬프트를 주고 잘못된 부분을 고치면서 게임 UI, 브랜드 아이덴티티, 블로그를 어떻게 만들었는지에 대한 이야기입니다.
 date: 2026-06-06
 category: DESIGN
 author: sorrysungkwon
@@ -30,11 +31,11 @@ I started with one constraint: it had to feel like a neon arcade game from the f
 
 My first prompt went something like:
 
-"Make the background a very dark navy, almost black. The neon glow colors of the blocks should be cyan, magenta, yellow, and green. This needs to match Tetris guidelines exactly, and the UI should feel like a dark interface from a sci-fi movie — clean, minimal, glowing."
+> "Make the background a very dark navy, almost black. The neon glow colors of the blocks should be cyan, magenta, yellow, and green. This needs to match Tetris guidelines exactly, and the UI should feel like a dark interface from a sci-fi movie — clean, minimal, glowing."
 
 Claude Code gave me CSS with `#000000` for the background and rough neon colors. But the problem: pure black kills the glow effect. Glow looks best against dark *blue-black*, not neutral black. I had to push again.
 
-"The background is too flat. It needs to be a very dark, desaturated navy — something like `#04041e`. The glow on the blocks should look like they're actually emitting light."
+> "The background is too flat. It needs to be a very dark, desaturated navy — something like `#04041e`. The glow on the blocks should look like they're actually emitting light."
 
 The second pass was much closer. The `#04041e` I mentioned offhand became the actual production value. Sometimes you just guess and it works. Lucky me.
 
@@ -46,7 +47,7 @@ But Orbitron at body size is unreadable. So the content needed a completely diff
 
 I wanted to use Pretendard for Korean text. It's the cleanest, most system-friendly Korean sans-serif I know. For English body text, I wanted Inter or the system stack.
 
-"Header and logo: Orbitron. Body and UI: Pretendard for Korean, system-ui for English. Monospace elements like category tags: JetBrains Mono."
+> "Header and logo: Orbitron. Body and UI: Pretendard for Korean, system-ui for English. Monospace elements like category tags: JetBrains Mono."
 
 The display / body / mono three-font system is a standard design pattern that creates hierarchy without visual noise. The pattern is established enough that Claude had it in its training data, so it got it right. When you ask for something standard, it usually works.
 
@@ -60,7 +61,7 @@ But looking at it on my phone at noon felt wrong — I wanted the blog to be rea
 
 The prompt was simple:
 
-"Make the Glowtris blog default to light mode, with dark mode as an option. And make it feel like a tech blog."
+> "Make the Glowtris blog default to light mode, with dark mode as an option. And make it feel like a tech blog."
 
 Making light mode work for a brand built for dark backgrounds was a challenge. My solution: in light mode, the glow colors get replaced by proper blue (`#2563eb`), which reads as confident and techy without needing a dark surface. The dot-grid hero background came from Vercel's site — it's everywhere on modern tech blogs because it implies "infrastructure" without being literal.
 
@@ -102,4 +103,5 @@ The iteration speed is genuinely unprecedented.
 
 What you can't prompt your way around: good judgment. Knowing that `#04041e` is better than `#000000` for glow effects. Knowing that a dot-grid pattern can make a point about "tech blog" without being pushy. Knowing that a three-font system needs clear rules about which font goes where — that's experience, not automation.
 
-> **The AI builds. The designer still has to know what to build.**
+**The AI builds. The designer still has to know what to build.**
+
