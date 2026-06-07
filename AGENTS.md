@@ -1,5 +1,20 @@
 # AGENTS.md — Glowtris Blog Collaboration Rules
 
+## 🔐 CREDENTIALS SECURITY (CRITICAL - READ FIRST)
+
+**NEVER put credentials in GitHub:**
+- ❌ NO passwords, tokens, API keys in any tracked file (README, robot.md, AGENTS.md, CLAUDE.md, TODO.md)
+- ✅ CREDENTIALS.md ONLY (git-ignored, server-only)
+- ✅ USE PLACEHOLDERS: `<ADMIN_PASSWORD>`, `<MOSHI_TOKEN>` → "see CREDENTIALS.md"
+- ✅ PRE-COMMIT CHECK: search for `password=`, `token=`, `secret=` before staging
+
+If you see plaintext credentials:
+1. Remove immediately
+2. Replace with: `<CREDENTIAL_NAME>`
+3. Commit: "security: remove plaintext credentials"
+
+---
+
 ## For Other AI Agents (Antigravity, etc.)
 
 This document establishes shared rules for any agents working on glowtris-blog alongside Claude.

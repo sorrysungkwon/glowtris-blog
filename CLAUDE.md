@@ -1,5 +1,21 @@
 # CLAUDE.md — Glowtris Blog Rules
 
+## 🔐 CREDENTIALS SECURITY (CRITICAL - READ FIRST)
+
+**NEVER store credentials in GitHub-tracked files:**
+- ❌ NO plaintext passwords, tokens, API keys in: README, robot.md, CLAUDE, AGENTS, TODO, code
+- ✅ USE CREDENTIALS.md ONLY (git-ignored, server-only backup)
+- ✅ REFERENCE WITH PLACEHOLDERS: `<ADMIN_PASSWORD>`, `<WEBHOOK_TOKEN>` → "see CREDENTIALS.md"
+- ✅ PRE-COMMIT SECURITY CHECK: search for `password=`, `token=`, `secret=` in all staged files
+
+**If you see exposed credentials:**
+1. Remove immediately from the file
+2. Replace with: `<CREDENTIAL_NAME>` + comment "see CREDENTIALS.md"
+3. Commit: "security: remove plaintext credentials"
+4. Verify in CREDENTIALS.md (it has the backup)
+
+---
+
 ## Project Overview
 Lightweight blog platform for glowtris.com with bilingual EN/KO support, admin editor, and automatic Git deployment.
 

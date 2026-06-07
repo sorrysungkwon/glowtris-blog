@@ -6,6 +6,29 @@ This document contains all rules that apply to every AI agent working on glowtri
 
 ---
 
+## 🔐 RULE 0: CREDENTIALS MUST NEVER BE IN GITHUB
+
+**ABSOLUTE REQUIREMENT:**
+- **All sensitive information** (passwords, API tokens, webhook tokens) MUST ONLY be stored in **CREDENTIALS.md** (git-ignored, server-only)
+- **NO plaintext credentials in: README.md, robot.md, CLAUDE.md, AGENTS.md, TODO.md, or any code files**
+- If you must reference a credential in docs, use **PLACEHOLDER ONLY**: `<ADMIN_PASSWORD>`, `<MOSHI_TOKEN>` with note: "see CREDENTIALS.md"
+- **NEVER commit**: passwords, tokens, API keys, .env files
+- **CHECK BEFORE COMMIT**: Search for `password=`, `token=`, `secret=` in all staged files
+
+✅ **CORRECT** (in docs):
+```
+curl -X POST api.example.com/webhook \
+  -d '{"token": "<WEBHOOK_TOKEN>"}' # see CREDENTIALS.md
+```
+
+❌ **WRONG** (never do this):
+```
+curl -X POST api.example.com/webhook \
+  -d '{"token": "abc123xyz789"}' # EXPOSED!
+```
+
+---
+
 ## Rule 1: English Documentation Only
 
 - **All project documentation must be in English**
