@@ -54,7 +54,6 @@ export async function POST(
     // Write KO file if it has content
     if (content_ko && content_ko.trim()) {
       fs.mkdirSync(path.dirname(koFile), { recursive: true })
-      // Extract KO frontmatter from original KO file or use EN frontmatter with KO adjustments
       const koContent = `---\n${frontmatter}\n---\n${content_ko}`
       fs.writeFileSync(koFile, koContent, 'utf8')
     }
@@ -63,27 +62,34 @@ export async function POST(
     const cwd = process.cwd()
 
     try {
-      execSync('git config user.name', { cwd, stdio: 'pipe' }).toString().trim()
-    } catch (e) {
-      execSync('git config user.name "Blog Editor"', { cwd })
-    }
-
-    try {
-      execSync('git config user.email', { cwd, stdio: 'pipe' }).toString().trim()
-    } catch (e) {
-      execSync('git config user.email "editor@blog.local"', { cwd })
-    }
-
-    try {
-      execSync(`git add "${enFile}"`, { cwd })
-      if (content_ko && content_ko.trim()) {
-        execSync(`git add "${koFile}"`, { cwd })
+      // Check and set git config
+      try {
+        execSync('git config user.name', { cwd, stdio: 'pipe' })
+      } catch {
+        execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
       }
-      execSync(`git commit -m "edit: update ${slug} (EN/KO) via admin editor"`, { cwd })
-      execSync('git push', { cwd })
-    } catch (e) {
-      console.error('Git error:', e)
-      // Continue anyway - files are saved
+
+      try {
+        execSync('git config user.email', { cwd, stdio: 'pipe' })
+      } catch {
+        execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
+      }
+
+      // Stage files
+      execSync(`git add "${enFile}"`, { cwd, stdio: 'pipe' })
+      if (content_ko && content_ko.trim()) {
+        execSync(`git add "${koFile}"`, { cwd, stdio: 'pipe' })
+      }
+
+      // Check if there are changes to commit
+      const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
+      if (status.trim()) {
+        execSync(`git commit -m "edit: update ${slug} (EN/KO) via admin editor"`, { cwd, stdio: 'pipe' })
+        execSync('git push origin main', { cwd, stdio: 'pipe' })
+      }
+    } catch (gitError) {
+      console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
+      throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
     }
 
     return NextResponse.json({ success: true })
@@ -106,29 +112,57 @@ export async function DELETE(
     const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
 
     // Delete EN file
+    let enDeleted = false
     try {
       fs.unlinkSync(enFile)
+      enDeleted = true
     } catch (e) {
-      // File may not exist, continue
+      // File may not exist
     }
 
     // Delete KO file
+    let koDeleted = false
     try {
       fs.unlinkSync(koFile)
+      koDeleted = true
     } catch (e) {
-      // File may not exist, continue
+      // File may not exist
+    }
+
+    // If no files were deleted, throw error
+    if (!enDeleted && !koDeleted) {
+      throw new Error('Post not found')
     }
 
     // Git operations
     const cwd = process.cwd()
 
     try {
-      execSync(`git add -A`, { cwd })
-      execSync(`git commit -m "delete: remove ${slug} post"`, { cwd })
-      execSync('git push', { cwd })
-    } catch (e) {
-      console.error('Git error:', e)
-      // Continue anyway - files are deleted
+      // Check and set git config
+      try {
+        execSync('git config user.name', { cwd, stdio: 'pipe' })
+      } catch {
+        execSync('git config user.name "Blog Editor"', { cwd, stdio: 'pipe' })
+      }
+
+      try {
+        execSync('git config user.email', { cwd, stdio: 'pipe' })
+      } catch {
+        execSync('git config user.email "editor@blog.local"', { cwd, stdio: 'pipe' })
+      }
+
+      // Stage deleted files
+      execSync(`git add -A`, { cwd, stdio: 'pipe' })
+
+      // Check if there are changes to commit
+      const status = execSync('git status --porcelain', { cwd, encoding: 'utf8' })
+      if (status.trim()) {
+        execSync(`git commit -m "delete: remove ${slug} post"`, { cwd, stdio: 'pipe' })
+        execSync('git push origin main', { cwd, stdio: 'pipe' })
+      }
+    } catch (gitError) {
+      console.error('Git operation error:', gitError instanceof Error ? gitError.message : String(gitError))
+      throw new Error(`Git error: ${gitError instanceof Error ? gitError.message : String(gitError)}`)
     }
 
     return NextResponse.json({ success: true })
