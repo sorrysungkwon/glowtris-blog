@@ -126,7 +126,7 @@ img { max-width: 100%; height: auto; display: block; }
 button { font-family: inherit; cursor: pointer; border: none; }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
-.container { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-6); }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6); }
 @media (max-width: 640px) { .container { padding: 0 var(--space-4); } }
 
 /* ─── Header — Gestalt: Figure-Ground + Continuity ───────────────────────── */
@@ -965,7 +965,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   }
 }
 .admin-header-inner {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   height: 56px;
   display: flex;
@@ -990,7 +990,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* Posts grid — admin */
 .admin-body {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6);
 }
@@ -1100,7 +1100,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   }
 }
 .editor-header-inner {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   height: 52px;
   display: flex;
@@ -1202,7 +1202,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   grid-template-columns: 1fr 1fr;
   flex: 1;
   overflow: hidden;
-  max-width: 1280px;
+  max-width: 1200px;
   width: 100%;
 }
 
