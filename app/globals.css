@@ -1393,3 +1393,62 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .admin-modal-title { font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: var(--space-2); }
 .admin-modal-body { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: var(--space-6); }
 .admin-modal-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+
+/* Draft History Modal & Item styles */
+.draft-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.draft-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+}
+.draft-history-item:hover {
+  background: var(--surface-3);
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+}
+.draft-history-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.draft-history-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.draft-history-stats {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+.draft-history-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 3px 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  transition: all var(--t-fast);
+}
+.draft-history-item:hover .draft-history-badge {
+  background: var(--cyan);
+  color: var(--bg);
+  border-color: var(--cyan);
+}

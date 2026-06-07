@@ -11,6 +11,11 @@ interface PostData {
   content_ko: string
 }
 
+interface DraftHistoryItem {
+  timestamp: string
+  data: PostData
+}
+
 export default function PostEditor() {
   const router = useRouter()
   const params = useParams()
@@ -24,6 +29,8 @@ export default function PostEditor() {
   const [success, setSuccess] = useState('')
   const [hasDraft, setHasDraft] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [draftHistory, setDraftHistory] = useState<DraftHistoryItem[]>([])
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
   const [showMenu, setShowMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -47,9 +54,17 @@ export default function PostEditor() {
             content_ko: loaded.content_ko || '',
           }
           setData(freshData)
-          const draftKey = `draft_${slug}`
-          const draft = localStorage.getItem(draftKey)
-          if (draft) setHasDraft(true)
+          const historyKey = `draft_history_${slug}`
+          const stored = localStorage.getItem(historyKey)
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored) as DraftHistoryItem[]
+              setDraftHistory(parsed)
+              setHasDraft(parsed.length > 0)
+            } catch (e) {
+              console.error('Failed to parse draft history:', e)
+            }
+          }
         } else if (res.status === 404) {
           const today = new Date().toISOString().split('T')[0]
           const defaultFrontmatter = `title: "New Post Title"\ndescription: "Brief description of the post"\ndate: "${today}"\ncategory: "DEV"\nauthor: "sorrysungkwon"\nauthorEmoji: "🔧"\ncoverGradient: "linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)"\ncoverEmoji: "⚙️"`
@@ -59,6 +74,18 @@ export default function PostEditor() {
             content_ko: '# 새 한국어 포스트\n\n한국어 내용을 여기에 작성하세요...',
           })
           setError('')
+          
+          const historyKey = `draft_history_${slug}`
+          const stored = localStorage.getItem(historyKey)
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored) as DraftHistoryItem[]
+              setDraftHistory(parsed)
+              setHasDraft(parsed.length > 0)
+            } catch (e) {
+              console.error('Failed to parse draft history:', e)
+            }
+          }
         } else {
           setError('Failed to load post')
         }
@@ -70,23 +97,29 @@ export default function PostEditor() {
   }, [slug])
 
   function saveDraft() {
-    localStorage.setItem(`draft_${slug}`, JSON.stringify(data))
+    const newItem: DraftHistoryItem = {
+      timestamp: new Date().toISOString(),
+      data: data
+    }
+    const updated = [newItem, ...draftHistory].slice(0, 10)
+    setDraftHistory(updated)
+    localStorage.setItem(`draft_history_${slug}`, JSON.stringify(updated))
     setHasDraft(true)
     setSuccess('Draft saved')
     setTimeout(() => setSuccess(''), 2000)
   }
 
-  function restoreDraft() {
-    const draft = localStorage.getItem(`draft_${slug}`)
-    if (draft) {
-      setData(JSON.parse(draft))
-      setSuccess('Draft restored')
-      setTimeout(() => setSuccess(''), 2000)
-    }
+  function restoreDraft(item: DraftHistoryItem) {
+    setData(item.data)
+    setShowHistoryModal(false)
+    setSuccess('Draft version restored')
+    setTimeout(() => setSuccess(''), 2000)
   }
 
   function clearDraft() {
     localStorage.removeItem(`draft_${slug}`)
+    localStorage.removeItem(`draft_history_${slug}`)
+    setDraftHistory([])
     setHasDraft(false)
   }
 
@@ -191,7 +224,7 @@ export default function PostEditor() {
           {!isMobile ? (
             <>
               {hasDraft && (
-                <button onClick={restoreDraft} className="admin-btn admin-btn-warning" style={{ fontSize: '12px', padding: '6px 12px' }}>
+                <button onClick={() => setShowHistoryModal(true)} className="admin-btn admin-btn-warning" style={{ fontSize: '12px', padding: '6px 12px' }}>
                   Restore
                 </button>
               )}
@@ -246,7 +279,7 @@ export default function PostEditor() {
         ))}
       </div>
       {hasDraft && (
-        <button onClick={() => { restoreDraft(); setShowMenu(false) }} className="admin-btn admin-btn-warning" style={{ width: '100%' }}>
+        <button onClick={() => { setShowHistoryModal(true); setShowMenu(false) }} className="admin-btn admin-btn-warning" style={{ width: '100%' }}>
           📝 Restore Draft
         </button>
       )}
@@ -449,12 +482,67 @@ export default function PostEditor() {
     </div>
   )
 
+  /* ── Restore draft history modal ────────────────────────────────────── */
+  const historyModal = showHistoryModal && (
+    <div className="admin-modal-backdrop" onClick={() => setShowHistoryModal(false)}>
+      <div className="admin-modal" style={{ maxWidth: '440px' }} onClick={e => e.stopPropagation()}>
+        <h3 className="admin-modal-title">Restore Draft</h3>
+        <p className="admin-modal-body" style={{ marginBottom: '16px' }}>
+          Select a saved version to restore. Up to 10 versions are stored locally.
+        </p>
+
+        <div className="draft-history-list">
+          {draftHistory.map((item) => {
+            const enWordCount = item.data.content_en.split(/\s+/).filter(w => w).length
+            const koWordCount = item.data.content_ko.split(/\s+/).filter(w => w).length
+
+            const date = new Date(item.timestamp)
+            const formattedTime = date.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            })
+
+            return (
+              <button
+                key={item.timestamp}
+                onClick={() => restoreDraft(item)}
+                className="draft-history-item"
+              >
+                <div className="draft-history-meta">
+                  <span className="draft-history-time">🕒 {formattedTime}</span>
+                  <span className="draft-history-stats">
+                    EN: {enWordCount} words · KO: {koWordCount} words
+                  </span>
+                </div>
+                <span className="draft-history-badge">Restore</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="admin-modal-actions">
+          <button
+            onClick={() => setShowHistoryModal(false)}
+            className="admin-btn admin-btn-secondary"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div className="editor-root">
       {headerBar}
       {mobileMenu}
       {notify}
       {deleteModal}
+      {historyModal}
       {isMobile ? mobileLayout : desktopLayout}
     </div>
   )
