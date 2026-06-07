@@ -95,3 +95,48 @@ export async function POST(
     }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params
+  try {
+    const enFile = path.join(postsDir, `${slug}.mdx`)
+    const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
+
+    // Delete EN file
+    try {
+      fs.unlinkSync(enFile)
+    } catch (e) {
+      // File may not exist, continue
+    }
+
+    // Delete KO file
+    try {
+      fs.unlinkSync(koFile)
+    } catch (e) {
+      // File may not exist, continue
+    }
+
+    // Git operations
+    const cwd = process.cwd()
+
+    try {
+      execSync(`git add -A`, { cwd })
+      execSync(`git commit -m "delete: remove ${slug} post"`, { cwd })
+      execSync('git push', { cwd })
+    } catch (e) {
+      console.error('Git error:', e)
+      // Continue anyway - files are deleted
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Delete error:', error)
+    return NextResponse.json({
+      error: 'Failed to delete post',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
+  }
+}

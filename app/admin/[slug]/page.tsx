@@ -19,8 +19,11 @@ export default function PostEditor() {
   const [data, setData] = useState<PostData>({ frontmatter: '', content_en: '', content_ko: '' })
   const [lang, setLang] = useState<'en' | 'ko'>('en')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [hasDraft, setHasDraft] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     async function loadPost() {
@@ -28,11 +31,19 @@ export default function PostEditor() {
         const res = await fetch(`/api/admin/posts/${slug}`)
         if (res.ok) {
           const loaded = await res.json()
-          setData({
+          const freshData = {
             frontmatter: loaded.frontmatter,
             content_en: loaded.content_en || loaded.content,
             content_ko: loaded.content_ko || '',
-          })
+          }
+          setData(freshData)
+
+          // Check for draft
+          const draftKey = `draft_${slug}`
+          const draft = localStorage.getItem(draftKey)
+          if (draft) {
+            setHasDraft(true)
+          }
         }
       } catch (err) {
         setError('Failed to load post')
@@ -40,6 +51,53 @@ export default function PostEditor() {
     }
     if (slug) loadPost()
   }, [slug])
+
+  function saveDraft() {
+    const draftKey = `draft_${slug}`
+    localStorage.setItem(draftKey, JSON.stringify(data))
+    setHasDraft(true)
+    setSuccess('💾 Draft saved locally')
+    setTimeout(() => setSuccess(''), 2000)
+  }
+
+  function restoreDraft() {
+    const draftKey = `draft_${slug}`
+    const draft = localStorage.getItem(draftKey)
+    if (draft) {
+      setData(JSON.parse(draft))
+      setSuccess('✅ Draft restored')
+      setTimeout(() => setSuccess(''), 2000)
+    }
+  }
+
+  function clearDraft() {
+    const draftKey = `draft_${slug}`
+    localStorage.removeItem(draftKey)
+    setHasDraft(false)
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/admin/posts/${slug}`, {
+        method: 'DELETE',
+      })
+
+      if (res.ok) {
+        setSuccess('🗑️ Post deleted!')
+        clearDraft()
+        setTimeout(() => router.push('/admin'), 1500)
+      } else {
+        setError('Failed to delete post')
+      }
+    } catch (err) {
+      setError('Error deleting post')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -77,7 +135,7 @@ export default function PostEditor() {
             ← Back to posts
           </Link>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Language Toggle */}
             <div style={{
               display: 'flex',
@@ -107,23 +165,84 @@ export default function PostEditor() {
               ))}
             </div>
 
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                padding: '8px 20px',
-                background: saving ? '#ccc' : '#0f0f11',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                fontWeight: 600,
-                transition: 'all 0.2s',
-              }}
-            >
-              {saving ? '💾 Saving...' : '🚀 Save & Deploy'}
-            </button>
+            {/* Draft Actions */}
+            {hasDraft && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>📝 Draft</span>
+                <button
+                  onClick={restoreDraft}
+                  style={{
+                    padding: '6px 12px',
+                    background: '#f59e0b',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Restore
+                </button>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={saveDraft}
+                style={{
+                  padding: '8px 16px',
+                  background: '#94a3b8',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                💾 Draft
+              </button>
+
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  padding: '8px 20px',
+                  background: saving ? '#ccc' : '#0f0f11',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {saving ? '💾 Saving...' : '🚀 Deploy'}
+              </button>
+
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleting}
+                style={{
+                  padding: '8px 16px',
+                  background: deleting ? '#ccc' : '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {deleting ? '🗑️ Deleting...' : '🗑️ Delete'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -131,6 +250,73 @@ export default function PostEditor() {
       {/* Messages */}
       {error && <div style={{ padding: '12px 24px', background: '#fee', color: '#c33', fontSize: '13px', borderBottom: '1px solid #fcc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{error}</div></div>}
       {success && <div style={{ padding: '12px 24px', background: '#efe', color: '#3a3', fontSize: '13px', borderBottom: '1px solid #cfc', display: 'flex', justifyContent: 'center' }}><div style={{ maxWidth: '1280px', width: '100%' }}>{success}</div></div>}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '400px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+          }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 700 }}>
+              Delete post?
+            </h3>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#666', lineHeight: 1.5 }}>
+              This will permanently delete the post and all its versions (EN/KO). This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                style={{
+                  padding: '8px 16px',
+                  background: '#e5e5e5',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  padding: '8px 16px',
+                  background: deleting ? '#ccc' : '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {deleting ? 'Deleting...' : 'Delete Forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Editor Container */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
