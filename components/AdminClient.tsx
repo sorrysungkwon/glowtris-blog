@@ -13,6 +13,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
   const [logging, setLogging] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [token, setToken] = useState<string | null>(null)
+  const [showDrafts, setShowDrafts] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_token')
@@ -88,6 +89,8 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
 
   if (!mounted) return null
 
+  const filteredPosts = showDrafts ? posts : posts.filter(p => !p.draft)
+
   /* ── Login ──────────────────────────────────────────────────────────── */
   if (!authenticated) {
     return (
@@ -140,11 +143,19 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
           <div className="admin-header-info">
             <span className="admin-header-title">✏️ Blog Editor</span>
             <span className="admin-header-sub">
-              {posts.length} post{posts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
+              {filteredPosts.length} post{filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
             </span>
           </div>
           {/* Actions cluster */}
           <div className="admin-header-actions">
+            {posts.some(p => p.draft) && (
+              <button
+                onClick={() => setShowDrafts(!showDrafts)}
+                className={`admin-btn ${showDrafts ? 'admin-btn-warning' : 'admin-btn-secondary'}`}
+              >
+                {showDrafts ? '📝 Hide Drafts' : '📝 Show Drafts'}
+              </button>
+            )}
             <button onClick={handleNewPost} className="admin-btn admin-btn-primary">
               ➕ New Post
             </button>
@@ -160,9 +171,11 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
 
       {/* Posts grid */}
       <div className="admin-body">
-        <p className="admin-section-title">All posts</p>
+        <p className="admin-section-title">
+          {showDrafts ? 'All posts (including drafts)' : 'Published posts'}
+        </p>
         <div className="admin-posts-grid">
-          {posts.map((post) => (
+          {filteredPosts.map((post) => (
             <Link
               key={post.slug}
               href={`/admin/${post.slug}`}
