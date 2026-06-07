@@ -24,6 +24,7 @@ curl -X POST https://api.getmoshi.app/api/webhook \
   -H "Content-Type: application/json" \
   -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary"}'
 ```
+- Token stored in CREDENTIALS.md (server-only, never in docs)
 
 ### 4. Admin Authentication
 - Password protected via `ADMIN_PASSWORD` environment variable

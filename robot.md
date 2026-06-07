@@ -40,7 +40,7 @@ Examples ❌:
 
 ## Rule 3: Moshi Notifications on Task Completion
 
-When a major task completes, send notification:
+When a major task completes, send notification via Moshi webhook:
 ```bash
 curl -X POST https://api.getmoshi.app/api/webhook \
   -H "Content-Type: application/json" \
@@ -48,6 +48,7 @@ curl -X POST https://api.getmoshi.app/api/webhook \
 ```
 
 - Use curl command (NOT PushNotification tool)
+- Token stored in CREDENTIALS.md (server-only)
 - Send on: bug fixes, features, documentation, deployment tasks
 - Keep message concise (under 50 chars)
 
