@@ -110,8 +110,8 @@ So when the server says "June 5 is over, let's move to June 6," there are still 
 
 ---
 
-That's the whole thing.
+One global clock. One source of truth. Every player sees the same day.
 
-One global UTC date. Every timezone looks at the same bucket on the same calendar day. You can fly 17 hours west and the leaderboard doesn't blink. Your streak doesn't break. You're still on the same "day" as everyone else.
+You play in Seoul, fly to San Francisco, land 12 hours later (local time), and the leaderboard looks exactly as you left it. Your streak is unbroken. Same 24-hour window. Same competition.
 
-It's so simple I almost didn't ship it. Sometimes the best solution isn't clever. It's just: use the server's clock and stop pretending the client knows what time it is.
+The solution isn't clever. It's just: let the server keep time, not the client.
