@@ -169,7 +169,7 @@ export default function PostEditor() {
                 onClick={() => setLang(l)}
                 className={`editor-lang-btn${lang === l ? ' active' : ''}`}
               >
-                {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+                {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
               </button>
             ))}
           </div>
@@ -230,7 +230,7 @@ export default function PostEditor() {
             className={`editor-lang-btn${lang === l ? ' active' : ''}`}
             style={{ flex: 1, textAlign: 'center' }}
           >
-            {l === 'en' ? '🇬🇧 EN' : '🇰🇷 KO'}
+            {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
           </button>
         ))}
       </div>
@@ -318,7 +318,7 @@ export default function PostEditor() {
 
           {/* Content section */}
           <div className="pane-label">
-            <span className="pane-label-accent">{lang === 'en' ? '🇬🇧' : '🇰🇷'}</span>
+            <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
             <span>{lang === 'en' ? 'English Content' : 'Korean Content'}</span>
           </div>
           <textarea
@@ -335,17 +335,17 @@ export default function PostEditor() {
         {/* Right pane: live preview */}
         <div className="editor-pane-right">
           <div className="pane-label">
-            <span>{lang === 'en' ? '🇰🇷' : '🇬🇧'}</span>
-            <span>Preview · {lang === 'en' ? 'Korean' : 'English'}</span>
+            <span>{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
+            <span>Preview · {lang === 'en' ? 'English' : 'Korean'}</span>
           </div>
           <div className="pane-preview">
             <article
               className="mdx"
-              dangerouslySetInnerHTML={{ __html: marked(otherContent || '') as string }}
+              dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
             />
-            {!otherContent.trim() && (
+            {!content.trim() && (
               <p className="pane-preview-empty">
-                No {lang === 'en' ? 'Korean' : 'English'} content yet
+                No {lang === 'en' ? 'English' : 'Korean'} content yet
               </p>
             )}
           </div>
@@ -353,7 +353,7 @@ export default function PostEditor() {
           {/* Stats cluster — proximity: EN + KO stats together */}
           <div className="pane-stats">
             <div className="pane-stat">
-              <span className="pane-stat-label">🇬🇧 EN words</span>
+              <span className="pane-stat-label">🇺🇸 EN words</span>
               <span className="pane-stat-value">{enWords.toLocaleString()}</span>
             </div>
             <div className="pane-stat">
@@ -393,7 +393,7 @@ export default function PostEditor() {
               onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
             />
             <div className="pane-label">
-              <span className="pane-label-accent">{lang === 'en' ? '🇬🇧' : '🇰🇷'}</span>
+              <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
               <span>{lang === 'en' ? 'English' : 'Korean'}</span>
             </div>
             <textarea
@@ -424,7 +424,7 @@ export default function PostEditor() {
           <div style={{ padding: 'var(--space-5)' }}>
             <div className="pane-stats" style={{ borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
               <div className="pane-stat">
-                <span className="pane-stat-label">🇬🇧 EN words</span>
+                <span className="pane-stat-label">🇺🇸 EN words</span>
                 <span className="pane-stat-value">{enWords.toLocaleString()}</span>
               </div>
               <div className="pane-stat">
