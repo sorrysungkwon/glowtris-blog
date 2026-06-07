@@ -9,6 +9,12 @@
 
 ## ✅ Completed (Session 2026-06-07)
 
+### Admin Editor
+- [x] **Draft Mode** (2026-06-07): Tab-based All Posts / Drafts UI, draft toggle button in editor
+- [x] **Image Upload** (2026-06-07): GitHub upload in production, local filesystem in dev, max 5MB
+- [x] **Markdown Toolbar** (2026-06-07): H1/H2/H3, bold, italic, strikethrough, underline, quote, code, list, link, image, hr — all buttons insert at cursor position
+- [x] **Image Width** (2026-06-07): MDX images force 100% post width
+
 ### Core Features
 - [x] **Error Handling** (2026-06-07): Comprehensive validation in lib/posts.ts, graceful fallback behavior
 - [x] **Cache Invalidation** (2026-06-07): Multi-path ISR revalidation on post save/delete

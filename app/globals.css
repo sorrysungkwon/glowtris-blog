@@ -879,7 +879,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .mdx a { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; opacity: 1; transition: opacity var(--t-fast); }
 .mdx a:hover { opacity: 0.75; }
 .mdx hr { border: none; border-top: 1px solid var(--border-hi); margin: 48px 0; }
-.mdx img { border-radius: var(--r-lg); box-shadow: var(--shadow-md); margin: 8px 0; }
+.mdx img { width: 100%; border-radius: var(--r-lg); box-shadow: var(--shadow-md); margin: 8px 0; }
 .mdx strong { color: var(--text-primary); font-weight: 700; }
 .mdx table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 24px 0; border-radius: var(--r-md); overflow: hidden; }
 .mdx th, .mdx td { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--border); }
