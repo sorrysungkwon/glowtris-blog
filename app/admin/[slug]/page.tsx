@@ -204,15 +204,15 @@ export default function PostEditor() {
             <article
               className="mdx"
               dangerouslySetInnerHTML={{
-                __html: marked(lang === 'en' ? data.content_ko : data.content_en)
+                __html: marked(lang === 'en' ? data.content_en : data.content_ko)
               }}
               style={{
                 maxWidth: '100%',
               }}
             />
-            {!(lang === 'en' ? data.content_ko : data.content_en).trim() && (
+            {!(lang === 'en' ? data.content_en : data.content_ko).trim() && (
               <p style={{ color: '#999', fontStyle: 'italic' }}>
-                {lang === 'en' ? 'No Korean content yet' : 'No English content yet'}
+                {lang === 'en' ? 'No English content yet' : 'No Korean content yet'}
               </p>
             )}
           </div>
