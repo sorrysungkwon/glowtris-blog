@@ -5,10 +5,12 @@ Modern tech blog platform for glowtris.com with bilingual (EN/KO) support and we
 ## Features
 
 - 🌍 **Bilingual**: English and Korean posts with language toggle
-- ✏️ **Web Editor**: Live markdown editing with split-pane preview
+- ✏️ **Web Editor**: Live markdown editing with split-pane preview, draft history
 - 🎨 **Modern Design**: Tech blog aesthetic, light/dark mode toggle
 - 🚀 **Auto-Deploy**: Git-based workflow, instant Vercel deployment
-- 🔐 **Admin Auth**: Password-protected editor access
+- 🔐 **Admin Auth**: Token-based authentication (30-day expiration, multi-device support)
+- 🔍 **Search & Validation**: searchPosts utility, automatic EN/KO sync validation
+- 📱 **Multi-Device**: Separate sessions on iPad/phone, automatic logout on token invalidation
 
 ## Tech Stack
 
@@ -16,39 +18,61 @@ Modern tech blog platform for glowtris.com with bilingual (EN/KO) support and we
 - **Content**: MDX with marked markdown rendering
 - **Styling**: CSS custom properties (light/dark theme)
 - **Deployment**: Vercel with Git auto-deploy
-- **Admin**: React client component with localStorage auth
+- **Admin**: React client component with token-based auth
+- **Search**: searchPosts utility with case-insensitive matching
+- **Validation**: scripts/validate-posts.ts for EN/KO sync checks
 
 ## Access
 
 ### Admin Editor
 1. Navigate to `/admin`
 2. Enter password (set via `ADMIN_PASSWORD` environment variable)
-3. Select post to edit
-4. Toggle EN/KO language, edit markdown
-5. Click "Save & Deploy" to publish
+3. Receive HMAC-SHA256 signed token (30-day expiration)
+4. Select post to edit, toggle EN/KO language
+5. Edit markdown with live preview
+6. Click "Save & Deploy" to publish both versions
+
+### Authentication
+- **Token-Based**: Each login generates a cryptographically signed token
+- **Multi-Device**: Separate tokens for iPad, phone, browser — all work simultaneously
+- **Automatic Logout**: Token invalidation on logout, prevents token reuse
+- **Expiration**: 30-day sliding window (can adjust based on usage patterns)
+- **Security**: HMAC-SHA256 signature validation, no localStorage-only storage
 
 ### Deployment
 - All changes push directly to main branch
 - Vercel auto-deploys immediately
 - No local development environment required
+- ISR cache invalidation on post save (multiple paths revalidated)
 
 ## Project Structure
 
 ```
 app/
-├── admin/[slug]/page.tsx       # Post editor UI
+├── admin/page.tsx               # Admin dashboard
+├── admin/[slug]/page.tsx        # Post editor UI
 ├── posts/[slug]/page.tsx        # Post read page
-└── api/admin/                   # Auth & save endpoints
+└── api/admin/
+    ├── auth/route.ts            # Token generation endpoint
+    ├── logout/route.ts          # Token invalidation endpoint
+    └── posts/[slug]/route.ts    # Save/delete endpoints
 
 components/
-├── AdminClient.tsx              # Editor dashboard
+├── AdminClient.tsx              # Editor dashboard & auth UI
 ├── PostCard.tsx                 # Post preview card
 └── ...
 
 posts/                           # English posts (MDX)
 posts/ko/                        # Korean posts (MDX)
 
-lib/posts.ts                     # Server-only post utilities
+lib/
+├── posts.ts                     # Server-only post loading with error handling
+├── auth.ts                      # Token validation utilities
+├── search.ts                    # Post search & filtering
+└── utils.ts                     # Utility functions
+
+scripts/
+└── validate-posts.ts            # EN/KO sync validation tool
 ```
 
 ## Post Format
