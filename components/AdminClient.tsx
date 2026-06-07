@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { PostMeta } from '@/lib/posts'
 
 export default function AdminClient({ posts }: { posts: PostMeta[] }) {
+  const router = useRouter()
   const [password, setPassword] = useState('')
   const [authenticated, setAuthenticated] = useState(false)
   const [error, setError] = useState('')
@@ -16,6 +18,23 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
     if (stored === 'true') setAuthenticated(true)
     setMounted(true)
   }, [])
+
+  function handleNewPost() {
+    const raw = prompt('Enter a slug for the new post (e.g. my-new-post):')
+    if (!raw) return
+    const slug = raw
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9-_]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+
+    if (slug) {
+      router.push(`/admin/${slug}`)
+    } else {
+      alert('Invalid slug!')
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -106,6 +125,9 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
           </div>
           {/* Actions cluster */}
           <div className="admin-header-actions">
+            <button onClick={handleNewPost} className="admin-btn admin-btn-primary">
+              ➕ New Post
+            </button>
             <Link href="/" className="admin-btn admin-btn-secondary admin-back-blog-btn">
               ← Blog
             </Link>

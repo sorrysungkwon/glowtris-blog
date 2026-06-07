@@ -50,6 +50,17 @@ export default function PostEditor() {
           const draftKey = `draft_${slug}`
           const draft = localStorage.getItem(draftKey)
           if (draft) setHasDraft(true)
+        } else if (res.status === 404) {
+          const today = new Date().toISOString().split('T')[0]
+          const defaultFrontmatter = `title: "New Post Title"\ndescription: "Brief description of the post"\ndate: "${today}"\ncategory: "DEV"\nauthor: "sorrysungkwon"\nauthorEmoji: "🔧"\ncoverGradient: "linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)"\ncoverEmoji: "⚙️"`
+          setData({
+            frontmatter: defaultFrontmatter,
+            content_en: '# New English Post\n\nWrite English content here...',
+            content_ko: '# 새 한국어 포스트\n\n한국어 내용을 여기에 작성하세요...',
+          })
+          setError('')
+        } else {
+          setError('Failed to load post')
         }
       } catch {
         setError('Failed to load post')
