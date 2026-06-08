@@ -1,8 +1,16 @@
 import AdminClient from '@/components/AdminClient'
-import { getAllPostMeta } from '@/lib/posts'
+import { getAllPostMeta, PostMeta } from '@/lib/posts'
 
 export default async function AdminDashboard() {
-  const posts = await getAllPostMeta(undefined, true)
+  const publishedPosts = await getAllPostMeta(undefined, false, 'main')
 
-  return <AdminClient posts={posts} />
+  let draftPosts: PostMeta[] = []
+  try {
+    const allFromDrafts = await getAllPostMeta(undefined, true, 'drafts')
+    draftPosts = allFromDrafts.filter(p => p.draft)
+  } catch {
+    // drafts branch doesn't exist yet — no drafts
+  }
+
+  return <AdminClient publishedPosts={publishedPosts} draftPosts={draftPosts} />
 }

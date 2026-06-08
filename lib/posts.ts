@@ -7,23 +7,22 @@ export { formatDate } from './utils'
 const postsDir = path.join(process.cwd(), 'posts')
 const isProduction = process.env.NODE_ENV === 'production'
 
-async function fetchFromGitHub(filePath: string): Promise<string | null> {
+async function fetchFromGitHub(filePath: string, branch = 'main'): Promise<string | null> {
   const token = process.env.GITHUB_TOKEN
   const owner = process.env.GITHUB_OWNER
   const repo = process.env.GITHUB_REPO
 
-  if (!token || !owner || !repo) {
-    return null
-  }
+  if (!token || !owner || !repo) return null
 
   try {
     const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
       {
         headers: {
           Authorization: `token ${token}`,
           Accept: 'application/vnd.github.v3.raw',
         },
+        cache: 'no-store',
       }
     )
 
@@ -39,23 +38,22 @@ async function fetchFromGitHub(filePath: string): Promise<string | null> {
   }
 }
 
-async function listFilesFromGitHub(dirPath: string): Promise<string[]> {
+async function listFilesFromGitHub(dirPath: string, branch = 'main'): Promise<string[]> {
   const token = process.env.GITHUB_TOKEN
   const owner = process.env.GITHUB_OWNER
   const repo = process.env.GITHUB_REPO
 
-  if (!token || !owner || !repo) {
-    return []
-  }
+  if (!token || !owner || !repo) return []
 
   try {
     const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${dirPath}`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${dirPath}?ref=${branch}`,
       {
         headers: {
           Authorization: `token ${token}`,
           Accept: 'application/vnd.github.v3+json',
         },
+        cache: 'no-store',
       }
     )
 
@@ -95,13 +93,13 @@ export interface Post extends PostMeta {
   content: string
 }
 
-export async function getAllPostMeta(lang?: string, includeDrafts: boolean = false): Promise<PostMeta[]> {
+export async function getAllPostMeta(lang?: string, includeDrafts: boolean = false, branch = 'main'): Promise<PostMeta[]> {
   let files: string[] = []
   const dir = lang === 'ko' ? 'posts/ko' : 'posts'
 
   try {
     if (isProduction) {
-      files = await listFilesFromGitHub(dir)
+      files = await listFilesFromGitHub(dir, branch)
     } else {
       const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
       if (!fs.existsSync(targetDir)) return []
@@ -120,7 +118,7 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
 
     try {
       if (isProduction) {
-        content = await fetchFromGitHub(`${dir}/${file}`)
+        content = await fetchFromGitHub(`${dir}/${file}`, branch)
       } else {
         const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
         content = fs.readFileSync(path.join(targetDir, file), 'utf8')
@@ -161,13 +159,13 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
   return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-export async function getPost(slug: string, lang?: string, includeDraft: boolean = false): Promise<Post> {
+export async function getPost(slug: string, lang?: string, includeDraft: boolean = false, branch = 'main'): Promise<Post> {
   let content: string | null = null
 
   if (lang === 'ko') {
     try {
       if (isProduction) {
-        content = await fetchFromGitHub(`posts/ko/${slug}.mdx`)
+        content = await fetchFromGitHub(`posts/ko/${slug}.mdx`, branch)
       } else {
         const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
         if (fs.existsSync(koFile)) {
@@ -194,7 +192,7 @@ export async function getPost(slug: string, lang?: string, includeDraft: boolean
   // Fallback to English
   try {
     if (isProduction) {
-      content = await fetchFromGitHub(`posts/${slug}.mdx`)
+      content = await fetchFromGitHub(`posts/${slug}.mdx`, branch)
     } else {
       const file = path.join(postsDir, `${slug}.mdx`)
       content = fs.readFileSync(file, 'utf8')

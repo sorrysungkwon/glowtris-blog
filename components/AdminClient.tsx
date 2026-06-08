@@ -5,7 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { PostMeta } from '@/lib/posts'
 
-export default function AdminClient({ posts }: { posts: PostMeta[] }) {
+interface AdminClientProps {
+  publishedPosts: PostMeta[]
+  draftPosts: PostMeta[]
+}
+
+export default function AdminClient({ publishedPosts, draftPosts }: AdminClientProps) {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [authenticated, setAuthenticated] = useState(false)
@@ -89,8 +94,7 @@ export default function AdminClient({ posts }: { posts: PostMeta[] }) {
 
   if (!mounted) return null
 
-  const allPosts = posts.filter(p => !p.draft)
-  const draftPosts = posts.filter(p => p.draft)
+  const allPosts = publishedPosts
   const filteredPosts = tab === 'all' ? allPosts : draftPosts
   const hasDrafts = draftPosts.length > 0
 

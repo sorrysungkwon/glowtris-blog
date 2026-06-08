@@ -234,7 +234,7 @@ export default function PostEditor() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(draftData),
+        body: JSON.stringify({ ...draftData, deploy: false }),
       })
       const resData = await res.json()
       if (res.ok) {
@@ -265,7 +265,7 @@ export default function PostEditor() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(liveData),
+        body: JSON.stringify({ ...liveData, deploy: true }),
       })
       const resData = await res.json()
       if (res.ok) {
