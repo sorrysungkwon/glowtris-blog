@@ -169,7 +169,7 @@ async function updateGitHubFile(
   }
 }
 
-async function deleteGitHubFile(filePath: string, message: string): Promise<boolean> {
+async function deleteGitHubFile(filePath: string, message: string, branch = 'main'): Promise<boolean> {
   const token = process.env.GITHUB_TOKEN
   const owner = process.env.GITHUB_OWNER
   const repo = process.env.GITHUB_REPO
@@ -179,19 +179,20 @@ async function deleteGitHubFile(filePath: string, message: string): Promise<bool
   }
 
   try {
-    // Get SHA first
+    // Get SHA first from the specified branch
     const metaResponse = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
       {
         headers: {
           Authorization: `token ${token}`,
           Accept: 'application/vnd.github.v3+json',
         },
+        cache: 'no-store',
       }
     )
 
     if (!metaResponse.ok) {
-      if (metaResponse.status === 404) return true // Already deleted
+      if (metaResponse.status === 404) return true // Already deleted or doesn't exist on this branch
       throw new Error(`Failed to get file SHA: ${metaResponse.status}`)
     }
 
@@ -209,6 +210,7 @@ async function deleteGitHubFile(filePath: string, message: string): Promise<bool
         body: JSON.stringify({
           message,
           sha: metaData.sha,
+          branch,
         }),
       }
     )
@@ -383,25 +385,25 @@ export async function DELETE(
   const { slug } = await params
   try {
     if (isProduction) {
-      // Use GitHub API in production
-      let enDeleted = false
-      let koDeleted = false
+      // Delete from both drafts and main branches
+      let deleted = false
 
-      try {
-        await deleteGitHubFile(`posts/${slug}.mdx`, `delete: remove ${slug} post`)
-        enDeleted = true
-      } catch (e) {
-        // File may not exist
+      for (const branch of ['drafts', 'main']) {
+        try {
+          await deleteGitHubFile(`posts/${slug}.mdx`, `delete: remove ${slug} post`, branch)
+          deleted = true
+        } catch (e) {
+          // File may not exist on this branch
+        }
+        try {
+          await deleteGitHubFile(`posts/ko/${slug}.mdx`, `delete: remove ${slug} (KO) post`, branch)
+          deleted = true
+        } catch (e) {
+          // File may not exist on this branch
+        }
       }
 
-      try {
-        await deleteGitHubFile(`posts/ko/${slug}.mdx`, `delete: remove ${slug} (KO) post`)
-        koDeleted = true
-      } catch (e) {
-        // File may not exist
-      }
-
-      if (!enDeleted && !koDeleted) {
+      if (!deleted) {
         throw new Error('Post not found')
       }
     } else {
