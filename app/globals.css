@@ -1945,5 +1945,13 @@ button { font-family: inherit; cursor: pointer; border: none; }
   box-shadow: var(--shadow-sm);
 }
 
+/* iOS Safari auto-zoom prevention: inputs below 16px trigger zoom on focus */
+@media (max-width: 768px) {
+  .editor-textarea,
+  .admin-input {
+    font-size: 16px;
+  }
+}
+
 
 
