@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import PostCard from './PostCard'
 import type { PostMeta } from '@/lib/posts'
+import { searchPosts } from '@/lib/search'
 
 const ALL_CATEGORIES = ['ALL', 'DEV', 'DESIGN', 'UPDATE', 'GUIDE', 'NOTICE']
 
@@ -19,25 +20,15 @@ export default function PostGrid({ posts, lang }: Props) {
     c => c === 'ALL' || posts.some(p => p.category === c)
   )
 
-  const filtered = posts.filter(p => {
-    const matchesCategory = active === 'ALL' || p.category === active
-    
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return matchesCategory
-
-    const titleMatch = (p.title || '').toLowerCase().includes(query) || (p.title_ko || '').toLowerCase().includes(query)
-    const descMatch = (p.description || '').toLowerCase().includes(query) || (p.description_ko || '').toLowerCase().includes(query)
-    const slugMatch = (p.slug || '').toLowerCase().includes(query)
-    const catMatch = (p.category || '').toLowerCase().includes(query)
-
-    return matchesCategory && (titleMatch || descMatch || slugMatch || catMatch)
-  })
+  const query = searchQuery.trim()
+  const searched = query ? searchPosts(posts, query) : posts
+  const filtered = active === 'ALL' ? searched : searched.filter(p => p.category === active)
 
   // Disable featured layout when a search query is active
-  const hasSearch = searchQuery.trim().length > 0
+  const hasSearch = query.length > 0
   const featuredPost =
     !hasSearch && active === 'ALL' ? (filtered.find(p => p.featured) ?? filtered[0]) : null
-  
+
   const rest = featuredPost
     ? filtered.filter(p => p.slug !== featuredPost.slug)
     : filtered
@@ -100,6 +91,18 @@ export default function PostGrid({ posts, lang }: Props) {
         </div>
       </div>
 
+      {/* Result count — shown when searching */}
+      {hasSearch && (
+        <p className="search-result-count">
+          {filtered.length === 0
+            ? (lang === 'ko' ? '결과 없음' : 'No results')
+            : lang === 'ko'
+              ? `"${query}" — ${filtered.length}개`
+              : `"${query}" — ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`
+          }
+        </p>
+      )}
+
       {/* Post grid — common fate: all cards share same hover behavior */}
       <div className="post-grid">
         {featuredPost && <PostCard post={featuredPost} featured lang={lang} />}
@@ -108,9 +111,10 @@ export default function PostGrid({ posts, lang }: Props) {
         ))}
         {filtered.length === 0 && (
           <p className="grid-empty">
-            {lang === 'ko'
-              ? '검색 결과와 일치하는 포스트가 없습니다.'
-              : 'No posts match your search.'}
+            {hasSearch
+              ? (lang === 'ko' ? `"${query}"에 맞는 포스트가 없습니다.` : `No posts found for "${query}".`)
+              : (lang === 'ko' ? '포스트가 없습니다.' : 'No posts yet.')
+            }
           </p>
         )}
       </div>

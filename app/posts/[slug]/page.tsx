@@ -47,12 +47,12 @@ export default async function PostPage({ params, searchParams }: Props) {
   const backHref = lang === 'ko' ? '/?lang=ko' : '/'
   const readUnit = lang === 'ko' ? '분 읽기' : 'min read'
 
-  // Get recommended posts
+  // Get recommended posts — same category first, fill remainder from other posts
   const allPosts = await getAllPostMeta(lang)
-  const currentIndex = allPosts.findIndex(p => p.slug === slug)
-  const sameCategoryPosts = allPosts.filter(p => p.category === post.category && p.slug !== slug)
-  const recommendedPosts = sameCategoryPosts.length > 0 ? sameCategoryPosts : allPosts.filter(p => p.slug !== slug)
-  const postsToShow = recommendedPosts.slice(0, 4)
+  const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== slug)
+  const otherPosts = allPosts.filter(p => p.category !== post.category && p.slug !== slug)
+  const postsToShow = [...sameCat, ...otherPosts].slice(0, 3)
+  const isSameCategory = sameCat.length > 0
 
   return (
     <div className="post-page">
@@ -83,7 +83,12 @@ export default async function PostPage({ params, searchParams }: Props) {
       {/* Recommended posts nudge */}
       {postsToShow.length > 0 && (
         <div className="post-nudge">
-          <h2 className="post-nudge-title">{lang === 'ko' ? '다음 글을 읽어보세요' : 'Keep reading'}</h2>
+          <h2 className="post-nudge-title">
+            {isSameCategory
+              ? (lang === 'ko' ? `다른 ${post.category} 글` : `More in ${post.category}`)
+              : (lang === 'ko' ? '다음 글을 읽어보세요' : 'Keep reading')
+            }
+          </h2>
           <div className="nudge-grid">
             {postsToShow.map(p => (
               <PostCard key={p.slug} post={p} lang={lang} />
