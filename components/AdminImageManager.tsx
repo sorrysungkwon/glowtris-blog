@@ -1,11 +1,19 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+
+interface ImageReference {
+  slug: string
+  title: string
+  lang: string
+}
 
 interface ImageFile {
   name: string
   url: string
   size: number
+  referencedBy?: ImageReference[]
 }
 
 export default function AdminImageManager() {
@@ -226,7 +234,7 @@ export default function AdminImageManager() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
             gap: '20px',
           }}
         >
@@ -234,6 +242,8 @@ export default function AdminImageManager() {
             const isCopiedMd = copiedIndex?.idx === idx && copiedIndex?.type === 'md'
             const isCopiedUrl = copiedIndex?.idx === idx && copiedIndex?.type === 'url'
             const isDeleting = deleteConfirm === img.name
+            const references = img.referencedBy || []
+            const isUsed = references.length > 0
 
             return (
               <div
@@ -276,6 +286,30 @@ export default function AdminImageManager() {
                     }}
                     loading="lazy"
                   />
+                  {/* Status Badge */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: isUsed ? 'rgba(16, 185, 129, 0.9)' : 'rgba(107, 114, 128, 0.9)',
+                      color: '#fff',
+                      backdropFilter: 'blur(4px)',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    }}
+                  >
+                    <span className="material-icons-round" style={{ fontSize: '10px' }}>
+                      {isUsed ? 'check_circle' : 'help_outline'}
+                    </span>
+                    {isUsed ? `Used (${references.length})` : 'Unused'}
+                  </div>
                 </div>
 
                 {/* Meta details */}
@@ -284,7 +318,7 @@ export default function AdminImageManager() {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '4px',
-                    marginBottom: '16px',
+                    marginBottom: '12px',
                     flexGrow: 1,
                   }}
                 >
@@ -305,43 +339,120 @@ export default function AdminImageManager() {
                   >
                     {img.name}
                   </span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-faint)' }}>
-                    Size: {formatSize(img.size)}
-                  </span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'between',
+                      alignItems: 'center',
+                      width: '100%',
+                      fontSize: '11px',
+                      color: 'var(--text-faint)',
+                    }}
+                  >
+                    <span>Size: {formatSize(img.size)}</span>
+                  </div>
                 </div>
+
+                {/* References info */}
+                {isUsed && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--border)',
+                      paddingTop: '8px',
+                      marginBottom: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                    }}
+                  >
+                    <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-faint)' }}>
+                      Referenced in:
+                    </span>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        maxHeight: '40px',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {references.map((ref, rIdx) => (
+                        <Link
+                          key={rIdx}
+                          href={`/admin/${ref.slug}`}
+                          style={{
+                            fontSize: '9px',
+                            padding: '2px 6px',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            color: 'var(--text-muted)',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                          }}
+                          title={`Go to editor for ${ref.title} (${ref.lang})`}
+                        >
+                          <span>{ref.slug}</span>
+                          <span style={{ opacity: 0.6 }}>({ref.lang.toUpperCase()})</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Actions container */}
                 <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
                   {isDeleting ? (
-                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
-                      <button
-                        onClick={() => handleDelete(img.name)}
-                        className="admin-btn admin-btn-danger"
-                        style={{
-                          flex: 1,
-                          fontSize: '11px',
-                          padding: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="admin-btn admin-btn-secondary"
-                        style={{
-                          flex: 1,
-                          fontSize: '11px',
-                          padding: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        Cancel
-                      </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '6px' }}>
+                      {isUsed && (
+                        <div
+                          style={{
+                            fontSize: '10px',
+                            color: 'var(--red, #ef4444)',
+                            background: 'rgba(239, 68, 68, 0.08)',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            textAlign: 'center',
+                            fontWeight: 500,
+                          }}
+                        >
+                          ⚠️ Used in {references.length} post(s)!
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <button
+                          onClick={() => handleDelete(img.name)}
+                          className="admin-btn admin-btn-danger"
+                          style={{
+                            flex: 1,
+                            fontSize: '11px',
+                            padding: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="admin-btn admin-btn-secondary"
+                          style={{
+                            flex: 1,
+                            fontSize: '11px',
+                            padding: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>
