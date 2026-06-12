@@ -886,6 +886,23 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .mdx a:hover { opacity: 0.75; }
 .mdx hr { border: none; border-top: 1px solid var(--border-hi); margin: 48px 0; }
 .mdx img { width: 100%; border-radius: var(--r-lg); box-shadow: var(--shadow-md); margin: 8px 0; }
+.mdx figure { margin: var(--space-6) 0; }
+.mdx figure img { margin: 0; }
+.mdx figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.mdx figcaption .figcredit {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-faint);
+}
 .mdx strong { color: var(--text-primary); font-weight: 700; }
 .mdx table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 24px 0; border-radius: var(--r-md); overflow: hidden; }
 .mdx th, .mdx td { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--border); }

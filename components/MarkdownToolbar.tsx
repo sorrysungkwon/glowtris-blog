@@ -102,12 +102,49 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
     }
   }
 
+  // Compress an image client-side using the Canvas API.
+  // Resizes to max 1920px on the longest side and encodes as WebP at 0.85 quality.
+  // Falls back to the original file if compression fails or isn't supported.
+  async function compressImage(file: File): Promise<File> {
+    if (!file.type.startsWith('image/') || file.type === 'image/gif') return file
+    return new Promise((resolve) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const MAX = 1920
+        let { width, height } = img
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+          else { width = Math.round(width * MAX / height); height = MAX }
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(file); return }
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || blob.size >= file.size) { resolve(file); return }
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' }))
+          },
+          'image/webp',
+          0.85
+        )
+      }
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+      img.src = url
+    })
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const raw = e.target.files?.[0]
+    if (!raw) return
 
     setUploading(true)
     try {
+      const file = await compressImage(raw)
       const formData = new FormData()
       formData.append('file', file)
 
@@ -137,6 +174,35 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
 
   function handleHorizontalRule() {
     insertBlock('---')
+  }
+
+  function handleFigure() {
+    const { before: contentBefore, selected, after: contentAfter } = getSelection()
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    // If selection is a markdown image, extract URL + alt for the figure
+    const imgMatch = selected.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
+    const src = imgMatch ? imgMatch[2] : (prompt('Image URL:') || '')
+    const alt = imgMatch ? imgMatch[1] : ''
+    if (!src) return
+
+    const caption = prompt('Caption text:') || ''
+    const credit = prompt('Source / credit (optional — press Enter to skip):') || ''
+
+    const creditHtml = credit ? `\n  <span class="figcredit">Source: ${credit}</span>` : ''
+    const figcaptionHtml = caption || credit
+      ? `\n<figcaption>${caption}${creditHtml}\n</figcaption>`
+      : ''
+    const figure = `<figure>\n  <img src="${src}" alt="${alt}" />${figcaptionHtml}\n</figure>`
+
+    const newContent = contentBefore + figure + contentAfter
+    onChange(newContent)
+    setTimeout(() => {
+      const pos = contentBefore.length + figure.length
+      textarea.focus()
+      textarea.setSelectionRange(pos, pos)
+    }, 0)
   }
 
   const btnClass = 'markdown-toolbar-btn'
@@ -264,6 +330,14 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
           title="Horizontal rule"
         >
           —
+        </button>
+        <button
+          onClick={handleFigure}
+          disabled={disabledState}
+          className={btnClass}
+          title="Image with caption"
+        >
+          <span className="material-icons-round" style={{ fontSize: '14px' }}>photo_camera</span>
         </button>
       </div>
     </div>
