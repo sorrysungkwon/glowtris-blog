@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import PostCard from '@/components/PostCard'
+import GlowtrisCTA from '@/components/GlowtrisCTA'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -79,6 +80,8 @@ export default async function PostPage({ params, searchParams }: Props) {
       <article className="mdx">
         <MDXRemote source={post.content} />
       </article>
+
+      <GlowtrisCTA lang={lang} />
 
       {/* Recommended posts nudge */}
       {postsToShow.length > 0 && (

@@ -892,6 +892,66 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .mdx th { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-faint); background: var(--surface-2); }
 .mdx tr:last-child td { border-bottom: none; }
 
+/* ─── Glowtris CTA box ────────────────────────────────────────────────────── */
+.glowtris-cta {
+  margin-top: var(--space-16);
+  border: 1px solid var(--cyan);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--cyan) 6%, var(--surface));
+  padding: 28px 32px;
+}
+.glowtris-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.glowtris-cta-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  display: block;
+  margin-bottom: 6px;
+}
+.glowtris-cta-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: 1px;
+}
+.glowtris-cta-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 480px;
+  line-height: 1.6;
+}
+.glowtris-cta-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--cyan);
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: opacity var(--t-fast);
+  white-space: nowrap;
+}
+.glowtris-cta-btn:hover { opacity: 0.85; }
+@media (max-width: 600px) {
+  .glowtris-cta { padding: 24px 20px; }
+  .glowtris-cta-btn { width: 100%; justify-content: center; }
+}
+
 /* ─── Related posts nudge ─────────────────────────────────────────────────── */
 .post-nudge {
   margin-top: var(--space-16);
