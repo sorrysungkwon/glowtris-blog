@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { marked } from 'marked'
 import MarkdownToolbar from '@/components/MarkdownToolbar'
+import type { BilingualImageFields } from '@/components/ImageUploadModal'
 
 function MI({ icon, size = 14 }: { icon: string; size?: number }) {
   return (
@@ -386,6 +387,74 @@ export default function PostEditor() {
     } else {
       return frontmatter.replace(/\ndraft:\s*(true|false)[^\n]*/i, '').replace(/^draft:\s*(true|false)[^\n]*\n?/im, '')
     }
+  }
+
+  /* ── Bilingual image insertion ─────────────────────────────────────────
+     Active language: insert at textarea cursor position
+     Inactive language: append to the end of that content            */
+  function buildImageSnippet(
+    url: string,
+    fields: BilingualImageFields,
+    credit: string,
+  ): string {
+    const creditHtml = credit
+      ? `<span className="figcredit"> Source: ${credit}</span>`
+      : ''
+    if (fields.caption || credit) {
+      return `<figure>\n  <img src="${url}" alt="${fields.alt}" />\n  <figcaption>${fields.caption}${creditHtml}</figcaption>\n</figure>`
+    }
+    return `![${fields.alt || 'Image'}](${url})`
+  }
+
+  function handleBilingualImageInsert(
+    en: BilingualImageFields,
+    ko: BilingualImageFields,
+    credit: string,
+    url: string,
+  ) {
+    const el = contentTextareaRef.current
+    const enSnippet = buildImageSnippet(url, en, credit)
+    const koSnippet = buildImageSnippet(url, ko, credit)
+
+    setData(prev => {
+      if (lang === 'en') {
+        // Insert EN at cursor, append KO at end
+        let enContent = prev.content_en
+        if (el) {
+          const before = enContent.slice(0, el.selectionStart)
+          const after = enContent.slice(el.selectionEnd)
+          const bl = before.endsWith('\n') ? before : before + '\n'
+          const al = after.startsWith('\n') ? after : '\n' + after
+          enContent = bl + enSnippet + al
+          setTimeout(() => {
+            el.focus()
+            el.setSelectionRange(bl.length + enSnippet.length, bl.length + enSnippet.length)
+          }, 0)
+        } else {
+          enContent = enContent.trimEnd() + '\n\n' + enSnippet
+        }
+        const koContent = prev.content_ko.trimEnd() + '\n\n' + koSnippet
+        return { ...prev, content_en: enContent, content_ko: koContent }
+      } else {
+        // Insert KO at cursor, append EN at end
+        let koContent = prev.content_ko
+        if (el) {
+          const before = koContent.slice(0, el.selectionStart)
+          const after = koContent.slice(el.selectionEnd)
+          const bl = before.endsWith('\n') ? before : before + '\n'
+          const al = after.startsWith('\n') ? after : '\n' + after
+          koContent = bl + koSnippet + al
+          setTimeout(() => {
+            el.focus()
+            el.setSelectionRange(bl.length + koSnippet.length, bl.length + koSnippet.length)
+          }, 0)
+        } else {
+          koContent = koContent.trimEnd() + '\n\n' + koSnippet
+        }
+        const enContent = prev.content_en.trimEnd() + '\n\n' + enSnippet
+        return { ...prev, content_en: enContent, content_ko: koContent }
+      }
+    })
   }
 
   // Renames the post if slug changed: write to new slug, then delete old slug.
@@ -991,6 +1060,7 @@ export default function PostEditor() {
               if (lang === 'en') setData({ ...data, content_en: newContent })
               else setData({ ...data, content_ko: newContent })
             }}
+            onImageInsert={handleBilingualImageInsert}
             disabled={saving || deleting}
           />
           <textarea
@@ -1071,6 +1141,7 @@ export default function PostEditor() {
                 if (lang === 'en') setData({ ...data, content_en: newContent })
                 else setData({ ...data, content_ko: newContent })
               }}
+              onImageInsert={handleBilingualImageInsert}
               disabled={saving || deleting}
             />
             <textarea

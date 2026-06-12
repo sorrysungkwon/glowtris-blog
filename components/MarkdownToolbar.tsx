@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import ImageUploadModal from './ImageUploadModal'
+import ImageUploadModal, { type BilingualImageFields } from './ImageUploadModal'
 
 interface MarkdownToolbarProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   onChange: (content: string) => void
+  onImageInsert?: (en: BilingualImageFields, ko: BilingualImageFields, credit: string, url: string) => void
   disabled?: boolean
 }
 
-export default function MarkdownToolbar({ textareaRef, onChange, disabled }: MarkdownToolbarProps) {
+export default function MarkdownToolbar({ textareaRef, onChange, onImageInsert, disabled }: MarkdownToolbarProps) {
   const [showModal, setShowModal] = useState(false)
 
   function getSelection() {
@@ -58,21 +59,29 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
     if (url) insertMarkdown(`[${selected || 'link text'}](${url})`)
   }
 
-  // Called by the modal after a successful upload
-  function handleImageInsert(url: string, alt: string, caption: string, credit: string) {
+  // Called by the modal after a successful upload.
+  // If a parent onImageInsert handler is provided, delegate full bilingual
+  // insertion to the parent (admin editor) which knows both language panes.
+  // Otherwise fall back to inserting an EN-only snippet at the cursor.
+  function handleImageInsert(url: string, en: BilingualImageFields, ko: BilingualImageFields, credit: string) {
+    if (onImageInsert) {
+      onImageInsert(en, ko, credit, url)
+      setShowModal(false)
+      return
+    }
+
+    // Fallback: EN-only snippet at cursor
     const el = textareaRef.current
     if (!el) return
 
+    const creditHtml = credit
+      ? `<span className="figcredit"> Source: ${credit}</span>`
+      : ''
     let snippet: string
-    if (caption || credit) {
-      const creditHtml = credit
-        ? `<span className="figcredit"> Source: ${credit}</span>`
-        : ''
-      // Keep figcaption content on ONE line — MDX v3 breaks if there's a
-      // newline between the opening tag and text content inside an HTML block.
-      snippet = `<figure>\n  <img src="${url}" alt="${alt}" />\n  <figcaption>${caption}${creditHtml}</figcaption>\n</figure>`
+    if (en.caption || credit) {
+      snippet = `<figure>\n  <img src="${url}" alt="${en.alt}" />\n  <figcaption>${en.caption}${creditHtml}</figcaption>\n</figure>`
     } else {
-      snippet = `![${alt || 'Image'}](${url})`
+      snippet = `![${en.alt || 'Image'}](${url})`
     }
 
     const { before: b, after: a } = getSelection()

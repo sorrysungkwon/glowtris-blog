@@ -73,9 +73,85 @@ function uploadWithProgress(
 
 type Phase = 'idle' | 'compressing' | 'ready' | 'uploading'
 
+export interface BilingualImageFields {
+  alt: string
+  caption: string
+}
+
 interface Props {
-  onInsert: (url: string, alt: string, caption: string, credit: string) => void
+  onInsert: (
+    url: string,
+    en: BilingualImageFields,
+    ko: BilingualImageFields,
+    credit: string
+  ) => void
   onClose: () => void
+}
+
+/* ── Sub-components ──────────────────────────────────────────────────────── */
+
+function LangSection({
+  lang,
+  alt,
+  caption,
+  onAlt,
+  onCaption,
+  inputStyle,
+}: {
+  lang: 'EN' | 'KO'
+  alt: string
+  caption: string
+  onAlt: (v: string) => void
+  onCaption: (v: string) => void
+  inputStyle: React.CSSProperties
+}) {
+  const accent = lang === 'EN' ? 'var(--cyan)' : '#f59e0b'
+  const accentBg = lang === 'EN' ? 'rgba(37,99,235,0.07)' : 'rgba(245,158,11,0.07)'
+  const accentBorder = lang === 'EN' ? 'rgba(37,99,235,0.25)' : 'rgba(245,158,11,0.25)'
+
+  return (
+    <div style={{
+      border: `1px solid ${accentBorder}`,
+      borderRadius: '8px',
+      overflow: 'hidden',
+    }}>
+      {/* Section header */}
+      <div style={{
+        background: accentBg,
+        padding: '6px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        borderBottom: `1px solid ${accentBorder}`,
+      }}>
+        <span style={{
+          fontSize: '10px',
+          fontWeight: 800,
+          letterSpacing: '0.8px',
+          color: accent,
+        }}>{lang}</span>
+        <span style={{ fontSize: '11px', color: 'var(--text-faint)' }}>
+          {lang === 'EN' ? '— English fields' : '— 한국어 필드'}
+        </span>
+      </div>
+
+      {/* Inputs */}
+      <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '7px', background: 'var(--surface)' }}>
+        <input
+          style={inputStyle}
+          placeholder={lang === 'EN' ? 'Alt text (accessibility)' : '대체 텍스트 (접근성)'}
+          value={alt}
+          onChange={e => onAlt(e.target.value)}
+        />
+        <input
+          style={inputStyle}
+          placeholder={lang === 'EN' ? 'Caption (optional)' : '캡션 (선택)'}
+          value={caption}
+          onChange={e => onCaption(e.target.value)}
+        />
+      </div>
+    </div>
+  )
 }
 
 /* ── Component ───────────────────────────────────────────────────────────── */
@@ -88,12 +164,21 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
   const [compressed, setCompressed] = useState<File | null>(null)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
-  const [alt, setAlt] = useState('')
-  const [caption, setCaption] = useState('')
+
+  // EN fields
+  const [altEn, setAltEn] = useState('')
+  const [captionEn, setCaptionEn] = useState('')
+
+  // KO fields
+  const [altKo, setAltKo] = useState('')
+  const [captionKo, setCaptionKo] = useState('')
+
+  // Shared
   const [credit, setCredit] = useState('')
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Revoke object URL on unmount to avoid memory leak
+  // Revoke object URL on unmount
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   // Close on Escape
@@ -102,6 +187,11 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
+
+  // Mirror EN alt → KO alt while KO alt is empty (convenience)
+  useEffect(() => {
+    if (!altKo) setAltKo(altEn)
+  }, [altEn]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function processFile(file: File) {
     if (!file.type.startsWith('image/')) {
@@ -125,7 +215,12 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
     setError('')
     try {
       const url = await uploadWithProgress(compressed, setProgress)
-      onInsert(url, alt, caption, credit)
+      onInsert(
+        url,
+        { alt: altEn, caption: captionEn },
+        { alt: altKo, caption: captionKo },
+        credit,
+      )
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Upload failed')
       setPhase('ready')
@@ -137,10 +232,10 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
     setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
     if (file) processFile(file)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const inputStyle: React.CSSProperties = {
-    padding: '8px 10px',
+    padding: '7px 10px',
     fontSize: '12.5px',
     background: 'var(--bg)',
     border: '1px solid var(--border)',
@@ -165,11 +260,11 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
       >
         {/* Card */}
         <div
-          style={{ background: 'var(--surface)', borderRadius: '14px', width: '100%', maxWidth: '480px', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', overflow: 'hidden' }}
+          style={{ background: 'var(--surface)', borderRadius: '14px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', overflow: 'hidden' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 1 }}>
             <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span className="material-icons-round" style={{ fontSize: '16px', color: 'var(--cyan)' }}>upload</span>
               Insert Image
@@ -233,9 +328,8 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
             {(phase === 'ready' || phase === 'uploading') && compressed && (
               <>
                 {/* Preview */}
-                <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)', maxHeight: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                  <img src={preview} alt="preview" style={{ maxWidth: '100%', maxHeight: '220px', objectFit: 'contain', display: 'block' }} />
-                  {/* Change button */}
+                <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)', maxHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <img src={preview} alt="preview" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block' }} />
                   {phase === 'ready' && (
                     <button
                       onClick={() => fileInputRef.current?.click()}
@@ -267,12 +361,35 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                   )}
                 </div>
 
-                {/* Fields */}
+                {/* Bilingual fields */}
                 {phase === 'ready' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <input style={inputStyle} placeholder="Alt text (for accessibility)" value={alt} onChange={e => setAlt(e.target.value)} />
-                    <input style={inputStyle} placeholder="Caption (optional — shown below image)" value={caption} onChange={e => setCaption(e.target.value)} />
-                    <input style={inputStyle} placeholder="Source / credit (optional)" value={credit} onChange={e => setCredit(e.target.value)} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <LangSection
+                      lang="EN"
+                      alt={altEn}
+                      caption={captionEn}
+                      onAlt={setAltEn}
+                      onCaption={setCaptionEn}
+                      inputStyle={inputStyle}
+                    />
+                    <LangSection
+                      lang="KO"
+                      alt={altKo}
+                      caption={captionKo}
+                      onAlt={setAltKo}
+                      onCaption={setCaptionKo}
+                      inputStyle={inputStyle}
+                    />
+                    {/* Shared credit */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="material-icons-round" style={{ fontSize: '14px', color: 'var(--text-faint)', flexShrink: 0 }}>link</span>
+                      <input
+                        style={inputStyle}
+                        placeholder="Source / credit (optional — shared)"
+                        value={credit}
+                        onChange={e => setCredit(e.target.value)}
+                      />
+                    </div>
                   </div>
                 )}
 
