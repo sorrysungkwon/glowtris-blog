@@ -704,10 +704,10 @@ button { font-family: inherit; cursor: pointer; border: none; }
   line-height: 1.6;
   margin-top: 5px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
+  /* no flex: 1 — flex-grow overrides the line-clamp height, preventing ellipsis */
 }
 
 /* Footer cluster — secondary info, visually separated from title cluster */
@@ -716,7 +716,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   align-items: center;
   justify-content: space-between;
   padding-top: var(--space-3);
-  margin-top: var(--space-3);
+  margin-top: auto; /* push footer to bottom within equal-height grid cells */
   border-top: 1px solid var(--border);
   gap: var(--space-2);
 }

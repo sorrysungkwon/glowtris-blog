@@ -189,11 +189,22 @@ export default function PostEditor() {
 
   // Auto-grow the content textarea so the pane scrolls (not the textarea),
   // letting the sticky markdown toolbar follow the scroll.
+  // We freeze the scroll container's position around the height change so the
+  // browser cannot jump to re-center the cursor on every keystroke.
   const autoResize = () => {
     const el = contentTextareaRef.current
     if (!el) return
+    // Walk up to find the nearest scrollable ancestor
+    let container: HTMLElement | null = el.parentElement
+    while (container && container !== document.documentElement) {
+      const { overflowY } = window.getComputedStyle(container)
+      if (overflowY === 'auto' || overflowY === 'scroll') break
+      container = container.parentElement
+    }
+    const savedTop = container ? container.scrollTop : 0
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight + 4}px`
+    if (container) container.scrollTop = savedTop
   }
 
   useEffect(() => {
