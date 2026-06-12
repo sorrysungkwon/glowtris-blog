@@ -9,7 +9,7 @@
     "validate": "npx tsx scripts/validate-posts.ts"
   },
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
+    "@next/third-parties": "^16.2.9",
     "gray-matter": "^4.0.3",
     "marked": "^18.0.5",
     "next": "^15.3.0",
