@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import LangToggle from '@/components/LangToggle'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -14,6 +15,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'Glowtris Blog',
+  },
+  alternates: {
+    types: {
+      'application/rss+xml': 'https://blog.glowtris.com/feed.xml',
+    },
   },
 }
 
@@ -73,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
 
         <main>{children}</main>
+        <Analytics />
 
         <footer className="site-footer">
           <div className="container">
