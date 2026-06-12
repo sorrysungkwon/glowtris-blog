@@ -22,6 +22,12 @@
 - [x] `components/AdminImageManager.tsx`: grid of uploaded images, scan which posts reference each, delete unused
 - [x] `components/AdminClient.tsx`: add "Images" tab alongside Published / Drafts
 
+#### 3. UI Polishing & Bug Fixes
+- [x] Global icon vertical alignment: `.material-icons-round` vertical-align and transform adjusted.
+- [x] Fix icon-text spacing: Wrapped post-author emoji and text in spans in `PostCard.tsx` and `posts/[slug]/page.tsx` so flex gap applies correctly.
+- [x] Google Translate React crash fix: Added monkeypatch in `<head>` for `removeChild` and `insertBefore` to prevent client-side exception crashes.
+- [x] Mobile nav-play-icon alignment: Vertically centered mobile header icon and removed translateY transform.
+
 ---
 
 ### 🔲 Phase 2 — Content & Discovery
