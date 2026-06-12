@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import LangToggle from '@/components/LangToggle'
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleTagManager } from '@next/third-parties/google'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -79,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
 
         <main>{children}</main>
-        <GoogleAnalytics gaId="G-2XE78X0YKK" />
+        <GoogleTagManager gtmId="GTM-PMZTHX9N" />
 
         <footer className="site-footer">
           <div className="container">
