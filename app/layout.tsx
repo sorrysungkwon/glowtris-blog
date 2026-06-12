@@ -74,6 +74,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           rel="stylesheet"
         />
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+          rel="stylesheet"
+        />
       </head>
       <body>
         <header className="site-header">
@@ -89,7 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   className="nav-link"
                 >
                   <span className="nav-play-text">Play the game ↗</span>
-                  <span className="nav-play-icon" aria-hidden="true" title="Play Glowtris">🎮</span>
+                  <span className="nav-play-icon material-icons-round" aria-hidden="true" title="Play Glowtris" style={{ fontSize: '16px' }}>sports_esports</span>
                 </Link>
 
                 {/* Controls grouped together — Gestalt: proximity */}

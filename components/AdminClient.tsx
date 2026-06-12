@@ -148,7 +148,7 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
         <div className="admin-header-inner">
           {/* Info cluster — proximity */}
           <div className="admin-header-info">
-            <span className="admin-header-title">✏️ Blog Editor</span>
+            <span className="admin-header-title"><span className="material-icons-round" style={{ fontSize: '15px', verticalAlign: 'middle' }}>edit</span> Blog Editor</span>
             <span className="admin-header-sub">
               {filteredPosts.length} {tab === 'drafts' ? 'draft' : 'published'}{filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
             </span>
@@ -156,7 +156,7 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
           {/* Actions cluster */}
           <div className="admin-header-actions">
             <button onClick={handleNewPost} className="admin-btn admin-btn-primary">
-              ➕ New Post
+              <span className="material-icons-round" style={{ fontSize: '14px', verticalAlign: 'middle' }}>add</span> New Post
             </button>
             <Link href="/" className="admin-btn admin-btn-secondary admin-back-blog-btn">
               ← Blog
@@ -211,7 +211,7 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
                 paddingBottom: '20px',
               }}
             >
-              📝 Drafts ({draftPosts.length})
+              <span className="material-icons-round" style={{ fontSize: '13px', verticalAlign: 'middle' }}>edit_note</span> Drafts ({draftPosts.length})
             </button>
           )}
         </div>
@@ -228,7 +228,7 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
               <div className="admin-card-top">
                 <h3 className="admin-card-title">
                   {post.title}
-                  {post.draft && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}>📝 DRAFT</span>}
+                  {post.draft && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}><span className="material-icons-round" style={{ fontSize: '12px', verticalAlign: 'middle' }}>edit_note</span> DRAFT</span>}
                 </h3>
                 <span className="admin-card-badge">{post.category}</span>
               </div>

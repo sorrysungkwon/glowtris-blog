@@ -240,7 +240,7 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
           className={btnClass}
           title="Link"
         >
-          🔗
+          <span className="material-icons-round" style={{ fontSize: '14px' }}>link</span>
         </button>
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -248,7 +248,7 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
           className={btnClass}
           title="Image"
         >
-          {uploading ? '⏳' : '🖼️'}
+          <span className="material-icons-round" style={{ fontSize: '14px' }}>{uploading ? 'hourglass_empty' : 'image'}</span>
         </button>
         <input
           ref={fileInputRef}

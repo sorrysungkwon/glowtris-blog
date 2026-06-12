@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              ⚡ Play Glowtris
+              <span className="material-icons-round" style={{ fontSize: '18px', verticalAlign: 'middle' }}>bolt</span> Play Glowtris
             </a>
           </div>
         </div>

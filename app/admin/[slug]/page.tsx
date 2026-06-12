@@ -6,6 +6,18 @@ import Link from 'next/link'
 import { marked } from 'marked'
 import MarkdownToolbar from '@/components/MarkdownToolbar'
 
+function MI({ icon, size = 14 }: { icon: string; size?: number }) {
+  return (
+    <span
+      className="material-icons-round"
+      style={{ fontSize: `${size}px`, verticalAlign: 'middle', lineHeight: 1, userSelect: 'none' }}
+      aria-hidden="true"
+    >
+      {icon}
+    </span>
+  )
+}
+
 interface SeoCheck {
   id: string
   label: string
@@ -455,7 +467,7 @@ export default function PostEditor() {
               flexShrink: 0,
             }}
           >
-            {isDraft ? '📝 DRAFT' : '✅ LIVE'}
+            {isDraft ? <><MI icon="edit_note" size={13} /> DRAFT</> : <><MI icon="check_circle" size={13} /> LIVE</>}
           </button>
         )}
 
@@ -468,7 +480,7 @@ export default function PostEditor() {
                 onClick={() => setLang(l)}
                 className={`editor-lang-btn${lang === l ? ' active' : ''}`}
               >
-                {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
+                {l === 'en' ? 'EN' : 'KO'}
               </button>
             ))}
           </div>
@@ -489,7 +501,7 @@ export default function PostEditor() {
                 className="admin-btn admin-btn-secondary"
                 style={{ fontSize: '12px', padding: '6px 12px' }}
               >
-                {saving ? '…' : '💾 Save Draft'}
+                {saving ? '…' : <><MI icon="save" size={13} /> Save Draft</>}
               </button>
               <button
                 onClick={handleSave}
@@ -497,7 +509,7 @@ export default function PostEditor() {
                 className="admin-btn admin-btn-primary"
                 style={{ fontSize: '12px', padding: '6px 16px' }}
               >
-                {saving ? 'Deploying…' : '🚀 Deploy'}
+                {saving ? 'Deploying…' : <><MI icon="rocket_launch" size={13} /> Deploy</>}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -505,7 +517,7 @@ export default function PostEditor() {
                 className="admin-btn admin-btn-danger"
                 style={{ fontSize: '12px', padding: '6px 10px' }}
               >
-                🗑️
+                <MI icon="delete" size={14} />
               </button>
             </>
           ) : (
@@ -537,7 +549,7 @@ export default function PostEditor() {
                     className={`editor-lang-btn${lang === l ? ' active' : ''}`}
                     style={{ padding: '4px 8px', fontSize: '11px' }}
                   >
-                    {l === 'en' ? '🇺🇸 EN' : '🇰🇷 KO'}
+                    {l === 'en' ? 'EN' : 'KO'}
                   </button>
                 ))}
               </div>
@@ -561,7 +573,7 @@ export default function PostEditor() {
 
       {hasDraft && (
         <button onClick={() => { setShowHistoryModal(true); setShowMenu(false) }} className="admin-btn admin-btn-warning" style={{ width: '100%' }}>
-          📝 Restore Draft
+          <MI icon="history" size={14} /> Restore Draft
         </button>
       )}
       {/* Status toggle in mobile menu */}
@@ -579,7 +591,7 @@ export default function PostEditor() {
           cursor: 'pointer',
         }}
       >
-        {isDraft ? '📝 DRAFT — tap to mark as Live' : '✅ LIVE — tap to mark as Draft'}
+        {isDraft ? <><MI icon="edit_note" size={13} /> DRAFT — tap to mark as Live</> : <><MI icon="check_circle" size={13} /> LIVE — tap to mark as Draft</>}
       </button>
       <button
         onClick={() => { handleSaveDraft(); setShowMenu(false) }}
@@ -587,7 +599,7 @@ export default function PostEditor() {
         className="admin-btn admin-btn-secondary"
         style={{ width: '100%' }}
       >
-        {saving ? '…' : '💾 Save Draft'}
+        {saving ? '…' : <><MI icon="save" size={14} /> Save Draft</>}
       </button>
       <button
         onClick={() => { handleSave(); setShowMenu(false) }}
@@ -595,7 +607,7 @@ export default function PostEditor() {
         className="admin-btn admin-btn-primary"
         style={{ width: '100%' }}
       >
-        {saving ? 'Deploying…' : '🚀 Deploy'}
+        {saving ? 'Deploying…' : <><MI icon="rocket_launch" size={14} /> Deploy</>}
       </button>
       <button
         onClick={() => { setShowDeleteConfirm(true); setShowMenu(false) }}
@@ -603,7 +615,7 @@ export default function PostEditor() {
         className="admin-btn admin-btn-danger"
         style={{ width: '100%' }}
       >
-        🗑️ Delete
+        <MI icon="delete" size={14} /> Delete
       </button>
     </div>
   )
@@ -650,8 +662,8 @@ export default function PostEditor() {
   /* ── Notification bar ─────────────────────────────────────────────── */
   const notify = (
     <>
-      {error && <div className="editor-notify error">⚠ {error}</div>}
-      {success && <div className="editor-notify success">✓ {success}</div>}
+      {error && <div className="editor-notify error"><MI icon="warning" size={14} /> {error}</div>}
+      {success && <div className="editor-notify success"><MI icon="check" size={14} /> {success}</div>}
     </>
   )
 
@@ -664,7 +676,7 @@ export default function PostEditor() {
 
   const gradientSuggestions = (
     <div className="gradient-recommendations">
-      <span className="recommendations-label">🎨 Recommend colors ({currentCategory}):</span>
+      <span className="recommendations-label"><MI icon="palette" size={12} /> Recommend colors ({currentCategory}):</span>
       <div className="recommendations-list">
         {suggestedGradients.map((grad, idx) => (
           <button
@@ -708,7 +720,7 @@ export default function PostEditor() {
 
   const fmLabelBar = (
     <div className="pane-label">
-      <span>📋</span>
+      <MI icon="list_alt" size={13} />
       <span>Frontmatter</span>
       <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>— shared</span>
       <button
@@ -725,7 +737,7 @@ export default function PostEditor() {
           cursor: 'pointer',
         }}
       >
-        {fmMode === 'form' ? '{ } Raw' : '📋 Form'}
+        {fmMode === 'form' ? '{ } Raw' : <><MI icon="list_alt" size={11} /> Form</>}
       </button>
     </div>
   )
@@ -743,16 +755,16 @@ export default function PostEditor() {
       ) : (
         <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <label style={fmLabelStyle}>🇺🇸 Title (EN)</label>
+            <label style={fmLabelStyle}>Title (EN)</label>
             <input style={fmInputStyle} value={fmField('title')} onChange={e => updateFm('title', fmQuote(e.target.value))} placeholder="Post title" />
           </div>
           <div>
-            <label style={fmLabelStyle}>🇰🇷 Title (KO)</label>
+            <label style={fmLabelStyle}>Title (KO)</label>
             <input style={fmInputStyle} value={fmField('title_ko')} onChange={e => updateFm('title_ko', e.target.value ? fmQuote(e.target.value) : null)} placeholder="한국어 제목 (없으면 EN 사용)" />
           </div>
           <div>
             <label style={fmLabelStyle}>
-              🇺🇸 Description (EN)
+              Description (EN)
               <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', color: descLenColor(fmField('description').length), textTransform: 'none' }}>
                 {fmField('description').length}/160
               </span>
@@ -761,7 +773,7 @@ export default function PostEditor() {
           </div>
           <div>
             <label style={fmLabelStyle}>
-              🇰🇷 Description (KO)
+              Description (KO)
               <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', color: descLenColor(fmField('description_ko').length), textTransform: 'none' }}>
                 {fmField('description_ko').length}/160
               </span>
@@ -816,7 +828,7 @@ export default function PostEditor() {
               onChange={e => updateFm('featured', e.target.checked ? 'true' : null)}
               style={{ width: '15px', height: '15px', accentColor: 'var(--cyan)', cursor: 'pointer' }}
             />
-            ⭐ Featured post
+            <MI icon="star" size={14} /> Featured post
           </label>
         </div>
       )}
@@ -834,7 +846,7 @@ export default function PostEditor() {
 
           {/* Content section */}
           <div className="pane-label">
-            <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
+            <span className="pane-label-accent"><MI icon="language" size={13} /></span>
             <span>{lang === 'en' ? 'English Content' : 'Korean Content'}</span>
           </div>
           <MarkdownToolbar
@@ -861,7 +873,7 @@ export default function PostEditor() {
         {/* Right pane: live preview */}
         <div className="editor-pane-right">
           <div className="pane-label">
-            <span>{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
+            <MI icon="preview" size={13} />
             <span>Preview · {lang === 'en' ? 'English' : 'Korean'}</span>
           </div>
           <div className="pane-preview">
@@ -879,11 +891,11 @@ export default function PostEditor() {
           {/* Stats cluster — proximity: EN + KO stats together */}
           <div className="pane-stats">
             <div className="pane-stat">
-              <span className="pane-stat-label">🇺🇸 EN words</span>
+              <span className="pane-stat-label">EN words</span>
               <span className="pane-stat-value">{enWords.toLocaleString()}</span>
             </div>
             <div className="pane-stat">
-              <span className="pane-stat-label">🇰🇷 KO words</span>
+              <span className="pane-stat-label">KO words</span>
               <span className="pane-stat-value">{koWords.toLocaleString()}</span>
             </div>
           </div>
@@ -903,7 +915,7 @@ export default function PostEditor() {
             onClick={() => setActiveTab(tab)}
             className={`editor-tab${activeTab === tab ? ' active' : ''}`}
           >
-            {tab === 'edit' ? '✎ Edit' : tab === 'preview' ? '👁 Preview' : '📊 Stats'}
+            {tab === 'edit' ? <><MI icon="edit" size={14} /> Edit</> : tab === 'preview' ? <><MI icon="visibility" size={14} /> Preview</> : <><MI icon="bar_chart" size={14} /> Stats</>}
           </button>
         ))}
       </div>
@@ -914,7 +926,7 @@ export default function PostEditor() {
             {frontmatterSection}
             {gradientSuggestions}
             <div className="pane-label">
-              <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
+              <span className="pane-label-accent"><MI icon="language" size={13} /></span>
               <span>{lang === 'en' ? 'English' : 'Korean'}</span>
             </div>
             <MarkdownToolbar
@@ -954,11 +966,11 @@ export default function PostEditor() {
           <div style={{ padding: 'var(--space-5)' }}>
             <div className="pane-stats" style={{ borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
               <div className="pane-stat">
-                <span className="pane-stat-label">🇺🇸 EN words</span>
+                <span className="pane-stat-label">EN words</span>
                 <span className="pane-stat-value">{enWords.toLocaleString()}</span>
               </div>
               <div className="pane-stat">
-                <span className="pane-stat-label">🇰🇷 KO words</span>
+                <span className="pane-stat-label">KO words</span>
                 <span className="pane-stat-value">{koWords.toLocaleString()}</span>
               </div>
             </div>
@@ -999,7 +1011,7 @@ export default function PostEditor() {
                 className="draft-history-item"
               >
                 <div className="draft-history-meta">
-                  <span className="draft-history-time">🕒 {formattedTime}</span>
+                  <span className="draft-history-time"><MI icon="schedule" size={12} /> {formattedTime}</span>
                   <span className="draft-history-stats">
                     EN: {enWordCount} words · KO: {koWordCount} words
                   </span>
@@ -1084,7 +1096,7 @@ export default function PostEditor() {
             <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Critical</div>
             {criticalChecks.map(c => (
               <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : '#ef4444', flexShrink: 0, marginTop: '1px' }}>{c.pass ? '✓' : '✗'}</span>
+                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : '#ef4444', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'cancel'} size={12} /></span>
                 <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
               </div>
             ))}
@@ -1095,7 +1107,7 @@ export default function PostEditor() {
             <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Recommended</div>
             {recChecks.map(c => (
               <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : 'var(--text-faint)', flexShrink: 0, marginTop: '1px' }}>{c.pass ? '✓' : '○'}</span>
+                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : 'var(--text-faint)', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'radio_button_unchecked'} size={12} /></span>
                 <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
               </div>
             ))}
