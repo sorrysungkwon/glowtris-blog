@@ -43,7 +43,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         <div
           style={{
             position: 'absolute',
-            inset: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
             background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.05) 60%)',
           }}
         />
@@ -76,7 +79,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 textTransform: 'uppercase',
               }}
             >
-              GLOWTRIS BLOG · {category}
+              {`GLOWTRIS BLOG · ${category}`}
             </span>
           </div>
 
@@ -94,7 +97,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
           {readingTime > 0 && (
             <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
-              {readingTime} min read
+              {`${readingTime} min read`}
             </div>
           )}
         </div>
