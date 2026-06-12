@@ -178,6 +178,7 @@ export default function PostEditor() {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [autoFixWarning, setAutoFixWarning] = useState<string[]>([])  // MDX auto-fix notices
   const [hasDraft, setHasDraft] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -388,12 +389,13 @@ export default function PostEditor() {
   }
 
   // Renames the post if slug changed: write to new slug, then delete old slug.
+  // Returns fixes list and sanitized content from the API response.
   async function renameSlugIfNeeded(
     token: string | null,
     targetSlug: string,
     payload: object,
     deploy: boolean,
-  ): Promise<{ ok: boolean; error?: string }> {
+  ): Promise<{ ok: boolean; error?: string; fixes?: string[]; sanitized_en?: string; sanitized_ko?: string }> {
     const slugChanged = targetSlug !== slug
 
     // Write to the target slug first
@@ -405,9 +407,9 @@ export default function PostEditor() {
       },
       body: JSON.stringify({ ...payload, deploy }),
     })
+    const writeJson = await writeRes.json()
     if (!writeRes.ok) {
-      const d = await writeRes.json()
-      return { ok: false, error: d.details || d.error || 'Failed to save post' }
+      return { ok: false, error: writeJson.details || writeJson.error || 'Failed to save post' }
     }
 
     // If slug changed, delete old slug
@@ -421,7 +423,12 @@ export default function PostEditor() {
       }
     }
 
-    return { ok: true }
+    return {
+      ok: true,
+      fixes: writeJson.fixes || [],
+      sanitized_en: writeJson.sanitized_en,
+      sanitized_ko: writeJson.sanitized_ko,
+    }
   }
 
   async function handleSaveDraft() {
@@ -429,17 +436,26 @@ export default function PostEditor() {
     setSaving(true)
     setError('')
     setSuccess('')
+    setAutoFixWarning([])
     const targetSlug = newSlug.trim() || slug
     try {
       const token = localStorage.getItem('admin_token')
       const draftData = { ...data, frontmatter: withDraftFlag(data.frontmatter, true) }
       const result = await renameSlugIfNeeded(token, targetSlug, draftData, false)
       if (result.ok) {
-        setData(draftData)
+        // Update editor with sanitized content from server
+        const updatedData = {
+          ...draftData,
+          content_en: result.sanitized_en ?? draftData.content_en,
+          content_ko: result.sanitized_ko ?? draftData.content_ko,
+        }
+        setData(updatedData)
         setIsDraft(true)
+        if (result.fixes && result.fixes.length > 0) {
+          setAutoFixWarning(result.fixes)
+        }
         setSuccess(targetSlug !== slug ? `Slug renamed → ${targetSlug} · Draft saved` : 'Saved as draft')
         if (targetSlug !== slug) {
-          // Navigate to new slug editor URL
           setTimeout(() => router.replace(`/admin/${targetSlug}`), 1200)
         } else {
           setTimeout(() => setSuccess(''), 3000)
@@ -459,12 +475,16 @@ export default function PostEditor() {
     setSaving(true)
     setError('')
     setSuccess('')
+    setAutoFixWarning([])
     const targetSlug = newSlug.trim() || slug
     try {
       const token = localStorage.getItem('admin_token')
       const liveData = { ...data, frontmatter: withDraftFlag(data.frontmatter, false) }
       const result = await renameSlugIfNeeded(token, targetSlug, liveData, true)
       if (result.ok) {
+        if (result.fixes && result.fixes.length > 0) {
+          setAutoFixWarning(result.fixes)
+        }
         setSuccess(targetSlug !== slug ? `Slug renamed → ${targetSlug} · Deployed!` : 'Deployed!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
@@ -727,6 +747,33 @@ export default function PostEditor() {
     <>
       {error && <div className="editor-notify error"><MI icon="warning" size={14} /> {error}</div>}
       {success && <div className="editor-notify success"><MI icon="check" size={14} /> {success}</div>}
+      {autoFixWarning.length > 0 && (
+        <div style={{
+          background: 'rgba(245,158,11,0.12)',
+          border: '1px solid rgba(245,158,11,0.4)',
+          borderRadius: '0',
+          padding: '8px 16px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '10px',
+          fontSize: '12px',
+          color: '#f59e0b',
+          lineHeight: 1.5,
+        }}>
+          <MI icon="auto_fix_high" size={14} />
+          <div style={{ flex: 1 }}>
+            <strong>Auto-fixed before saving:</strong>
+            <ul style={{ margin: '3px 0 0 0', padding: '0 0 0 16px' }}>
+              {autoFixWarning.map((fix, i) => <li key={i}>{fix}</li>)}
+            </ul>
+            <span style={{ fontSize: '11px', opacity: 0.7 }}>Content in the editor has been updated to match.</span>
+          </div>
+          <button
+            onClick={() => setAutoFixWarning([])}
+            style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 0 0 4px', flexShrink: 0 }}
+          >×</button>
+        </div>
+      )}
     </>
   )
 

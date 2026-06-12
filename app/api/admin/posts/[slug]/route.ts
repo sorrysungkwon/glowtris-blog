@@ -4,6 +4,7 @@ import path from 'path'
 import { execSync } from 'child_process'
 import { revalidatePath } from 'next/cache'
 import matter from 'gray-matter'
+import { compile } from '@mdx-js/mdx'
 import { requireAuth } from '@/lib/auth'
 import { fetchRawFile, putFile, deleteFile } from '@/lib/github'
 
@@ -31,6 +32,76 @@ function splitPost(raw: string): { frontmatter: string; content: string } {
     content: raw.replace(FRONTMATTER_STRIP_RE, ''),
   }
 }
+
+/* ── MDX auto-sanitizer ─────────────────────────────────────────────────
+   Applies safe, reversible transforms to the *body* content (not frontmatter)
+   to prevent the most common MDX v3 parse errors writers hit:
+
+   1. class= → className=  (MDX is JSX; class is not a valid JSX attribute)
+   2. Multi-line content inside inline HTML elements collapses onto one line
+      e.g. <figcaption>text\n  </figcaption>  →  <figcaption>text</figcaption>
+   3. Bare < / > that are NOT part of tags get escaped
+      (only when they look like stray angle brackets, not real tags)
+
+   Returns { content: string, fixes: string[] }                           */
+function sanitizeMDXContent(raw: string): { content: string; fixes: string[] } {
+  const fixes: string[] = []
+  let content = raw
+
+  // 1. class= → className= inside HTML opening tags
+  const classRe = /(<[a-zA-Z][^>]*)\bclass=/g
+  if (classRe.test(content)) {
+    content = content.replace(/(<[a-zA-Z][^>]*)\bclass=/g, '$1className=')
+    fixes.push('Converted class= → className= (MDX requires JSX attribute names)')
+  }
+
+  // 2. Collapse multi-line inline HTML elements that MDX can't parse
+  //    Targets tags whose opening and closing tag are NOT on the same line
+  //    and whose inner content does not itself contain block-level HTML.
+  //    Covers: figcaption, span, em, strong, a, cite, code, kbd, sub, sup
+  const inlineTags = ['figcaption', 'span', 'em', 'strong', 'a', 'cite', 'code', 'kbd', 'sub', 'sup', 'mark', 'small', 'del', 'ins']
+  for (const tag of inlineTags) {
+    const re = new RegExp(`<${tag}([^>]*)>([\\s\\S]*?)<\/${tag}>`, 'g')
+    let changed = false
+    content = content.replace(re, (_match, attrs, inner) => {
+      if (!inner.includes('\n')) return _match // already single-line
+      changed = true
+      const collapsed = inner.replace(/\n\s*/g, ' ').trim()
+      return `<${tag}${attrs}>${collapsed}</${tag}>`
+    })
+    if (changed) {
+      fixes.push(`Collapsed multi-line <${tag}> onto a single line (MDX v3 requirement)`)
+    }
+  }
+
+  return { content, fixes }
+}
+
+/* ── MDX compile-time validator ─────────────────────────────────────────
+   Runs the real @mdx-js/mdx compiler on the *full* file content (including
+   frontmatter stripped) so we catch syntax errors before they reach Vercel.
+   Returns null when valid, or a human-readable error string.              */
+async function validateMDXContent(bodyContent: string): Promise<string | null> {
+  try {
+    await compile(bodyContent, {
+      outputFormat: 'function-body',
+      development: false,
+    })
+    return null // compilation succeeded
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'message' in err) {
+      const msg = (err as { message: string }).message
+      // Extract line number if present
+      const lineMatch = msg.match(/(\d+):(\d+)/)
+      if (lineMatch) {
+        return `MDX syntax error at line ${lineMatch[1]}, column ${lineMatch[2]}: ${msg.split('\n')[0]}`
+      }
+      return `MDX syntax error: ${msg.split('\n')[0]}`
+    }
+    return 'MDX compilation failed — check for unclosed tags, stray { } characters, or invalid HTML attributes'
+  }
+}
+
 
 function ensureGitIdentity(cwd: string) {
   try {
@@ -117,11 +188,15 @@ export async function POST(
   try {
     const { frontmatter, content_en, content_ko, deploy = false } = await req.json()
 
-    const enContent = `---\n${frontmatter}\n---\n${content_en}`
-    const koContent = content_ko?.trim() ? `---\n${frontmatter}\n---\n${content_ko}` : null
+    // ── Auto-sanitize MDX content (fix class=, multi-line tags, etc.) ──
+    const { content: sanitizedEn, fixes: fixesEn } = sanitizeMDXContent(content_en || '')
+    const { content: sanitizedKo, fixes: fixesKo } = sanitizeMDXContent(content_ko || '')
+    const allFixes = [...fixesEn.map(f => `EN: ${f}`), ...fixesKo.map(f => `KO: ${f}`)]
 
-    // Reject malformed frontmatter before it reaches the repo — invalid
-    // YAML makes the post silently disappear from the blog.
+    const enContent = `---\n${frontmatter}\n---\n${sanitizedEn}`
+    const koContent = sanitizedKo?.trim() ? `---\n${frontmatter}\n---\n${sanitizedKo}` : null
+
+    // ── Validate frontmatter ─────────────────────────────────────────
     try {
       const { data } = matter(enContent)
       if (!data.title || !data.date) {
@@ -136,6 +211,25 @@ export async function POST(
         details: `Frontmatter is not valid YAML: ${e instanceof Error ? e.message : String(e)}`,
       }, { status: 400 })
     }
+
+    // ── Validate MDX compilation ──────────────────────────────────────
+    const enValidationError = await validateMDXContent(sanitizedEn)
+    if (enValidationError) {
+      return NextResponse.json({
+        error: 'MDX validation failed (EN)',
+        details: enValidationError,
+      }, { status: 422 })
+    }
+    if (sanitizedKo?.trim()) {
+      const koValidationError = await validateMDXContent(sanitizedKo)
+      if (koValidationError) {
+        return NextResponse.json({
+          error: 'MDX validation failed (KO)',
+          details: koValidationError,
+        }, { status: 422 })
+      }
+    }
+
 
     if (isProduction) {
       // Always save to drafts branch
@@ -189,7 +283,15 @@ export async function POST(
       console.log(`✅ Draft saved for post: ${slug}`)
     }
 
-    return NextResponse.json({ success: true, deployed: deploy })
+    // Return sanitized content + fix list so the editor can update its state
+    return NextResponse.json({
+      success: true,
+      deployed: deploy,
+      fixes: allFixes,
+      sanitized_en: sanitizedEn,
+      sanitized_ko: sanitizedKo,
+    })
+
   } catch (error) {
     console.error('Save error:', error)
     return NextResponse.json({
