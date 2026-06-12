@@ -36,7 +36,8 @@ export default function PostCard({ post, featured, lang }: Props) {
         {/* Cluster 2: meta (separated by border) */}
         <div className="post-footer">
           <span className="post-author">
-            {post.authorEmoji} {post.author}
+            <span>{post.authorEmoji}</span>
+            <span>{post.author}</span>
           </span>
           <div className="post-meta-chips">
             <span>{formatDate(post.date)}</span>

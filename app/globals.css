@@ -179,16 +179,23 @@ button { font-family: inherit; cursor: pointer; border: none; }
   padding: 4px 2px;
 }
 .header-nav .nav-link:hover { color: var(--text-primary); }
-.nav-play-icon { display: none; }
+.header-nav .nav-play-icon { display: none; }
 @media (max-width: 768px) {
   .nav-play-text { display: none; }
-  .nav-play-icon {
+  .header-nav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+  }
+  .header-nav .nav-play-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 16px;
     padding: 0 4px;
     cursor: pointer;
+    transform: none;
   }
 }
 
@@ -368,7 +375,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: var(--cyan);
   border-color: var(--cyan);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.2);
 }
 [data-theme="dark"] .hero-cta {
   background: rgba(255,255,255,0.04);
@@ -561,6 +568,19 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: var(--bg);
 }
 
+::selection {
+  background: var(--cyan);
+  color: #fff;
+}
+
+.material-icons-round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+
 /* ─── Post grid ───────────────────────────────────────────────────────────── */
 .post-grid {
   display: grid;
@@ -603,8 +623,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* Common Fate: entire card group lifts as one unit */
 .post-card:hover {
   transform: translateY(-5px);
-  border-color: var(--border-hi);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--cyan);
+  box-shadow: 0 12px 32px rgba(0, 200, 255, 0.12), 0 4px 12px rgba(0,0,0,0.4);
 }
 
 /* Featured: editorial layout */

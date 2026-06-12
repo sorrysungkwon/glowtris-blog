@@ -79,7 +79,10 @@ export default async function PostPage({ params, searchParams }: Props) {
       <header className="post-header">
         <h1>{lang === 'ko' ? (post.title_ko || post.title) : post.title}</h1>
         <div className="post-meta-row">
-          <span>{post.authorEmoji} {post.author}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <span>{post.authorEmoji}</span>
+            <span>{post.author}</span>
+          </span>
           <span className="dot">·</span>
           <span>{formatDate(post.date)}</span>
           <span className="dot">·</span>
