@@ -7,14 +7,24 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Glowtris Blog',
+    default: 'Glowtris Blog — Indie Game Dev Log',
     template: '%s — Glowtris Blog',
   },
-  description: 'Dev logs, updates, and game tips from the Glowtris team.',
+  description: 'Behind-the-scenes dev log for Glowtris — a free browser block-stacking game. Game mechanics, design decisions, and indie dev stories.',
+  keywords: ['indie game dev blog', 'tetris clone devlog', 'block game development', 'browser game dev', 'Next.js game', 'indie game development', 'Glowtris'],
   metadataBase: new URL('https://blog.glowtris.com'),
   openGraph: {
     type: 'website',
     siteName: 'Glowtris Blog',
+    title: 'Glowtris Blog — Indie Game Dev Log',
+    description: 'Behind-the-scenes dev log for Glowtris — a free browser block-stacking game.',
+    url: 'https://blog.glowtris.com',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Glowtris Blog — Indie Game Dev Log',
+    description: 'Behind-the-scenes dev log for Glowtris — a free browser block-stacking game.',
   },
   alternates: {
     types: {
@@ -39,6 +49,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": "Glowtris Blog",
+          "description": "Indie game dev log for Glowtris — a free browser block-stacking game.",
+          "url": "https://blog.glowtris.com",
+          "author": { "@type": "Person", "name": "sorrysungkwon" },
+          "inLanguage": ["en", "ko"],
+          "about": { "@type": "VideoGame", "name": "Glowtris", "url": "https://glowtris.com" }
+        })}} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
