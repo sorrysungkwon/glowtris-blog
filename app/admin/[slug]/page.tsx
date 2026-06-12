@@ -48,6 +48,30 @@ function seoColor(score: number): string {
   return score >= 90 ? '#22c55e' : score >= 70 ? '#f59e0b' : score >= 50 ? '#f97316' : '#ef4444'
 }
 
+/* ── Frontmatter field helpers — keep raw string as source of truth ───── */
+function getFmField(fm: string, name: string): string {
+  const m = fm.match(new RegExp(`^${name}:\\s*(.+)$`, 'm'))
+  return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
+}
+
+function setFmField(fm: string, name: string, value: string | null): string {
+  const lineRe = new RegExp(`^${name}:.*(\\r?\\n|$)`, 'm')
+  if (value === null) {
+    return fm.replace(lineRe, '')
+  }
+  const line = `${name}: ${value}`
+  if (lineRe.test(fm)) {
+    return fm.replace(lineRe, (_match, nl) => line + nl)
+  }
+  return fm.trim() ? fm.trim() + `\n${line}` : line
+}
+
+function fmQuote(s: string): string {
+  return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+}
+
+const FM_CATEGORIES = ['DEV', 'DESIGN', 'UPDATE', 'NOTICE', 'GUIDE', 'STORIES']
+
 function ScoreRing({ score, size, label, stroke = 4 }: { score: number; size: number; label?: string; stroke?: number }) {
   const r = (size - stroke * 2) / 2
   const c = 2 * Math.PI * r
@@ -140,7 +164,17 @@ export default function PostEditor() {
   const [showMenu, setShowMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [seoOpen, setSeoOpen] = useState(false)
+  const [fmMode, setFmMode] = useState<'form' | 'raw'>('form')
   const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  // Auto-grow the content textarea so the pane scrolls (not the textarea),
+  // letting the sticky markdown toolbar follow the scroll.
+  const autoResize = () => {
+    const el = contentTextareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight + 4}px`
+  }
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -148,6 +182,10 @@ export default function PostEditor() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  useEffect(() => {
+    autoResize()
+  }, [data.content_en, data.content_ko, lang, isMobile, activeTab])
 
   useEffect(() => {
     async function loadPost() {
@@ -633,24 +671,157 @@ export default function PostEditor() {
     </div>
   )
 
+  /* ── Frontmatter form UI ───────────────────────────────────────────── */
+  const fmField = (name: string) => getFmField(data.frontmatter, name)
+  const updateFm = (name: string, value: string | null) =>
+    setData(d => ({ ...d, frontmatter: setFmField(d.frontmatter, name, value) }))
+
+  const fmInputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '7px 10px',
+    fontSize: '12.5px',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: '6px',
+    color: 'var(--text-body)',
+    outline: 'none',
+    fontFamily: 'inherit',
+  }
+  const fmLabelStyle: React.CSSProperties = {
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    color: 'var(--text-faint)',
+    display: 'block',
+    marginBottom: '3px',
+  }
+  const descLenColor = (n: number) => (n >= 100 && n <= 160 ? '#22c55e' : n === 0 ? 'var(--text-faint)' : '#f59e0b')
+
+  const fmLabelBar = (
+    <div className="pane-label">
+      <span>📋</span>
+      <span>Frontmatter</span>
+      <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>— shared</span>
+      <button
+        onClick={() => setFmMode(m => (m === 'form' ? 'raw' : 'form'))}
+        style={{
+          marginLeft: 'auto',
+          fontSize: '10px',
+          fontWeight: 700,
+          padding: '2px 8px',
+          borderRadius: '99px',
+          border: '1px solid var(--border)',
+          background: 'var(--surface)',
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+        }}
+      >
+        {fmMode === 'form' ? '{ } Raw' : '📋 Form'}
+      </button>
+    </div>
+  )
+
+  const frontmatterSection = (
+    <>
+      {fmLabelBar}
+      {fmMode === 'raw' ? (
+        <textarea
+          className="editor-textarea editor-textarea-frontmatter"
+          value={data.frontmatter}
+          onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
+          placeholder="---&#10;title: Post title&#10;---"
+        />
+      ) : (
+        <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+          <div>
+            <label style={fmLabelStyle}>🇺🇸 Title (EN)</label>
+            <input style={fmInputStyle} value={fmField('title')} onChange={e => updateFm('title', fmQuote(e.target.value))} placeholder="Post title" />
+          </div>
+          <div>
+            <label style={fmLabelStyle}>🇰🇷 Title (KO)</label>
+            <input style={fmInputStyle} value={fmField('title_ko')} onChange={e => updateFm('title_ko', e.target.value ? fmQuote(e.target.value) : null)} placeholder="한국어 제목 (없으면 EN 사용)" />
+          </div>
+          <div>
+            <label style={fmLabelStyle}>
+              🇺🇸 Description (EN)
+              <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', color: descLenColor(fmField('description').length), textTransform: 'none' }}>
+                {fmField('description').length}/160
+              </span>
+            </label>
+            <textarea style={{ ...fmInputStyle, resize: 'vertical', minHeight: '48px' }} rows={2} value={fmField('description')} onChange={e => updateFm('description', fmQuote(e.target.value))} placeholder="SEO description (100–160 chars)" />
+          </div>
+          <div>
+            <label style={fmLabelStyle}>
+              🇰🇷 Description (KO)
+              <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', color: descLenColor(fmField('description_ko').length), textTransform: 'none' }}>
+                {fmField('description_ko').length}/160
+              </span>
+            </label>
+            <textarea style={{ ...fmInputStyle, resize: 'vertical', minHeight: '48px' }} rows={2} value={fmField('description_ko')} onChange={e => updateFm('description_ko', e.target.value ? fmQuote(e.target.value) : null)} placeholder="한국어 SEO 설명" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <div>
+              <label style={fmLabelStyle}>Date</label>
+              <input type="date" style={fmInputStyle} value={fmField('date')} onChange={e => updateFm('date', e.target.value)} />
+            </div>
+            <div>
+              <label style={fmLabelStyle}>Category</label>
+              <select style={{ ...fmInputStyle, cursor: 'pointer' }} value={fmField('category') || 'DEV'} onChange={e => updateFm('category', e.target.value)}>
+                {FM_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={fmLabelStyle}>Read (min)</label>
+              <input type="number" min={1} style={fmInputStyle} value={fmField('readingTime')} onChange={e => updateFm('readingTime', e.target.value ? String(parseInt(e.target.value)) : null)} />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <div>
+              <label style={fmLabelStyle}>Author</label>
+              <input style={fmInputStyle} value={fmField('author')} onChange={e => updateFm('author', e.target.value)} />
+            </div>
+            <div>
+              <label style={fmLabelStyle}>Author emoji</label>
+              <input style={fmInputStyle} value={fmField('authorEmoji')} onChange={e => updateFm('authorEmoji', e.target.value ? fmQuote(e.target.value) : null)} placeholder="🪖" />
+            </div>
+            <div>
+              <label style={fmLabelStyle}>Cover emoji</label>
+              <input style={fmInputStyle} value={fmField('coverEmoji')} onChange={e => updateFm('coverEmoji', e.target.value ? fmQuote(e.target.value) : null)} placeholder="📝" />
+            </div>
+          </div>
+
+          <div>
+            <label style={fmLabelStyle}>Cover gradient</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input style={{ ...fmInputStyle, fontFamily: 'var(--font-mono)', fontSize: '11px' }} value={fmField('coverGradient')} onChange={e => updateFm('coverGradient', e.target.value ? fmQuote(e.target.value) : null)} placeholder="linear-gradient(…)" />
+              <div style={{ width: '32px', height: '32px', borderRadius: '6px', flexShrink: 0, border: '1px solid var(--border)', background: fmField('coverGradient') || 'var(--surface-2)' }} />
+            </div>
+          </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12.5px', color: 'var(--text-body)', fontWeight: 600 }}>
+            <input
+              type="checkbox"
+              checked={fmField('featured') === 'true'}
+              onChange={e => updateFm('featured', e.target.checked ? 'true' : null)}
+              style={{ width: '15px', height: '15px', accentColor: 'var(--cyan)', cursor: 'pointer' }}
+            />
+            ⭐ Featured post
+          </label>
+        </div>
+      )}
+    </>
+  )
+
   /* ── Desktop split layout ─────────────────────────────────────────── */
   const desktopLayout = (
     <div className="editor-body">
       <div className="editor-split">
         {/* Left pane: editable content */}
         <div className="editor-pane">
-          {/* Frontmatter section */}
-          <div className="pane-label">
-            <span>📋</span>
-            <span>Frontmatter</span>
-            <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>— shared</span>
-          </div>
-          <textarea
-            className="editor-textarea editor-textarea-frontmatter"
-            value={data.frontmatter}
-            onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
-            placeholder="---&#10;title: Post title&#10;---"
-          />
+          {frontmatterSection}
           {gradientSuggestions}
 
           {/* Content section */}
@@ -669,6 +840,7 @@ export default function PostEditor() {
           <textarea
             ref={contentTextareaRef}
             className="editor-textarea"
+            style={{ flex: 'none', overflow: 'hidden', minHeight: '320px' }}
             value={content}
             onChange={(e) => {
               if (lang === 'en') setData({ ...data, content_en: e.target.value })
@@ -730,14 +902,8 @@ export default function PostEditor() {
 
       <div style={{ flex: 1, overflow: 'auto', background: 'var(--surface)' }}>
         {activeTab === 'edit' && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div className="pane-label">📋 Frontmatter</div>
-            <textarea
-              className="editor-textarea editor-textarea-frontmatter"
-              style={{ height: '140px' }}
-              value={data.frontmatter}
-              onChange={(e) => setData({ ...data, frontmatter: e.target.value })}
-            />
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+            {frontmatterSection}
             {gradientSuggestions}
             <div className="pane-label">
               <span className="pane-label-accent">{lang === 'en' ? '🇺🇸' : '🇰🇷'}</span>
@@ -754,7 +920,7 @@ export default function PostEditor() {
             <textarea
               ref={contentTextareaRef}
               className="editor-textarea"
-              style={{ flex: 1 }}
+              style={{ flex: 'none', overflow: 'hidden', minHeight: '280px' }}
               value={content}
               onChange={(e) => {
                 if (lang === 'en') setData({ ...data, content_en: e.target.value })

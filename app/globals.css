@@ -1429,6 +1429,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .editor-split {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   flex: 1;
   overflow: hidden;
   max-width: 1200px;
