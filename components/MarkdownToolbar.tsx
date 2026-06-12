@@ -66,7 +66,7 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
     let snippet: string
     if (caption || credit) {
       const creditHtml = credit
-        ? `\n  <span class="figcredit">Source: ${credit}</span>`
+        ? `\n  <span className="figcredit">Source: ${credit}</span>`
         : ''
       snippet = `<figure>\n  <img src="${url}" alt="${alt}" />\n  <figcaption>${caption}${creditHtml}\n  </figcaption>\n</figure>`
     } else {
