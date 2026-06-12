@@ -8,7 +8,7 @@ export default function GlowtrisCTA({ lang = 'en' }: Props) {
       <div className="glowtris-cta-inner">
         <div className="glowtris-cta-left">
           <span className="glowtris-cta-label">
-            {isKo ? '이 블로그에 대해' : 'About this blog'}
+            {isKo ? 'Glowtris에 대하여' : 'About Glowtris'}
           </span>
           <p className="glowtris-cta-title">Glowtris</p>
           <p className="glowtris-cta-desc">
