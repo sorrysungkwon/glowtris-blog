@@ -1439,7 +1439,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .editor-pane {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-right: 1px solid var(--border);
   background: var(--surface);
 }
@@ -1723,6 +1724,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
 .markdown-toolbar-group {

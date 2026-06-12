@@ -9,8 +9,10 @@ import MarkdownToolbar from '@/components/MarkdownToolbar'
 interface SeoCheck {
   id: string
   label: string
+  short: string
   pass: boolean
   weight: 'critical' | 'recommended'
+  group: 'meta' | 'en' | 'ko'
 }
 
 function computeSeo(fm: string, contentEn: string, contentKo: string): { checks: SeoCheck[], score: number } {
@@ -24,22 +26,58 @@ function computeSeo(fm: string, contentEn: string, contentKo: string): { checks:
   const koWords = contentKo.split(/\s+/).filter(Boolean).length
 
   const checks: SeoCheck[] = [
-    { id: 'title_min',  label: `Title ≥ 30 chars (${title.length})`,        pass: title.length >= 30,                   weight: 'critical' },
-    { id: 'title_max',  label: `Title ≤ 70 chars (${title.length})`,        pass: title.length > 0 && title.length <= 70, weight: 'critical' },
-    { id: 'desc_min',   label: `Description ≥ 100 chars (${description.length})`, pass: description.length >= 100,      weight: 'critical' },
-    { id: 'desc_max',   label: `Description ≤ 160 chars (${description.length})`, pass: description.length > 0 && description.length <= 160, weight: 'critical' },
-    { id: 'en_300',     label: `EN ≥ 300 words (${enWords})`,               pass: enWords >= 300,                       weight: 'critical' },
-    { id: 'ko_present', label: `KO content present (${koWords} words)`,     pass: koWords >= 50,                        weight: 'critical' },
-    { id: 'reading_time', label: 'readingTime set',                         pass: /^readingTime:/m.test(fm),            weight: 'recommended' },
-    { id: 'cover',      label: 'coverGradient set',                         pass: /^coverGradient:/m.test(fm),          weight: 'recommended' },
-    { id: 'en_500',     label: `EN ≥ 500 words (${enWords})`,               pass: enWords >= 500,                       weight: 'recommended' },
-    { id: 'en_h2',      label: 'EN has H2 headings',                        pass: /^## /m.test(contentEn),              weight: 'recommended' },
-    { id: 'ko_300',     label: `KO ≥ 300 words (${koWords})`,               pass: koWords >= 300,                       weight: 'recommended' },
-    { id: 'ko_h2',      label: 'KO has H2 headings',                        pass: /^## /m.test(contentKo),              weight: 'recommended' },
+    { id: 'title_min',  label: `Title ≥ 30 chars (${title.length})`,        short: 'title too short',  pass: title.length >= 30,                   weight: 'critical',    group: 'meta' },
+    { id: 'title_max',  label: `Title ≤ 70 chars (${title.length})`,        short: 'title too long',   pass: title.length > 0 && title.length <= 70, weight: 'critical',  group: 'meta' },
+    { id: 'desc_min',   label: `Description ≥ 100 chars (${description.length})`, short: 'description too short', pass: description.length >= 100, weight: 'critical', group: 'meta' },
+    { id: 'desc_max',   label: `Description ≤ 160 chars (${description.length})`, short: 'description too long', pass: description.length > 0 && description.length <= 160, weight: 'critical', group: 'meta' },
+    { id: 'reading_time', label: 'readingTime set',                         short: 'no readingTime',   pass: /^readingTime:/m.test(fm),            weight: 'recommended', group: 'meta' },
+    { id: 'cover',      label: 'coverGradient set',                         short: 'no coverGradient', pass: /^coverGradient:/m.test(fm),          weight: 'recommended', group: 'meta' },
+    { id: 'en_300',     label: `EN ≥ 300 words (${enWords})`,               short: 'EN too thin',      pass: enWords >= 300,                       weight: 'critical',    group: 'en' },
+    { id: 'en_500',     label: `EN ≥ 500 words (${enWords})`,               short: 'EN under 500 words', pass: enWords >= 500,                     weight: 'recommended', group: 'en' },
+    { id: 'en_h2',      label: 'EN has H2 headings',                        short: 'EN missing headings', pass: /^## /m.test(contentEn),           weight: 'recommended', group: 'en' },
+    { id: 'ko_present', label: `KO content present (${koWords} words)`,     short: 'KO missing',       pass: koWords >= 50,                        weight: 'critical',    group: 'ko' },
+    { id: 'ko_300',     label: `KO ≥ 300 words (${koWords})`,               short: 'KO too thin',      pass: koWords >= 300,                       weight: 'recommended', group: 'ko' },
+    { id: 'ko_h2',      label: 'KO has H2 headings',                        short: 'KO missing headings', pass: /^## /m.test(contentKo),           weight: 'recommended', group: 'ko' },
   ]
 
   const score = Math.round(checks.filter(c => c.pass).length / checks.length * 100)
   return { checks, score }
+}
+
+function seoColor(score: number): string {
+  return score >= 90 ? '#22c55e' : score >= 70 ? '#f59e0b' : score >= 50 ? '#f97316' : '#ef4444'
+}
+
+function ScoreRing({ score, size, label, stroke = 4 }: { score: number; size: number; label?: string; stroke?: number }) {
+  const r = (size - stroke * 2) / 2
+  const c = 2 * Math.PI * r
+  const color = seoColor(score)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+      <svg width={size} height={size}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none"
+          stroke={color} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: 'stroke-dashoffset 0.4s ease, stroke 0.3s' }}
+        />
+        <text
+          x="50%" y="50%" dominantBaseline="central" textAnchor="middle"
+          fontSize={size * 0.3} fontWeight={800} fill={color}
+          fontFamily="var(--font-mono)"
+        >
+          {score}
+        </text>
+      </svg>
+      {label && (
+        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+          {label}
+        </span>
+      )}
+    </div>
+  )
 }
 
 interface PostData {
@@ -812,9 +850,23 @@ export default function PostEditor() {
 
   /* ── SEO floating panel ─────────────────────────────────────────────── */
   const { checks: seoChecks, score: seoScore } = computeSeo(data.frontmatter, data.content_en, data.content_ko)
-  const seoColor = seoScore >= 90 ? '#22c55e' : seoScore >= 70 ? '#f59e0b' : seoScore >= 50 ? '#f97316' : '#ef4444'
+  const overallColor = seoColor(seoScore)
   const criticalChecks = seoChecks.filter(c => c.weight === 'critical')
   const recChecks = seoChecks.filter(c => c.weight === 'recommended')
+
+  const groupScore = (g: SeoCheck['group']) => {
+    const gc = seoChecks.filter(c => c.group === g)
+    return Math.round(gc.filter(c => c.pass).length / gc.length * 100)
+  }
+
+  const failedCrit = criticalChecks.filter(c => !c.pass)
+  const failedRec = recChecks.filter(c => !c.pass)
+  const seoSummary = failedCrit.length === 0 && failedRec.length === 0
+    ? '✓ All checks passed — ready to publish.'
+    : [
+        failedCrit.length > 0 ? `Fix: ${failedCrit.map(c => c.short).join(', ')}` : '',
+        failedRec.length > 0 ? `Improve: ${failedRec.map(c => c.short).join(', ')}` : '',
+      ].filter(Boolean).join(' · ')
 
   const seoFloating = (
     <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
@@ -824,20 +876,33 @@ export default function PostEditor() {
           border: '1px solid var(--border)',
           borderRadius: '12px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
-          width: '280px',
-          maxHeight: '420px',
+          width: '300px',
+          maxHeight: '480px',
           overflowY: 'auto',
           padding: '16px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
         }}>
-          {/* Score bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ flex: 1, height: '6px', borderRadius: '99px', background: 'var(--border)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${seoScore}%`, background: seoColor, borderRadius: '99px', transition: 'width 0.3s' }} />
-            </div>
-            <span style={{ fontSize: '15px', fontWeight: 800, color: seoColor, fontFamily: 'var(--font-mono)', minWidth: '36px', textAlign: 'right' }}>{seoScore}</span>
+          {/* Score rings row — overall + per-group */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', paddingBottom: '4px' }}>
+            <ScoreRing score={seoScore} size={64} label="Overall" stroke={5} />
+            <ScoreRing score={groupScore('meta')} size={48} label="Meta" />
+            <ScoreRing score={groupScore('en')} size={48} label="EN" />
+            <ScoreRing score={groupScore('ko')} size={48} label="KO" />
+          </div>
+
+          {/* Reason summary */}
+          <div style={{
+            fontSize: '11.5px',
+            lineHeight: 1.5,
+            color: failedCrit.length > 0 ? 'var(--text-primary)' : 'var(--text-muted)',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '8px 10px',
+          }}>
+            {seoSummary}
           </div>
 
           {/* Critical */}
@@ -864,28 +929,26 @@ export default function PostEditor() {
         </div>
       )}
 
-      {/* FAB toggle button */}
+      {/* FAB — circular score ring */}
       <button
         onClick={() => setSeoOpen(o => !o)}
+        title={seoOpen ? 'Close SEO panel' : 'Open SEO panel'}
         style={{
+          width: '56px',
+          height: '56px',
+          borderRadius: '50%',
+          border: `1.5px solid ${seoOpen ? overallColor : 'var(--border)'}`,
+          background: 'var(--surface)',
+          cursor: 'pointer',
+          padding: 0,
           display: 'flex',
           alignItems: 'center',
-          gap: '7px',
-          padding: '10px 16px',
-          borderRadius: '99px',
-          border: `1.5px solid ${seoOpen ? seoColor : 'var(--border)'}`,
-          background: seoOpen ? 'var(--surface)' : 'var(--surface-2)',
-          color: 'var(--text-primary)',
-          cursor: 'pointer',
-          fontWeight: 700,
-          fontSize: '13px',
+          justifyContent: 'center',
           boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
-          transition: 'all 0.15s',
+          transition: 'border-color 0.15s',
         }}
       >
-        <span style={{ fontSize: '14px' }}>📊</span>
-        <span>SEO</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: seoColor, fontWeight: 800 }}>{seoScore}</span>
+        <ScoreRing score={seoScore} size={46} stroke={4} />
       </button>
     </div>
   )
