@@ -989,7 +989,7 @@ export default function PostEditor() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             <div>
               <label style={fmLabelStyle}>Date</label>
-              <input type="date" style={fmInputStyle} value={fmField('date')} onChange={e => updateFm('date', e.target.value)} />
+              <input type="date" style={{ ...fmInputStyle, WebkitAppearance: 'none', height: '34px', boxSizing: 'border-box' }} value={fmField('date')} onChange={e => updateFm('date', e.target.value)} />
             </div>
             <div>
               <label style={fmLabelStyle}>Category</label>
