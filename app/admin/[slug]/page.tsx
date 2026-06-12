@@ -163,12 +163,16 @@ const CATEGORY_GRADIENTS: Record<string, string[]> = {
   ]
 }
 
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$/
+
 export default function PostEditor() {
   const router = useRouter()
   const params = useParams()
   const slug = params.slug as string
 
   const [data, setData] = useState<PostData>({ frontmatter: '', content_en: '', content_ko: '' })
+  const [newSlug, setNewSlug] = useState('')          // editable slug (mirrors slug on load)
+  const [slugError, setSlugError] = useState('')      // inline slug validation message
   const [lang, setLang] = useState<'en' | 'ko'>('en')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -186,6 +190,19 @@ export default function PostEditor() {
   const [seoOpen, setSeoOpen] = useState(false)
   const [fmMode, setFmMode] = useState<'form' | 'raw'>('form')
   const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  function handleSlugChange(val: string) {
+    setNewSlug(val)
+    if (!val) {
+      setSlugError('Slug cannot be empty')
+    } else if (!/^[a-z0-9-]+$/.test(val)) {
+      setSlugError('Only lowercase letters, numbers, and hyphens allowed')
+    } else if (!SLUG_RE.test(val)) {
+      setSlugError('Must start and end with a letter or number')
+    } else {
+      setSlugError('')
+    }
+  }
 
   // Auto-grow the content textarea so the pane scrolls (not the textarea),
   // letting the sticky markdown toolbar follow the scroll.
@@ -233,6 +250,7 @@ export default function PostEditor() {
             content_ko: loaded.content_ko || '',
           }
           setData(freshData)
+          setNewSlug(slug)  // initialise editable slug
 
           const draftMatch = loaded.frontmatter.match(/draft:\s*(true|false)/i)
           setIsDraft(draftMatch ? draftMatch[1].toLowerCase() === 'true' : false)
@@ -256,8 +274,9 @@ export default function PostEditor() {
             content_en: '# New English Post\n\nWrite English content here...',
             content_ko: '# 새 한국어 포스트\n\n한국어 내용을 여기에 작성하세요...',
           })
+          setNewSlug(slug)  // initialise even for new posts
           setError('')
-          
+
           const historyKey = `draft_history_${slug}`
           const stored = localStorage.getItem(historyKey)
           if (stored) {
@@ -368,29 +387,65 @@ export default function PostEditor() {
     }
   }
 
+  // Renames the post if slug changed: write to new slug, then delete old slug.
+  async function renameSlugIfNeeded(
+    token: string | null,
+    targetSlug: string,
+    payload: object,
+    deploy: boolean,
+  ): Promise<{ ok: boolean; error?: string }> {
+    const slugChanged = targetSlug !== slug
+
+    // Write to the target slug first
+    const writeRes = await fetch(`/api/admin/posts/${targetSlug}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ ...payload, deploy }),
+    })
+    if (!writeRes.ok) {
+      const d = await writeRes.json()
+      return { ok: false, error: d.details || d.error || 'Failed to save post' }
+    }
+
+    // If slug changed, delete old slug
+    if (slugChanged) {
+      const delRes = await fetch(`/api/admin/posts/${slug}`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
+      if (!delRes.ok) {
+        return { ok: false, error: `Post written to "${targetSlug}" but old slug could not be deleted` }
+      }
+    }
+
+    return { ok: true }
+  }
+
   async function handleSaveDraft() {
+    if (slugError) { setError('Fix the slug error first'); return }
     setSaving(true)
     setError('')
     setSuccess('')
+    const targetSlug = newSlug.trim() || slug
     try {
       const token = localStorage.getItem('admin_token')
       const draftData = { ...data, frontmatter: withDraftFlag(data.frontmatter, true) }
-      const res = await fetch(`/api/admin/posts/${slug}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ ...draftData, deploy: false }),
-      })
-      const resData = await res.json()
-      if (res.ok) {
+      const result = await renameSlugIfNeeded(token, targetSlug, draftData, false)
+      if (result.ok) {
         setData(draftData)
         setIsDraft(true)
-        setSuccess('Saved as draft')
-        setTimeout(() => setSuccess(''), 3000)
+        setSuccess(targetSlug !== slug ? `Slug renamed → ${targetSlug} · Draft saved` : 'Saved as draft')
+        if (targetSlug !== slug) {
+          // Navigate to new slug editor URL
+          setTimeout(() => router.replace(`/admin/${targetSlug}`), 1200)
+        } else {
+          setTimeout(() => setSuccess(''), 3000)
+        }
       } else {
-        setError(resData.details || resData.error || 'Failed to save draft')
+        setError(result.error || 'Failed to save draft')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error saving draft')
@@ -400,27 +455,21 @@ export default function PostEditor() {
   }
 
   async function handleSave() {
+    if (slugError) { setError('Fix the slug error first'); return }
     setSaving(true)
     setError('')
     setSuccess('')
+    const targetSlug = newSlug.trim() || slug
     try {
       const token = localStorage.getItem('admin_token')
       const liveData = { ...data, frontmatter: withDraftFlag(data.frontmatter, false) }
-      const res = await fetch(`/api/admin/posts/${slug}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ ...liveData, deploy: true }),
-      })
-      const resData = await res.json()
-      if (res.ok) {
-        setSuccess('Deployed!')
+      const result = await renameSlugIfNeeded(token, targetSlug, liveData, true)
+      if (result.ok) {
+        setSuccess(targetSlug !== slug ? `Slug renamed → ${targetSlug} · Deployed!` : 'Deployed!')
         clearDraft()
         setTimeout(() => router.push('/admin'), 1500)
       } else {
-        setError(resData.details || resData.error || 'Failed to deploy post')
+        setError(result.error || 'Failed to deploy post')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error deploying post')
@@ -443,7 +492,7 @@ export default function PostEditor() {
           ← Admin
         </Link>
 
-        {/* Slug label */}
+        {/* Slug label — shows current (possibly edited) slug */}
         <span style={{
           fontSize: '11px',
           fontWeight: 700,
@@ -456,7 +505,10 @@ export default function PostEditor() {
           whiteSpace: 'nowrap',
           maxWidth: '200px',
         }}>
-          {slug}
+          {newSlug || slug}
+          {newSlug && newSlug !== slug && (
+            <span style={{ color: '#f59e0b', marginLeft: '4px' }}>*</span>
+          )}
         </span>
 
         {/* Status pill — clickable, always visible on desktop */}
@@ -765,6 +817,32 @@ export default function PostEditor() {
         />
       ) : (
         <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+          {/* Slug field */}
+          <div>
+            <label style={fmLabelStyle}>
+              Slug
+              <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', textTransform: 'none', fontWeight: 400, color: newSlug !== slug ? '#f59e0b' : 'var(--text-faint)' }}>
+                {newSlug !== slug ? `(was: ${slug})` : '— URL identifier'}
+              </span>
+            </label>
+            <input
+              style={{
+                ...fmInputStyle,
+                fontFamily: 'var(--font-mono)',
+                fontSize: '12px',
+                border: slugError ? '1px solid #ef4444' : fmInputStyle.border,
+              }}
+              value={newSlug}
+              onChange={e => handleSlugChange(e.target.value)}
+              placeholder="my-post-slug"
+              spellCheck={false}
+            />
+            {slugError && (
+              <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '3px', display: 'block' }}>
+                {slugError}
+              </span>
+            )}
+          </div>
           <div>
             <label style={fmLabelStyle}>Title (EN)</label>
             <input style={fmInputStyle} value={fmField('title')} onChange={e => updateFm('title', fmQuote(e.target.value))} placeholder="Post title" />
