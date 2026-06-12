@@ -1301,17 +1301,15 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* ─── Editor page ─────────────────────────────────────────────────────────── */
 .editor-root {
-  min-height: 100vh;
+  /* Definite height so the editor pane (not the page) is the scroll
+     container — required for the sticky markdown toolbar to engage. */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--bg);
   position: relative;
-}
-@media (max-width: 768px) {
-  .editor-root {
-    height: calc(100dvh - 56px);
-    overflow: hidden;
-  }
 }
 
 .editor-header {
