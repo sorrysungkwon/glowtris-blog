@@ -70,7 +70,7 @@ export default async function PostPage({ params, searchParams }: Props) {
         <div className="post-meta-row">
           <span>{post.authorEmoji} {post.author}</span>
           <span className="dot">·</span>
-          <span>{formatDate(post.date, true)}</span>
+          <span>{formatDate(post.date)}</span>
           <span className="dot">·</span>
           <span>{post.readingTime} {readUnit}</span>
         </div>

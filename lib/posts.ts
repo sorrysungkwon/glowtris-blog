@@ -2,75 +2,11 @@ import 'server-only'
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
+import { fetchRawFile, listMdxFiles } from './github'
 export { formatDate } from './utils'
 
 const postsDir = path.join(process.cwd(), 'posts')
 const isProduction = process.env.NODE_ENV === 'production'
-
-async function fetchFromGitHub(filePath: string, branch = 'main'): Promise<string | null> {
-  const token = process.env.GITHUB_TOKEN
-  const owner = process.env.GITHUB_OWNER
-  const repo = process.env.GITHUB_REPO
-
-  if (!token || !owner || !repo) return null
-
-  try {
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
-      {
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3.raw',
-        },
-        cache: 'no-store',
-      }
-    )
-
-    if (!response.ok) {
-      if (response.status === 404) return null
-      throw new Error(`GitHub API error: ${response.status}`)
-    }
-
-    return await response.text()
-  } catch (error) {
-    console.error('GitHub fetch error:', error)
-    return null
-  }
-}
-
-async function listFilesFromGitHub(dirPath: string, branch = 'main'): Promise<string[]> {
-  const token = process.env.GITHUB_TOKEN
-  const owner = process.env.GITHUB_OWNER
-  const repo = process.env.GITHUB_REPO
-
-  if (!token || !owner || !repo) return []
-
-  try {
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${dirPath}?ref=${branch}`,
-      {
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-        cache: 'no-store',
-      }
-    )
-
-    if (!response.ok) {
-      if (response.status === 404) return []
-      throw new Error(`GitHub API error: ${response.status}`)
-    }
-
-    const files = await response.json()
-    return files
-      .filter((f: any) => f.type === 'file' && f.name.endsWith('.mdx'))
-      .map((f: any) => f.name)
-  } catch (error) {
-    console.error('GitHub list error:', error)
-    return []
-  }
-}
 
 export interface PostMeta {
   slug: string
@@ -93,15 +29,19 @@ export interface Post extends PostMeta {
   content: string
 }
 
+function localDir(lang?: string): string {
+  return lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
+}
+
 export async function getAllPostMeta(lang?: string, includeDrafts: boolean = false, branch = 'main'): Promise<PostMeta[]> {
   let files: string[] = []
   const dir = lang === 'ko' ? 'posts/ko' : 'posts'
 
   try {
     if (isProduction) {
-      files = await listFilesFromGitHub(dir, branch)
+      files = await listMdxFiles(dir, branch)
     } else {
-      const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
+      const targetDir = localDir(lang)
       if (!fs.existsSync(targetDir)) return []
       files = fs.readdirSync(targetDir).filter(f => f.endsWith('.mdx'))
     }
@@ -118,10 +58,9 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
 
     try {
       if (isProduction) {
-        content = await fetchFromGitHub(`${dir}/${file}`, branch)
+        content = await fetchRawFile(`${dir}/${file}`, branch)
       } else {
-        const targetDir = lang === 'ko' ? path.join(postsDir, 'ko') : postsDir
-        content = fs.readFileSync(path.join(targetDir, file), 'utf8')
+        content = fs.readFileSync(path.join(localDir(lang), file), 'utf8')
       }
     } catch (e) {
       console.error(`Error reading file ${file}:`, e)
@@ -136,7 +75,6 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
     try {
       const { data } = matter(content)
 
-      // Validate essential metadata
       if (!data.title || !data.date) {
         console.warn(`Post ${slug} missing required fields (title or date)`)
         continue
@@ -144,7 +82,6 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
 
       const post = { slug, ...data } as PostMeta
 
-      // Filter out draft posts unless explicitly included
       if (post.draft && !includeDrafts) {
         continue
       }
@@ -159,43 +96,45 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
   return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-export async function getPost(slug: string, lang?: string, includeDraft: boolean = false, branch = 'main'): Promise<Post> {
-  let content: string | null = null
+function parsePost(slug: string, raw: string, includeDraft: boolean): Post {
+  const { data, content } = matter(raw)
+  if (!content || !data.title) {
+    throw new Error(`Invalid post structure for ${slug}`)
+  }
+  const post = { slug, content, ...data } as Post
+  if (post.draft && !includeDraft) {
+    throw new Error(`Post ${slug} is in draft`)
+  }
+  return post
+}
 
+export async function getPost(slug: string, lang?: string, includeDraft: boolean = false, branch = 'main'): Promise<Post> {
   if (lang === 'ko') {
     try {
+      let content: string | null = null
       if (isProduction) {
-        content = await fetchFromGitHub(`posts/ko/${slug}.mdx`, branch)
+        content = await fetchRawFile(`posts/ko/${slug}.mdx`, branch)
       } else {
         const koFile = path.join(postsDir, 'ko', `${slug}.mdx`)
         if (fs.existsSync(koFile)) {
           content = fs.readFileSync(koFile, 'utf8')
         }
       }
-
       if (content) {
-        const { data, content: postContent } = matter(content)
-        if (!postContent || !data.title) {
-          throw new Error(`Invalid post structure for ${slug}`)
-        }
-        const post = { slug, content: postContent, ...data } as Post
-        if (post.draft && !includeDraft) {
-          throw new Error(`Post ${slug} is in draft`)
-        }
-        return post
+        return parsePost(slug, content, includeDraft)
       }
     } catch (e) {
       console.warn(`Error loading Korean post ${slug}, falling back to English:`, e)
     }
   }
 
-  // Fallback to English
+  // English (default / fallback)
+  let content: string | null = null
   try {
     if (isProduction) {
-      content = await fetchFromGitHub(`posts/${slug}.mdx`, branch)
+      content = await fetchRawFile(`posts/${slug}.mdx`, branch)
     } else {
-      const file = path.join(postsDir, `${slug}.mdx`)
-      content = fs.readFileSync(file, 'utf8')
+      content = fs.readFileSync(path.join(postsDir, `${slug}.mdx`), 'utf8')
     }
   } catch (e) {
     console.error(`Error reading post ${slug}:`, e)
@@ -207,15 +146,7 @@ export async function getPost(slug: string, lang?: string, includeDraft: boolean
   }
 
   try {
-    const { data, content: postContent } = matter(content)
-    if (!postContent || !data.title) {
-      throw new Error(`Invalid post structure for ${slug}`)
-    }
-    const post = { slug, content: postContent, ...data } as Post
-    if (post.draft && !includeDraft) {
-      throw new Error(`Post ${slug} is in draft`)
-    }
-    return post
+    return parsePost(slug, content, includeDraft)
   } catch (e) {
     console.error(`Error parsing post ${slug}:`, e)
     throw new Error(`Failed to parse post ${slug}`)
@@ -226,7 +157,7 @@ export async function getSlugs(): Promise<string[]> {
   let files: string[] = []
 
   if (isProduction) {
-    files = await listFilesFromGitHub('posts')
+    files = await listMdxFiles('posts')
   } else {
     if (!fs.existsSync(postsDir)) return []
     files = fs.readdirSync(postsDir).filter(f => f.endsWith('.mdx'))
