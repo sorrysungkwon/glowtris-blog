@@ -77,7 +77,10 @@ export default function PostEditor() {
   useEffect(() => {
     async function loadPost() {
       try {
-        const res = await fetch(`/api/admin/posts/${slug}`)
+        const token = localStorage.getItem('admin_token')
+        const res = await fetch(`/api/admin/posts/${slug}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        })
         if (res.ok) {
           const loaded = await res.json()
           const freshData = {

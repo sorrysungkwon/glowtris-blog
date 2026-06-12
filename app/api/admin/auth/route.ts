@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, randomBytes } from 'crypto'
-import { addValidToken } from '@/lib/auth'
-
-const tokenSecret = process.env.TOKEN_SECRET || 'default-dev-secret'
+import { getTokenSecret, safeCompare } from '@/lib/auth'
 
 function generateToken(): string {
   const payload = randomBytes(32).toString('hex')
   const timestamp = Date.now().toString()
   const data = `${payload}.${timestamp}`
-  const signature = createHmac('sha256', tokenSecret).update(data).digest('hex')
+  const signature = createHmac('sha256', getTokenSecret()).update(data).digest('hex')
   return `${data}.${signature}`
 }
 
@@ -21,14 +19,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin not configured' }, { status: 500 })
     }
 
-    if (password === adminPassword) {
-      const token = generateToken()
-      addValidToken(token)
-      return NextResponse.json({ success: true, token })
-    } else {
-      return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
+    if (typeof password === 'string' && safeCompare(password, adminPassword)) {
+      return NextResponse.json({ success: true, token: generateToken() })
     }
-  } catch (error) {
+
+    // Slow down brute-force attempts
+    await new Promise(r => setTimeout(r, 500))
+    return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
+  } catch {
     return NextResponse.json({ error: 'Auth failed' }, { status: 400 })
   }
 }

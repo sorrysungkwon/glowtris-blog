@@ -12,6 +12,17 @@ const isProduction = process.env.NODE_ENV === 'production'
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/
 const FRONTMATTER_STRIP_RE = /^---\n[\s\S]*?\n---\n/
 
+// Slug whitelist: blocks path traversal (../) and shell metacharacters
+// since slug flows into file paths, GitHub API paths, and git commands.
+const SLUG_RE = /^[a-z0-9][a-z0-9-_]{0,99}$/i
+
+function invalidSlug(slug: string): NextResponse | null {
+  if (!SLUG_RE.test(slug)) {
+    return NextResponse.json({ error: 'Invalid slug' }, { status: 400 })
+  }
+  return null
+}
+
 function splitPost(raw: string): { frontmatter: string; content: string } {
   const match = raw.match(FRONTMATTER_RE)
   return {
@@ -44,7 +55,13 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const auth = requireAuth(req)
+  if (!auth.valid) return auth.response
+
   const { slug } = await params
+  const slugError = invalidSlug(slug)
+  if (slugError) return slugError
+
   try {
     if (isProduction) {
       // Try drafts branch first, fall back to main
@@ -93,6 +110,9 @@ export async function POST(
   if (!auth.valid) return auth.response
 
   const { slug } = await params
+  const slugError = invalidSlug(slug)
+  if (slugError) return slugError
+
   try {
     const { frontmatter, content_en, content_ko, deploy = false } = await req.json()
 
@@ -169,6 +189,9 @@ export async function DELETE(
   if (!auth.valid) return auth.response
 
   const { slug } = await params
+  const slugError = invalidSlug(slug)
+  if (slugError) return slugError
+
   try {
     if (isProduction) {
       // Delete from both drafts and main branches

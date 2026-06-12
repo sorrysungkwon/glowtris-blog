@@ -1,14 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { extractToken, invalidateToken } from '@/lib/auth'
+import { NextResponse } from 'next/server'
 
-export async function POST(req: NextRequest) {
-  try {
-    const token = extractToken(req)
-    if (token) {
-      invalidateToken(token)
-    }
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: 'Logout failed' }, { status: 400 })
-  }
+// Tokens are stateless (HMAC-validated); logout is handled client-side
+// by clearing localStorage. This endpoint exists so the client has a
+// consistent logout call target.
+export async function POST() {
+  return NextResponse.json({ success: true })
 }

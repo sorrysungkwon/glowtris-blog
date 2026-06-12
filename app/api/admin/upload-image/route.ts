@@ -5,6 +5,9 @@ import { putFile } from '@/lib/github'
 const isProduction = process.env.NODE_ENV === 'production'
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
+// SVG deliberately excluded — it can embed scripts (stored XSS)
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif']
+
 export async function POST(req: NextRequest) {
   const auth = requireAuth(req)
   if (!auth.valid) return auth.response
@@ -16,8 +19,8 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'File must be an image' }, { status: 400 })
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'Allowed types: PNG, JPEG, GIF, WebP, AVIF' }, { status: 400 })
     }
     if (file.size > MAX_SIZE) {
       return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 })

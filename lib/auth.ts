@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 
-const tokenSecret = process.env.TOKEN_SECRET || 'default-dev-secret'
+const isProduction = process.env.NODE_ENV === 'production'
+
+export function getTokenSecret(): string {
+  const secret = process.env.TOKEN_SECRET
+  if (!secret) {
+    if (isProduction) {
+      throw new Error('TOKEN_SECRET must be set in production')
+    }
+    return 'default-dev-secret'
+  }
+  return secret
+}
+
+export function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a)
+  const bufB = Buffer.from(b)
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
+}
 
 export function validateAuthToken(token: string): boolean {
   if (!token) return false
@@ -13,20 +31,12 @@ export function validateAuthToken(token: string): boolean {
   if (!payload || !timestamp || !signature) return false
 
   const data = `${payload}.${timestamp}`
-  const expectedSignature = createHmac('sha256', tokenSecret).update(data).digest('hex')
-  if (signature !== expectedSignature) return false
+  const expectedSignature = createHmac('sha256', getTokenSecret()).update(data).digest('hex')
+  if (!safeCompare(signature, expectedSignature)) return false
 
   const tokenAge = Date.now() - parseInt(timestamp)
   const maxAge = 30 * 24 * 60 * 60 * 1000 // 30 days
   return tokenAge < maxAge
-}
-
-export function addValidToken(_token: string): void {
-  // no-op: tokens are stateless, validated by HMAC signature only
-}
-
-export function invalidateToken(_token: string): void {
-  // no-op: logout is handled client-side by clearing localStorage
 }
 
 export function extractToken(req: NextRequest): string | null {
