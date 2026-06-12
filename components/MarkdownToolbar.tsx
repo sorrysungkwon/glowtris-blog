@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+import ImageUploadModal from './ImageUploadModal'
 
 interface MarkdownToolbarProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
@@ -9,54 +10,39 @@ interface MarkdownToolbarProps {
 }
 
 export default function MarkdownToolbar({ textareaRef, onChange, disabled }: MarkdownToolbarProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   function getSelection() {
-    const textarea = textareaRef.current
-    if (!textarea) return { before: '', selected: '', after: '' }
-
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const content = textarea.value
-
+    const el = textareaRef.current
+    if (!el) return { before: '', selected: '', after: '' }
     return {
-      before: content.slice(0, start),
-      selected: content.slice(start, end),
-      after: content.slice(end),
+      before: el.value.slice(0, el.selectionStart),
+      selected: el.value.slice(el.selectionStart, el.selectionEnd),
+      after: el.value.slice(el.selectionEnd),
     }
   }
 
-  function insertMarkdown(before: string, after: string = '') {
-    const { before: contentBefore, selected, after: contentAfter } = getSelection()
-    const textarea = textareaRef.current
-    if (!textarea) return
-
-    const newContent = contentBefore + before + selected + after + contentAfter
-    onChange(newContent)
-
+  function insertMarkdown(before: string, after = '') {
+    const { before: b, selected: s, after: a } = getSelection()
+    const el = textareaRef.current
+    if (!el) return
+    onChange(b + before + s + after + a)
     setTimeout(() => {
-      const newCursorPos = contentBefore.length + before.length + selected.length
-      textarea.focus()
-      textarea.setSelectionRange(newCursorPos, newCursorPos)
+      el.focus()
+      el.setSelectionRange(b.length + before.length + s.length, b.length + before.length + s.length)
     }, 0)
   }
 
-  function insertBlock(prefix: string, suffix: string = '') {
-    const { before: contentBefore, selected, after: contentAfter } = getSelection()
-    const textarea = textareaRef.current
-    if (!textarea) return
-
-    const beforeLine = contentBefore.endsWith('\n') ? contentBefore : contentBefore + '\n'
-    const afterLine = contentAfter.startsWith('\n') ? contentAfter : '\n' + contentAfter
-
-    const newContent = beforeLine + prefix + selected + suffix + afterLine
-    onChange(newContent)
-
+  function insertBlock(prefix: string, suffix = '') {
+    const { before: b, selected: s, after: a } = getSelection()
+    const el = textareaRef.current
+    if (!el) return
+    const bl = b.endsWith('\n') ? b : b + '\n'
+    const al = a.startsWith('\n') ? a : '\n' + a
+    onChange(bl + prefix + s + suffix + al)
     setTimeout(() => {
-      const newCursorPos = beforeLine.length + prefix.length + selected.length
-      textarea.focus()
-      textarea.setSelectionRange(newCursorPos, newCursorPos)
+      el.focus()
+      el.setSelectionRange(bl.length + prefix.length + s.length, bl.length + prefix.length + s.length)
     }, 0)
   }
 
@@ -66,280 +52,82 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
     insertBlock(prefix, selected ? '' : 'Heading text')
   }
 
-  function handleBold() {
-    insertMarkdown('**', '**')
-  }
-
-  function handleItalic() {
-    insertMarkdown('*', '*')
-  }
-
-  function handleStrikethrough() {
-    insertMarkdown('~~', '~~')
-  }
-
-  function handleUnderline() {
-    insertMarkdown('<u>', '</u>')
-  }
-
-  function handleQuote() {
-    insertBlock('> ')
-  }
-
-  function handleCodeBlock() {
-    insertBlock('```\n', '\n```')
-  }
-
-  function handleList() {
-    insertBlock('- ')
-  }
-
   function handleLink() {
     const { selected } = getSelection()
     const url = prompt('Enter URL:')
-    if (url) {
-      insertMarkdown(`[${selected || 'link text'}](${url})`)
+    if (url) insertMarkdown(`[${selected || 'link text'}](${url})`)
+  }
+
+  // Called by the modal after a successful upload
+  function handleImageInsert(url: string, alt: string, caption: string, credit: string) {
+    const el = textareaRef.current
+    if (!el) return
+
+    let snippet: string
+    if (caption || credit) {
+      const creditHtml = credit
+        ? `\n  <span class="figcredit">Source: ${credit}</span>`
+        : ''
+      snippet = `<figure>\n  <img src="${url}" alt="${alt}" />\n  <figcaption>${caption}${creditHtml}\n  </figcaption>\n</figure>`
+    } else {
+      snippet = `![${alt || 'Image'}](${url})`
     }
-  }
 
-  // Compress an image client-side using the Canvas API.
-  // Resizes to max 1920px on the longest side and encodes as WebP at 0.85 quality.
-  // Falls back to the original file if compression fails or isn't supported.
-  async function compressImage(file: File): Promise<File> {
-    if (!file.type.startsWith('image/') || file.type === 'image/gif') return file
-    return new Promise((resolve) => {
-      const img = new Image()
-      const url = URL.createObjectURL(file)
-      img.onload = () => {
-        URL.revokeObjectURL(url)
-        const MAX = 1920
-        let { width, height } = img
-        if (width > MAX || height > MAX) {
-          if (width > height) { height = Math.round(height * MAX / width); width = MAX }
-          else { width = Math.round(width * MAX / height); height = MAX }
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        if (!ctx) { resolve(file); return }
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(
-          (blob) => {
-            if (!blob || blob.size >= file.size) { resolve(file); return }
-            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' }))
-          },
-          'image/webp',
-          0.85
-        )
-      }
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
-      img.src = url
-    })
-  }
-
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.files?.[0]
-    if (!raw) return
-
-    setUploading(true)
-    try {
-      const file = await compressImage(raw)
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const token = localStorage.getItem('admin_token')
-      const res = await fetch('/api/admin/upload-image', {
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-        body: formData,
-      })
-
-      if (res.ok) {
-        const { url } = await res.json()
-        insertBlock(`![Image](${url})`, '')
-      } else {
-        const error = await res.json()
-        alert(`Upload failed: ${error.error || 'Unknown error'}`)
-      }
-    } catch (error) {
-      alert(`Upload error: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-    }
-  }
-
-  function handleHorizontalRule() {
-    insertBlock('---')
-  }
-
-  function handleFigure() {
-    const { before: contentBefore, selected, after: contentAfter } = getSelection()
-    const textarea = textareaRef.current
-    if (!textarea) return
-
-    // If selection is a markdown image, extract URL + alt for the figure
-    const imgMatch = selected.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
-    const src = imgMatch ? imgMatch[2] : (prompt('Image URL:') || '')
-    const alt = imgMatch ? imgMatch[1] : ''
-    if (!src) return
-
-    const caption = prompt('Caption text:') || ''
-    const credit = prompt('Source / credit (optional — press Enter to skip):') || ''
-
-    const creditHtml = credit ? `\n  <span class="figcredit">Source: ${credit}</span>` : ''
-    const figcaptionHtml = caption || credit
-      ? `\n<figcaption>${caption}${creditHtml}\n</figcaption>`
-      : ''
-    const figure = `<figure>\n  <img src="${src}" alt="${alt}" />${figcaptionHtml}\n</figure>`
-
-    const newContent = contentBefore + figure + contentAfter
-    onChange(newContent)
+    const { before: b, after: a } = getSelection()
+    const bl = b.endsWith('\n') ? b : b + '\n'
+    const al = a.startsWith('\n') ? a : '\n' + a
+    onChange(bl + snippet + al)
     setTimeout(() => {
-      const pos = contentBefore.length + figure.length
-      textarea.focus()
-      textarea.setSelectionRange(pos, pos)
+      el.focus()
+      el.setSelectionRange(bl.length + snippet.length, bl.length + snippet.length)
     }, 0)
+
+    setShowModal(false)
   }
 
-  const btnClass = 'markdown-toolbar-btn'
-  const disabledState = disabled || uploading
+  const btn = 'markdown-toolbar-btn'
+  const off = disabled
 
   return (
-    <div className="markdown-toolbar">
-      <div className="markdown-toolbar-group">
-        <button
-          onClick={() => handleHeader(1)}
-          disabled={disabledState}
-          className={btnClass}
-          title="Header 1"
-        >
-          H1
-        </button>
-        <button
-          onClick={() => handleHeader(2)}
-          disabled={disabledState}
-          className={btnClass}
-          title="Header 2"
-        >
-          H2
-        </button>
-        <button
-          onClick={() => handleHeader(3)}
-          disabled={disabledState}
-          className={btnClass}
-          title="Header 3"
-        >
-          H3
-        </button>
+    <>
+      <div className="markdown-toolbar">
+        <div className="markdown-toolbar-group">
+          <button onClick={() => handleHeader(1)} disabled={off} className={btn} title="Header 1">H1</button>
+          <button onClick={() => handleHeader(2)} disabled={off} className={btn} title="Header 2">H2</button>
+          <button onClick={() => handleHeader(3)} disabled={off} className={btn} title="Header 3">H3</button>
+        </div>
+
+        <div className="markdown-toolbar-group">
+          <button onClick={() => insertMarkdown('**', '**')} disabled={off} className={btn} title="Bold"><strong>B</strong></button>
+          <button onClick={() => insertMarkdown('*', '*')} disabled={off} className={btn} title="Italic"><em>I</em></button>
+          <button onClick={() => insertMarkdown('~~', '~~')} disabled={off} className={btn} title="Strikethrough"><s>S</s></button>
+          <button onClick={() => insertMarkdown('<u>', '</u>')} disabled={off} className={btn} title="Underline"><u>U</u></button>
+        </div>
+
+        <div className="markdown-toolbar-group">
+          <button onClick={() => insertBlock('> ')} disabled={off} className={btn} title="Quote">„</button>
+          <button onClick={() => insertBlock('```\n', '\n```')} disabled={off} className={btn} title="Code block">{'<>'}</button>
+          <button onClick={() => insertBlock('- ')} disabled={off} className={btn} title="List">⋮</button>
+        </div>
+
+        <div className="markdown-toolbar-group">
+          <button onClick={handleLink} disabled={off} className={btn} title="Link">
+            <span className="material-icons-round" style={{ fontSize: '14px' }}>link</span>
+          </button>
+          {/* Image button → opens modal with drag-drop, compression, progress */}
+          <button onClick={() => setShowModal(true)} disabled={off} className={btn} title="Insert image">
+            <span className="material-icons-round" style={{ fontSize: '14px' }}>image</span>
+          </button>
+          <button onClick={() => insertBlock('---')} disabled={off} className={btn} title="Horizontal rule">—</button>
+        </div>
       </div>
 
-      <div className="markdown-toolbar-group">
-        <button
-          onClick={handleBold}
-          disabled={disabledState}
-          className={btnClass}
-          title="Bold"
-        >
-          <strong>B</strong>
-        </button>
-        <button
-          onClick={handleItalic}
-          disabled={disabledState}
-          className={btnClass}
-          title="Italic"
-        >
-          <em>I</em>
-        </button>
-        <button
-          onClick={handleStrikethrough}
-          disabled={disabledState}
-          className={btnClass}
-          title="Strikethrough"
-        >
-          <s>S</s>
-        </button>
-        <button
-          onClick={handleUnderline}
-          disabled={disabledState}
-          className={btnClass}
-          title="Underline"
-        >
-          <u>U</u>
-        </button>
-      </div>
-
-      <div className="markdown-toolbar-group">
-        <button
-          onClick={handleQuote}
-          disabled={disabledState}
-          className={btnClass}
-          title="Quote"
-        >
-          „
-        </button>
-        <button
-          onClick={handleCodeBlock}
-          disabled={disabledState}
-          className={btnClass}
-          title="Code block"
-        >
-          {"<>"}
-        </button>
-        <button
-          onClick={handleList}
-          disabled={disabledState}
-          className={btnClass}
-          title="List"
-        >
-          ⋮
-        </button>
-      </div>
-
-      <div className="markdown-toolbar-group">
-        <button
-          onClick={handleLink}
-          disabled={disabledState}
-          className={btnClass}
-          title="Link"
-        >
-          <span className="material-icons-round" style={{ fontSize: '14px' }}>link</span>
-        </button>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabledState || uploading}
-          className={btnClass}
-          title="Image"
-        >
-          <span className="material-icons-round" style={{ fontSize: '14px' }}>{uploading ? 'hourglass_empty' : 'image'}</span>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ display: 'none' }}
+      {showModal && (
+        <ImageUploadModal
+          onInsert={handleImageInsert}
+          onClose={() => setShowModal(false)}
         />
-        <button
-          onClick={handleHorizontalRule}
-          disabled={disabledState}
-          className={btnClass}
-          title="Horizontal rule"
-        >
-          —
-        </button>
-        <button
-          onClick={handleFigure}
-          disabled={disabledState}
-          className={btnClass}
-          title="Image with caption"
-        >
-          <span className="material-icons-round" style={{ fontSize: '14px' }}>photo_camera</span>
-        </button>
-      </div>
-    </div>
+      )}
+    </>
   )
 }

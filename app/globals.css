@@ -1599,6 +1599,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
   animation: fade-in 150ms ease;
 }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mi-spin { to { transform: rotate(360deg); } }
+.mi-spin { animation: mi-spin 0.9s linear infinite; display: inline-block; }
 
 .admin-modal {
   background: var(--surface);
