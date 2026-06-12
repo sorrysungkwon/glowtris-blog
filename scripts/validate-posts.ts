@@ -88,7 +88,9 @@ for (const slug of enFiles) {
         severity: 'warning'
       })
     }
-    if (enData.date !== koData.date) {
+    const enDateVal = enData.date ? new Date(enData.date).getTime() : 0;
+    const koDateVal = koData.date ? new Date(koData.date).getTime() : 0;
+    if (enDateVal !== koDateVal) {
       errors.push({
         slug,
         type: 'mismatch',
