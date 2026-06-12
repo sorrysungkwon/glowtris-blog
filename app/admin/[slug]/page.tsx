@@ -16,12 +16,8 @@ interface SeoCheck {
 }
 
 function computeSeo(fm: string, contentEn: string, contentKo: string): { checks: SeoCheck[], score: number } {
-  function field(name: string) {
-    const m = fm.match(new RegExp(`^${name}:\\s*(.+)$`, 'm'))
-    return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
-  }
-  const title = field('title')
-  const description = field('description')
+  const title = getFmField(fm, 'title')
+  const description = getFmField(fm, 'description')
   const enWords = contentEn.split(/\s+/).filter(Boolean).length
   const koWords = contentKo.split(/\s+/).filter(Boolean).length
 
@@ -48,26 +44,38 @@ function seoColor(score: number): string {
   return score >= 90 ? '#22c55e' : score >= 70 ? '#f59e0b' : score >= 50 ? '#f97316' : '#ef4444'
 }
 
-/* ── Frontmatter field helpers — keep raw string as source of truth ───── */
+/* ── Frontmatter field helpers — keep raw string as source of truth ─────
+   Quoted YAML values may span multiple lines, so field matching must
+   consume the entire quoted scalar — replacing only the first line once
+   orphaned the tail of a multiline description and broke YAML parsing. */
+function fmFieldRe(name: string): RegExp {
+  // Either a double-quoted scalar (may contain newlines) or a single line
+  return new RegExp(`^${name}:[ \\t]*(?:"((?:[^"\\\\]|\\\\[\\s\\S])*)"|([^\\n]*))[ \\t]*(\\r?\\n|$)`, 'm')
+}
+
 function getFmField(fm: string, name: string): string {
-  const m = fm.match(new RegExp(`^${name}:\\s*(.+)$`, 'm'))
-  return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
+  const m = fm.match(fmFieldRe(name))
+  if (!m) return ''
+  if (m[1] !== undefined) {
+    return m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\')
+  }
+  return (m[2] || '').trim().replace(/^['"]|['"]$/g, '')
 }
 
 function setFmField(fm: string, name: string, value: string | null): string {
-  const lineRe = new RegExp(`^${name}:.*(\\r?\\n|$)`, 'm')
+  const re = fmFieldRe(name)
   if (value === null) {
-    return fm.replace(lineRe, '')
+    return fm.replace(re, '')
   }
   const line = `${name}: ${value}`
-  if (lineRe.test(fm)) {
-    return fm.replace(lineRe, (_match, nl) => line + nl)
+  if (re.test(fm)) {
+    return fm.replace(re, (...args) => line + args[args.length - 3])
   }
   return fm.trim() ? fm.trim() + `\n${line}` : line
 }
 
 function fmQuote(s: string): string {
-  return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+  return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`
 }
 
 const FM_CATEGORIES = ['DEV', 'DESIGN', 'UPDATE', 'NOTICE', 'GUIDE', 'STORIES']

@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { execSync } from 'child_process'
 import { revalidatePath } from 'next/cache'
+import matter from 'gray-matter'
 import { requireAuth } from '@/lib/auth'
 import { fetchRawFile, putFile, deleteFile } from '@/lib/github'
 
@@ -118,6 +119,23 @@ export async function POST(
 
     const enContent = `---\n${frontmatter}\n---\n${content_en}`
     const koContent = content_ko?.trim() ? `---\n${frontmatter}\n---\n${content_ko}` : null
+
+    // Reject malformed frontmatter before it reaches the repo — invalid
+    // YAML makes the post silently disappear from the blog.
+    try {
+      const { data } = matter(enContent)
+      if (!data.title || !data.date) {
+        return NextResponse.json({
+          error: 'Invalid frontmatter',
+          details: 'Frontmatter must include title and date',
+        }, { status: 400 })
+      }
+    } catch (e) {
+      return NextResponse.json({
+        error: 'Invalid frontmatter',
+        details: `Frontmatter is not valid YAML: ${e instanceof Error ? e.message : String(e)}`,
+      }, { status: 400 })
+    }
 
     if (isProduction) {
       // Always save to drafts branch
