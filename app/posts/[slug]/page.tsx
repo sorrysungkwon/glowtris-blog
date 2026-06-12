@@ -22,6 +22,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     return {
       title,
       description,
+      alternates: {
+        canonical: lang === 'ko'
+          ? `https://blog.glowtris.com/posts/${slug}?lang=ko`
+          : `https://blog.glowtris.com/posts/${slug}`,
+        languages: {
+          'en': `https://blog.glowtris.com/posts/${slug}`,
+          'ko': `https://blog.glowtris.com/posts/${slug}?lang=ko`,
+          'x-default': `https://blog.glowtris.com/posts/${slug}`,
+        },
+      },
       openGraph: {
         title,
         description,

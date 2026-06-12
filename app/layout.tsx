@@ -30,6 +30,11 @@ export const metadata: Metadata = {
     types: {
       'application/rss+xml': 'https://blog.glowtris.com/feed.xml',
     },
+    languages: {
+      'en': 'https://blog.glowtris.com',
+      'ko': 'https://blog.glowtris.com/?lang=ko',
+      'x-default': 'https://blog.glowtris.com',
+    },
   },
 }
 

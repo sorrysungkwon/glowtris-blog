@@ -6,6 +6,42 @@ import Link from 'next/link'
 import { marked } from 'marked'
 import MarkdownToolbar from '@/components/MarkdownToolbar'
 
+interface SeoCheck {
+  id: string
+  label: string
+  pass: boolean
+  weight: 'critical' | 'recommended'
+}
+
+function computeSeo(fm: string, contentEn: string, contentKo: string): { checks: SeoCheck[], score: number } {
+  function field(name: string) {
+    const m = fm.match(new RegExp(`^${name}:\\s*(.+)$`, 'm'))
+    return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
+  }
+  const title = field('title')
+  const description = field('description')
+  const enWords = contentEn.split(/\s+/).filter(Boolean).length
+  const koWords = contentKo.split(/\s+/).filter(Boolean).length
+
+  const checks: SeoCheck[] = [
+    { id: 'title_min',  label: `Title ≥ 30 chars (${title.length})`,        pass: title.length >= 30,                   weight: 'critical' },
+    { id: 'title_max',  label: `Title ≤ 70 chars (${title.length})`,        pass: title.length > 0 && title.length <= 70, weight: 'critical' },
+    { id: 'desc_min',   label: `Description ≥ 100 chars (${description.length})`, pass: description.length >= 100,      weight: 'critical' },
+    { id: 'desc_max',   label: `Description ≤ 160 chars (${description.length})`, pass: description.length > 0 && description.length <= 160, weight: 'critical' },
+    { id: 'en_300',     label: `EN ≥ 300 words (${enWords})`,               pass: enWords >= 300,                       weight: 'critical' },
+    { id: 'ko_present', label: `KO content present (${koWords} words)`,     pass: koWords >= 50,                        weight: 'critical' },
+    { id: 'reading_time', label: 'readingTime set',                         pass: /^readingTime:/m.test(fm),            weight: 'recommended' },
+    { id: 'cover',      label: 'coverGradient set',                         pass: /^coverGradient:/m.test(fm),          weight: 'recommended' },
+    { id: 'en_500',     label: `EN ≥ 500 words (${enWords})`,               pass: enWords >= 500,                       weight: 'recommended' },
+    { id: 'en_h2',      label: 'EN has H2 headings',                        pass: /^## /m.test(contentEn),              weight: 'recommended' },
+    { id: 'ko_300',     label: `KO ≥ 300 words (${koWords})`,               pass: koWords >= 300,                       weight: 'recommended' },
+    { id: 'ko_h2',      label: 'KO has H2 headings',                        pass: /^## /m.test(contentKo),              weight: 'recommended' },
+  ]
+
+  const score = Math.round(checks.filter(c => c.pass).length / checks.length * 100)
+  return { checks, score }
+}
+
 interface PostData {
   frontmatter: string
   content_en: string
@@ -65,6 +101,7 @@ export default function PostEditor() {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'stats'>('edit')
   const [showMenu, setShowMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [seoOpen, setSeoOpen] = useState(false)
   const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
@@ -773,6 +810,86 @@ export default function PostEditor() {
     </div>
   )
 
+  /* ── SEO floating panel ─────────────────────────────────────────────── */
+  const { checks: seoChecks, score: seoScore } = computeSeo(data.frontmatter, data.content_en, data.content_ko)
+  const seoColor = seoScore >= 90 ? '#22c55e' : seoScore >= 70 ? '#f59e0b' : seoScore >= 50 ? '#f97316' : '#ef4444'
+  const criticalChecks = seoChecks.filter(c => c.weight === 'critical')
+  const recChecks = seoChecks.filter(c => c.weight === 'recommended')
+
+  const seoFloating = (
+    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+      {seoOpen && (
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
+          width: '280px',
+          maxHeight: '420px',
+          overflowY: 'auto',
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}>
+          {/* Score bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ flex: 1, height: '6px', borderRadius: '99px', background: 'var(--border)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${seoScore}%`, background: seoColor, borderRadius: '99px', transition: 'width 0.3s' }} />
+            </div>
+            <span style={{ fontSize: '15px', fontWeight: 800, color: seoColor, fontFamily: 'var(--font-mono)', minWidth: '36px', textAlign: 'right' }}>{seoScore}</span>
+          </div>
+
+          {/* Critical */}
+          <div>
+            <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Critical</div>
+            {criticalChecks.map(c => (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : '#ef4444', flexShrink: 0, marginTop: '1px' }}>{c.pass ? '✓' : '✗'}</span>
+                <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Recommended */}
+          <div>
+            <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Recommended</div>
+            {recChecks.map(c => (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : 'var(--text-faint)', flexShrink: 0, marginTop: '1px' }}>{c.pass ? '✓' : '○'}</span>
+                <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* FAB toggle button */}
+      <button
+        onClick={() => setSeoOpen(o => !o)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '7px',
+          padding: '10px 16px',
+          borderRadius: '99px',
+          border: `1.5px solid ${seoOpen ? seoColor : 'var(--border)'}`,
+          background: seoOpen ? 'var(--surface)' : 'var(--surface-2)',
+          color: 'var(--text-primary)',
+          cursor: 'pointer',
+          fontWeight: 700,
+          fontSize: '13px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+          transition: 'all 0.15s',
+        }}
+      >
+        <span style={{ fontSize: '14px' }}>📊</span>
+        <span>SEO</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: seoColor, fontWeight: 800 }}>{seoScore}</span>
+      </button>
+    </div>
+  )
+
   return (
     <div className="editor-root">
       {headerBar}
@@ -781,6 +898,7 @@ export default function PostEditor() {
       {deleteModal}
       {historyModal}
       {isMobile ? mobileLayout : desktopLayout}
+      {seoFloating}
     </div>
   )
 }
