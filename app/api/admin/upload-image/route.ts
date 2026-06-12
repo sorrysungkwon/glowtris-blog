@@ -30,17 +30,26 @@ export async function POST(req: NextRequest) {
     const fileName = `${timestamp}-${file.name.replace(/[^a-z0-9.-]/gi, '-').toLowerCase()}`
     const imageBuffer = Buffer.from(await file.arrayBuffer())
 
+    let url: string
     if (isProduction) {
-      await putFile(`public/images/${fileName}`, imageBuffer, `chore: upload image ${fileName}`)
+      const filePath = `public/images/${fileName}`
+      await putFile(filePath, imageBuffer, `chore: upload image ${fileName}`)
+      // Use GitHub raw URL so the image is accessible immediately — no Vercel
+      // rebuild needed. The same file is also served at /images/ after the
+      // next build, but raw.githubusercontent.com works the moment the commit lands.
+      const owner = process.env.GITHUB_OWNER
+      const repo = process.env.GITHUB_REPO
+      url = `https://raw.githubusercontent.com/${owner}/${repo}/main/${filePath}`
     } else {
       const fs = await import('fs')
       const path = await import('path')
       const imagesDir = path.join(process.cwd(), 'public/images')
       fs.mkdirSync(imagesDir, { recursive: true })
       fs.writeFileSync(path.join(imagesDir, fileName), imageBuffer)
+      url = `/images/${fileName}`
     }
 
-    return NextResponse.json({ url: `/images/${fileName}`, fileName })
+    return NextResponse.json({ url, fileName })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
