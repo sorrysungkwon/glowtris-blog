@@ -38,7 +38,7 @@ Lightweight blog platform for glowtris.com with bilingual EN/KO support, admin e
 ```bash
 curl -X POST https://api.getmoshi.app/api/webhook \
   -H "Content-Type: application/json" \
-  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary"}'
+  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary", "unified": true}'
 ```
 - Token stored in CREDENTIALS.md (server-only, never in docs)
 

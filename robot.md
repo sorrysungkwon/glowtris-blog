@@ -67,7 +67,7 @@ When a major task completes, send notification via Moshi webhook:
 ```bash
 curl -X POST https://api.getmoshi.app/api/webhook \
   -H "Content-Type: application/json" \
-  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary"}'
+  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Brief task summary", "unified": true}'
 ```
 
 - Use curl command (NOT PushNotification tool)

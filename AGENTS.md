@@ -37,7 +37,7 @@ All agents must send Moshi notification on task completion:
 ```bash
 curl -X POST https://api.getmoshi.app/api/webhook \
   -H "Content-Type: application/json" \
-  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Task description"}'
+  -d '{"token": "<MOSHI_WEBHOOK_TOKEN>", "title": "Done", "message": "Task description", "unified": true}'
 ```
 
 ### Code Changes
