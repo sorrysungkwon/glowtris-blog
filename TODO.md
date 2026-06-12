@@ -1,35 +1,36 @@
 # Glowtris Blog TODO
 
-## Current Phase: Image System Complete ✅ — Next: Bilingual Image Modal
+## Current Phase: Image System & Image Manager Complete ✅ — Next: Search UI & Discovery
 
 ---
 
-### 🔲 Immediate Next (Session 2026-06-12 — WIP)
+### ✅ Completed (Session 2026-06-12)
 
 #### 1. Bilingual Image Modal (ImageUploadModal + MarkdownToolbar + admin editor)
-- [ ] `ImageUploadModal.tsx`: rename `alt`→`altEn`, `caption`→`captionEn`, add `altKo`+`captionKo`, `credit` shared
+- [x] `ImageUploadModal.tsx`: rename `alt`→`altEn`, `caption`→`captionEn`, add `altKo`+`captionKo`, `credit` shared
   - Props: `onInsert(url, en: {alt, caption}, ko: {alt, caption}, credit)`
   - UI: EN section (cyan accent) + KO section (amber accent) + shared credit field
-- [ ] `MarkdownToolbar.tsx`: add `onImageInsert?` optional prop
+- [x] `MarkdownToolbar.tsx`: add `onImageInsert?` optional prop
   - If provided → pass all EN/KO fields up to parent; if not → insert EN-only snippet (backwards compat)
-- [ ] `admin/[slug]/page.tsx`: add `onImageInsert` handler
+- [x] `admin/[slug]/page.tsx`: add `onImageInsert` handler
   - Active language: insert snippet at cursor position
   - Inactive language: append snippet to end of that content
   - `buildSnippet(url, alt, caption, credit)` helper
 
 #### 2. Image Manager Admin Tab
-- [ ] `app/api/admin/images/route.ts`: GET = list `public/images/` via GitHub API; DELETE = delete a file
-- [ ] `components/AdminImages.tsx`: grid of uploaded images, scan which posts reference each, delete unused
-- [ ] `components/AdminClient.tsx`: add "Images" tab alongside Published / Drafts
+- [x] `app/api/admin/images/route.ts`: GET = list `public/images/` via GitHub API; DELETE = delete a file
+- [x] `components/AdminImageManager.tsx`: grid of uploaded images, scan which posts reference each, delete unused
+- [x] `components/AdminClient.tsx`: add "Images" tab alongside Published / Drafts
 
 ---
 
 ### 🔲 Phase 2 — Content & Discovery
 
 - [ ] Blog posts: write initial posts for launch (EN + KO, see post guidelines in memory)
-- [ ] Search UI: wire `lib/search.ts` into a frontend search component
-- [ ] Recommendation system: show related posts by category at bottom of post page
-- [ ] hreflang EN/KO tags on blog (and game site)
+- [x] Search UI: wire `lib/search.ts` into a frontend search component
+- [x] Recommendation system: show related posts by category at bottom of post page
+- [x] hreflang EN/KO tags on blog (and game site)
+
 
 ---
 
