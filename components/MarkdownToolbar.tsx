@@ -66,9 +66,11 @@ export default function MarkdownToolbar({ textareaRef, onChange, disabled }: Mar
     let snippet: string
     if (caption || credit) {
       const creditHtml = credit
-        ? `\n  <span className="figcredit">Source: ${credit}</span>`
+        ? `<span className="figcredit"> Source: ${credit}</span>`
         : ''
-      snippet = `<figure>\n  <img src="${url}" alt="${alt}" />\n  <figcaption>${caption}${creditHtml}\n  </figcaption>\n</figure>`
+      // Keep figcaption content on ONE line — MDX v3 breaks if there's a
+      // newline between the opening tag and text content inside an HTML block.
+      snippet = `<figure>\n  <img src="${url}" alt="${alt}" />\n  <figcaption>${caption}${creditHtml}</figcaption>\n</figure>`
     } else {
       snippet = `![${alt || 'Image'}](${url})`
     }
