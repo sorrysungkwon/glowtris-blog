@@ -5,7 +5,7 @@ import PostCard from './PostCard'
 import type { PostMeta } from '@/lib/posts'
 import { searchPosts } from '@/lib/search'
 
-const ALL_CATEGORIES = ['ALL', 'DEV', 'DESIGN', 'UPDATE', 'GUIDE', 'NOTICE']
+const ALL_CATEGORIES = ['ALL', 'DEV', 'DESIGN', 'UPDATE', 'GUIDE', 'NOTICE', 'STORIES']
 
 interface Props {
   posts: PostMeta[]
