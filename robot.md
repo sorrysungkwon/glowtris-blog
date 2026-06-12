@@ -79,13 +79,12 @@ curl -X POST https://api.getmoshi.app/api/webhook \
 
 ## Rule 4: Admin Editor Preview Language Sync
 
-The preview pane must show the **same language** being edited:
-- Editing EN → Show EN preview (not KO)
-- Editing KO → Show KO preview (not EN)
+The preview pane shows the **same language** being edited:
+- Editing EN → Shows EN preview
+- Editing KO → Shows KO preview
 
-File: `/app/admin/[slug]/page.tsx` line 203  
-Current: `lang === 'en' ? data.content_ko : data.content_en`  
-Should be: `lang === 'en' ? data.content_en : data.content_ko`
+✅ Already implemented: `const content = lang === 'en' ? data.content_en : data.content_ko`  
+File: `app/admin/[slug]/page.tsx`
 
 ---
 
@@ -190,6 +189,6 @@ If rules conflict or are unclear:
 
 ---
 
-**Last Updated**: 2026-06-06  
+**Last Updated**: 2026-06-12  
 **Scope**: glowtris-blog (all agents)  
 **Parent Document**: Sync protocol defined in glowtris memory system
