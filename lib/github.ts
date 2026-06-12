@@ -177,3 +177,26 @@ export async function deleteFile(filePath: string, message: string, branch = 'ma
   }
   return true
 }
+
+/** List all files/folders in a directory on GitHub. */
+export async function listDirectory(dirPath: string, branch = 'main'): Promise<any[]> {
+  const c = getConfig()
+  if (!c) return []
+
+  try {
+    const res = await fetch(contentUrl(c, dirPath, branch), {
+      headers: jsonHeaders(c.token),
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      if (res.status === 404) return []
+      throw new Error(`GitHub API error: ${res.status}`)
+    }
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (error) {
+    console.error('GitHub listDirectory error:', error)
+    return []
+  }
+}
+

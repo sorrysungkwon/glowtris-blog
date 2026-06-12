@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { PostMeta } from '@/lib/posts'
+import AdminImageManager from './AdminImageManager'
+
 
 interface AdminClientProps {
   publishedPosts: PostMeta[]
@@ -18,7 +20,8 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
   const [logging, setLogging] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [token, setToken] = useState<string | null>(null)
-  const [tab, setTab] = useState<'all' | 'drafts'>('all')
+  const [tab, setTab] = useState<'all' | 'drafts' | 'images'>('all')
+
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_token')
@@ -150,7 +153,11 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
           <div className="admin-header-info">
             <span className="admin-header-title"><span className="material-icons-round" style={{ fontSize: '15px', verticalAlign: 'middle' }}>edit</span> Blog Editor</span>
             <span className="admin-header-sub">
-              {filteredPosts.length} {tab === 'drafts' ? 'draft' : 'published'}{filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing
+              {tab === 'images' ? (
+                'Manage blog image assets'
+              ) : (
+                `${filteredPosts.length} ${tab === 'drafts' ? 'draft' : 'published'}${filteredPosts.length !== 1 ? 's' : ''} · EN / KO simultaneous editing`
+              )}
             </span>
           </div>
           {/* Actions cluster */}
@@ -214,42 +221,63 @@ export default function AdminClient({ publishedPosts, draftPosts }: AdminClientP
               <span className="material-icons-round" style={{ fontSize: '13px', verticalAlign: 'middle' }}>edit_note</span> Drafts ({draftPosts.length})
             </button>
           )}
+          <button
+            onClick={() => setTab('images')}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: tab === 'images' ? 700 : 400,
+              color: tab === 'images' ? 'var(--text-primary)' : 'var(--text-faint)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              borderBottom: tab === 'images' ? '2px solid var(--text-primary)' : 'none',
+              marginBottom: '-12px',
+              paddingBottom: '20px',
+            }}
+          >
+            <span className="material-icons-round" style={{ fontSize: '13px', verticalAlign: 'middle' }}>image</span> Images
+          </button>
         </div>
 
-        <div className="admin-posts-grid">
-          {filteredPosts.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/admin/${post.slug}`}
-              className="admin-post-card"
-              style={post.draft ? { opacity: 0.7 } : {}}
-            >
-              {/* Top cluster — title + badges */}
-              <div className="admin-card-top">
-                <h3 className="admin-card-title">
-                  {post.title}
-                  {post.draft && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}><span className="material-icons-round" style={{ fontSize: '12px', verticalAlign: 'middle' }}>edit_note</span> DRAFT</span>}
-                </h3>
-                <span className="admin-card-badge">{post.category}</span>
-              </div>
+        {tab === 'images' ? (
+          <AdminImageManager />
+        ) : (
+          <div className="admin-posts-grid">
+            {filteredPosts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/admin/${post.slug}`}
+                className="admin-post-card"
+                style={post.draft ? { opacity: 0.7 } : {}}
+              >
+                {/* Top cluster — title + badges */}
+                <div className="admin-card-top">
+                  <h3 className="admin-card-title">
+                    {post.title}
+                    {post.draft && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}><span className="material-icons-round" style={{ fontSize: '12px', verticalAlign: 'middle' }}>edit_note</span> DRAFT</span>}
+                  </h3>
+                  <span className="admin-card-badge">{post.category}</span>
+                </div>
 
-              {/* Description */}
-              <p className="admin-card-desc">{post.description}</p>
+                {/* Description */}
+                <p className="admin-card-desc">{post.description}</p>
 
-              {/* Meta cluster — separated from content by border */}
-              <div className="admin-card-meta">
-                <span>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                  {post.author}
-                </span>
-                <span>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                  {new Date(post.date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+                {/* Meta cluster — separated from content by border */}
+                <div className="admin-card-meta">
+                  <span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    {post.author}
+                  </span>
+                  <span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    {new Date(post.date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
