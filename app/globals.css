@@ -723,6 +723,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: var(--text-muted);
   line-height: 1.6;
   margin-top: 5px;
+  margin-bottom: var(--space-3);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
