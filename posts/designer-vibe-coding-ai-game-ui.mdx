@@ -1,0 +1,108 @@
+---
+title: "7-Year Designer Who Can’t Code Built a Game With AI. Here’s What Actually Happened."
+title_ko: "코딩 모르는 7년차 디자이너가 AI랑 게임 만든 이야기"
+description: "I’m a 7-year designer who can’t code. I built a game UI and blog by talking to Claude. Here’s what worked, what prompting couldn’t fix."
+description_ko: "저는 7년차 디자이너예요. 그리고 코딩은 못 해요. Claude한테 말로 설명하면서 게임 UI, 브랜드, 블로그까지 만들었어요. 색상 시스템, 타이포그래피, 그리고 프롬프트로 안 됐던 것들에 대한 이야기예요."
+date: 2026-06-06
+category: DESIGN
+author: sorrysungkwon
+authorEmoji: 🎨
+readingTime: 6
+coverGradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%)"
+coverEmoji: "🎨"
+---
+I can’t code.
+
+Seven years as a designer — Seoul, New York, and now, I’m serving in the military. 
+
+I learned color theory, typography, negative space. I understand all of that. But pointers? async/await? Why npm install randomly breaks? No idea. I just guess.
+
+And yet I built Glowtris. A Tetris-like game that runs in the browser. And this blog.
+
+I did it by talking.
+
+-----
+
+## What vibe coding actually means to me
+
+People use the term differently. For me it goes like this:
+
+Know what you want → describe it to AI → AI builds it → look at what came out → say what’s wrong → fix it.
+
+The key part: AI does the labor, but “that’s not right” still comes from me. From whatever’s been trained into my eye after seven years of looking at design work.
+
+It’s not magic. It doesn’t do everything while you sleep. But it’s completely different from being stuck because you can’t code. It’s closer to having a very fast developer who constantly needs art direction.
+
+-----
+
+## The color system
+
+I started with one constraint: feel like a futuristic neon arcade game, but readable for 20 minutes without eye strain.
+
+First prompt:
+
+> “Make the background very dark navy, almost black. Neon glow colors for pieces are cyan, magenta, yellow, green. UI should feel like a dark sci-fi interface — clean, minimal, glowing.”
+
+Claude Code gave me CSS with #000000 for the background and rough neon colors. Problem: pure black kills glow effects. Glow reads best against dark blue-black, not absolute black. I pushed back.
+
+> “The background feels flat. It needs to be very dark, desaturated navy — something like #04041e. The piece glow should look like it’s actually emitting light.”
+
+Second result was much closer. And the #04041e I threw out casually became the actual production value. Sometimes you guess right. Lucky.
+
+-----
+
+## Typography
+
+The logo font is Orbitron — heavy, geometric, sci-fi. It reads “space game” from a hundred meters away. Exactly what I wanted.
+
+But Orbitron at body size is unreadable. I needed a completely different voice for content.
+
+For Korean: Pretendard. Cleanest Korean sans-serif I know. For English body: system-ui. For monospace elements: JetBrains Mono.
+
+> “Headers and logo: Orbitron. Body and UI: Pretendard for Korean, system-ui for English. Monospace elements like category tags: JetBrains Mono.”
+
+Display / body / mono — three-font system is a standard design pattern. Claude knew it and implemented it correctly. The well-worn paths are well-worn for a reason.
+
+-----
+
+## Light mode was added late but became the default
+
+Glowtris is dark. The whole brand is built around glow on dark backgrounds. So the blog started dark too.
+
+But reading it on my phone in daylight felt uncomfortable. I wanted it to work in the light without losing the brand.
+
+> “Make the blog default light mode, dark mode as an option. Tone should feel like a proper tech blog.”
+
+In light mode, the glow colors swap to #2563eb — confident and technical without needing a dark background. The dot grid hero is borrowed from Vercel’s aesthetic — everywhere in modern tech, but it reads as “infrastructure, information, nodes.” Subtle enough not to scream about it.
+
+Dark mode keeps the original #00c8ff cyan and dark navy. Same brand, different colorway.
+
+-----
+
+## What prompting couldn’t fix
+
+There’s always stuff I had to adjust manually.
+
+**Spacing.** AI-generated spacing is always too tight or too loose. I tighten logo tracking, add breathing room around section dividers, reduce card padding. Years of looking at things calibrates your eye.
+
+**Type scale.** Default suggestions are mathematically correct but visually flat. I always push heading sizes up and body down slightly to increase contrast between levels.
+
+**Color relationships.** AI can nail individual colors but misses how colors interact across contexts. Active button text needing to invert between light and dark mode — I had to say that twice.
+
+**Microinteractions.** Default hover states are always too subtle or too dramatic. I want 0.15s ease, no scale transforms — responsive and confident. The industry standard for a reason.
+
+-----
+
+## The thing
+
+Every decision has my opinion behind it.
+
+Working with Claude means expressing those opinions in plain language and watching them render immediately.
+
+Something felt off. I said so. Saw what came back. Said what was still wrong. Kept going.
+
+There’s one thing prompting can’t do. Taste. The thing in your brain that screams “no, #04041e, #000000 is wrong.” Why a dot grid feels like infrastructure. Why three fonts need to know their place and stay quiet.
+
+Claude is fast. But if you don’t know what you want, it’ll just make something. Might be beautiful. Might be a disaster.
+
+That part’s on you.
