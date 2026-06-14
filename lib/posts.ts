@@ -23,6 +23,7 @@ export interface PostMeta {
   coverEmoji?: string
   featured?: boolean
   draft?: boolean
+  content?: string
 }
 
 export interface Post extends PostMeta {
@@ -73,14 +74,14 @@ export async function getAllPostMeta(lang?: string, includeDrafts: boolean = fal
     }
 
     try {
-      const { data } = matter(content)
+      const { data, content: rawContent } = matter(content)
 
       if (!data.title || !data.date) {
         console.warn(`Post ${slug} missing required fields (title or date)`)
         continue
       }
 
-      const post = { slug, ...data } as PostMeta
+      const post = { slug, content: rawContent, ...data } as PostMeta
 
       if (post.draft && !includeDrafts) {
         continue
