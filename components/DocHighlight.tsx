@@ -10,7 +10,7 @@ export default function DocHighlight() {
   useEffect(() => {
     if (!highlight || !highlight.trim()) return
 
-    const query = highlight.trim().toLowerCase()
+    const query = highlight.trim().normalize('NFC').toLowerCase()
     const article = document.querySelector('article.mdx')
     if (!article) return
 
@@ -26,7 +26,7 @@ export default function DocHighlight() {
 
     while (currentNode) {
       const textNode = currentNode as Text
-      const text = textNode.nodeValue || ''
+      const text = (textNode.nodeValue || '').normalize('NFC')
       const lowerText = text.toLowerCase()
       
       if (lowerText.includes(query)) {
