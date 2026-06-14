@@ -2281,5 +2281,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
   }
 }
 
+@media (max-width: 640px) {
+  .search-shortcut-badge {
+    display: none !important;
+  }
+}
+
 
 
