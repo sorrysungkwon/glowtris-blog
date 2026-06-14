@@ -75,16 +75,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <script dangerouslySetInnerHTML={{ __html: googleTranslateCrashPatch }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Blog",
-          "name": "Glowtris Blog",
-          "description": "Indie game dev log for Glowtris — a free browser block-stacking game.",
-          "url": "https://blog.glowtris.com",
-          "author": { "@type": "Person", "name": "sorrysungkwon" },
-          "inLanguage": ["en", "ko"],
-          "about": { "@type": "VideoGame", "name": "Glowtris", "url": "https://glowtris.com" }
-        })}} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Glowtris Blog",
+            "url": "https://blog.glowtris.com",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://blog.glowtris.com/?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "Glowtris Blog",
+            "description": "Indie game dev log for Glowtris — a free browser block-stacking game.",
+            "url": "https://blog.glowtris.com",
+            "author": { "@type": "Person", "name": "sorrysungkwon" },
+            "inLanguage": ["en", "ko"],
+            "about": { "@type": "VideoGame", "name": "Glowtris", "url": "https://glowtris.com" }
+          }
+        ])}} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
