@@ -1,12 +1,26 @@
 import type { PostMeta } from './posts'
 
 export interface SearchResult extends PostMeta {
-  matchType: 'title' | 'description' | 'category' | 'author'
+  matchType: 'title' | 'description' | 'category' | 'author' | 'content'
   matchText: string
 }
 
+function findContextSnippet(content: string, query: string): string {
+  // Clean markdown syntax characters
+  const cleanContent = content.replace(/[#*`[\]()_~]/g, '')
+  const idx = cleanContent.toLowerCase().indexOf(query)
+  if (idx === -1) return ''
+
+  const start = Math.max(0, idx - 40)
+  const end = Math.min(cleanContent.length, idx + query.length + 60)
+  let snippet = cleanContent.slice(start, end)
+  if (start > 0) snippet = '...' + snippet
+  if (end < cleanContent.length) snippet = snippet + '...'
+  return snippet
+}
+
 /**
- * Search posts by title, description, category, or author
+ * Search posts by title, description, category, author, or content body
  * Case-insensitive, returns matches with context
  */
 export function searchPosts(posts: PostMeta[], query: string, lang?: string): SearchResult[] {
@@ -67,6 +81,19 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
           ...post,
           matchType: 'author',
           matchText: post.author,
+        })
+        seen.add(post.slug)
+      }
+      continue
+    }
+
+    // Content body match (fallback search)
+    if (post.content && post.content.toLowerCase().includes(q)) {
+      if (!seen.has(post.slug)) {
+        results.push({
+          ...post,
+          matchType: 'content',
+          matchText: findContextSnippet(post.content, q),
         })
         seen.add(post.slug)
       }
