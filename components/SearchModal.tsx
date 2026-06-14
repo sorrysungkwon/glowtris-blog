@@ -73,23 +73,27 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
 
   useEffect(() => {
     if (selectedIndex > -1 && resultsRef.current) {
-      const activeEl = resultsRef.current.children[selectedIndex] as HTMLElement
-      if (activeEl) {
-        activeEl.scrollIntoView({ block: 'nearest' })
+      const children = resultsRef.current.children
+      if (selectedIndex < children.length) {
+        const activeEl = children[selectedIndex] as HTMLElement
+        if (activeEl && typeof activeEl.scrollIntoView === 'function') {
+          activeEl.scrollIntoView({ block: 'nearest' })
+        }
       }
     }
   }, [selectedIndex, results.length])
 
-  const highlightText = (text: string, search: string) => {
-    if (!search.trim()) return text
-    const idx = text.toLowerCase().indexOf(search.toLowerCase())
-    if (idx === -1) return text
-    const match = text.slice(idx, idx + search.length)
+  const highlightText = (text: string | undefined | null, search: string) => {
+    const safeText = text || ''
+    if (!search.trim()) return safeText
+    const idx = safeText.toLowerCase().indexOf(search.toLowerCase())
+    if (idx === -1) return safeText
+    const match = safeText.slice(idx, idx + search.length)
     return (
       <>
-        {text.slice(0, idx)}
+        {safeText.slice(0, idx)}
         <mark className="search-highlight-mark">{match}</mark>
-        {text.slice(idx + search.length)}
+        {safeText.slice(idx + search.length)}
       </>
     )
   }
