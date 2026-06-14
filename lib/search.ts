@@ -9,21 +9,25 @@ export interface SearchResult extends PostMeta {
  * Search posts by title, description, category, or author
  * Case-insensitive, returns matches with context
  */
-export function searchPosts(posts: PostMeta[], query: string): SearchResult[] {
+export function searchPosts(posts: PostMeta[], query: string, lang?: string): SearchResult[] {
   if (!query.trim()) return []
 
   const q = query.toLowerCase()
   const results: SearchResult[] = []
   const seen = new Set<string>()
+  const isKo = lang === 'ko'
 
   for (const post of posts) {
+    const title = isKo ? (post.title_ko ?? post.title) : post.title
+    const desc = isKo ? (post.description_ko ?? post.description) : post.description
+
     // Title match (highest priority)
-    if (post.title.toLowerCase().includes(q)) {
+    if (title.toLowerCase().includes(q)) {
       if (!seen.has(post.slug)) {
         results.push({
           ...post,
           matchType: 'title',
-          matchText: post.title,
+          matchText: title,
         })
         seen.add(post.slug)
       }
@@ -31,12 +35,12 @@ export function searchPosts(posts: PostMeta[], query: string): SearchResult[] {
     }
 
     // Description match
-    if (post.description.toLowerCase().includes(q)) {
+    if (desc.toLowerCase().includes(q)) {
       if (!seen.has(post.slug)) {
         results.push({
           ...post,
           matchType: 'description',
-          matchText: post.description,
+          matchText: desc,
         })
         seen.add(post.slug)
       }
