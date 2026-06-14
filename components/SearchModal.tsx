@@ -64,7 +64,10 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
       if (results[targetIdx]) {
         const slug = results[targetIdx].slug
         onClose()
-        window.location.href = lang === 'ko' ? `/posts/${slug}?lang=ko` : `/posts/${slug}`
+        const targetUrl = lang === 'ko'
+          ? `/posts/${slug}?lang=ko&highlight=${encodeURIComponent(query)}`
+          : `/posts/${slug}?highlight=${encodeURIComponent(query)}`
+        window.location.href = targetUrl
       }
     }
   }
@@ -144,7 +147,9 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
             results.map((item, idx) => (
               <Link
                 key={item.slug}
-                href={lang === 'ko' ? `/posts/${item.slug}?lang=ko` : `/posts/${item.slug}`}
+                href={lang === 'ko'
+                  ? `/posts/${item.slug}?lang=ko&highlight=${encodeURIComponent(query)}`
+                  : `/posts/${item.slug}?highlight=${encodeURIComponent(query)}`}
                 className={`search-modal-item ${selectedIndex === idx ? 'selected' : ''}`}
                 onClick={onClose}
                 onMouseEnter={() => setSelectedIndex(idx)}

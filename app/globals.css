@@ -2198,6 +2198,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 
 .search-modal-item {
+  display: flex;
+  flex-direction: column;
   padding: var(--space-4) var(--space-5);
   border-radius: var(--r-lg);
   cursor: pointer;
@@ -2284,6 +2286,35 @@ button { font-family: inherit; cursor: pointer; border: none; }
 @media (max-width: 640px) {
   .search-shortcut-badge {
     display: none !important;
+  }
+}
+
+/* Document Word-Level Highlights */
+.doc-highlight {
+  background: rgba(0, 200, 255, 0.2);
+  border-bottom: 2px solid var(--cyan);
+  color: inherit;
+  border-radius: var(--r-xs);
+  padding: 0 2px;
+  transition: background-color var(--t-slow) var(--ease-out);
+}
+
+.doc-highlight.pulse-highlight {
+  animation: cyan-pulse-highlight 1.5s var(--ease-out);
+}
+
+@keyframes cyan-pulse-highlight {
+  0% {
+    background-color: rgba(0, 200, 255, 0.85);
+    box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+  }
+  50% {
+    background-color: rgba(0, 200, 255, 0.5);
+    box-shadow: 0 0 8px rgba(0, 200, 255, 0.3);
+  }
+  100% {
+    background-color: rgba(0, 200, 255, 0.2);
+    box-shadow: none;
   }
 }
 
