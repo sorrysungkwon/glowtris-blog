@@ -18,6 +18,9 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
+  const results = query.trim() ? searchPosts(posts, query) : []
+  const resultsCount = results.length
+
   useEffect(() => {
     if (isOpen) {
       setQuery('')
@@ -43,9 +46,7 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
 
-  const results = query.trim() ? searchPosts(posts, query) : []
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (results.length === 0) return
@@ -77,7 +78,9 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
         }
       }
     }
-  }, [selectedIndex, results.length])
+  }, [selectedIndex, resultsCount])
+
+  if (!isOpen) return null
 
   const highlightText = (text: string | undefined | null, search: string) => {
     const safeText = text || ''
