@@ -6,13 +6,16 @@ export interface SearchResult extends PostMeta {
 }
 
 function findContextSnippet(content: string, query: string): string {
+  const normalizedContent = content.normalize('NFC')
+  const normalizedQuery = query.normalize('NFC')
+
   // Clean markdown syntax characters
-  const cleanContent = content.replace(/[#*`[\]()_~]/g, '')
-  const idx = cleanContent.toLowerCase().indexOf(query)
+  const cleanContent = normalizedContent.replace(/[#*`[\]()_~]/g, '')
+  const idx = cleanContent.toLowerCase().indexOf(normalizedQuery.toLowerCase())
   if (idx === -1) return ''
 
   const start = Math.max(0, idx - 40)
-  const end = Math.min(cleanContent.length, idx + query.length + 60)
+  const end = Math.min(cleanContent.length, idx + normalizedQuery.length + 60)
   let snippet = cleanContent.slice(start, end)
   if (start > 0) snippet = '...' + snippet
   if (end < cleanContent.length) snippet = snippet + '...'
@@ -26,14 +29,20 @@ function findContextSnippet(content: string, query: string): string {
 export function searchPosts(posts: PostMeta[], query: string, lang?: string): SearchResult[] {
   if (!query.trim()) return []
 
-  const q = query.toLowerCase()
+  const q = query.normalize('NFC').toLowerCase()
   const results: SearchResult[] = []
   const seen = new Set<string>()
   const isKo = lang === 'ko'
 
   for (const post of posts) {
-    const title = isKo ? (post.title_ko ?? post.title) : post.title
-    const desc = isKo ? (post.description_ko ?? post.description) : post.description
+    const rawTitle = isKo ? (post.title_ko ?? post.title) : post.title
+    const rawDesc = isKo ? (post.description_ko ?? post.description) : post.description
+
+    const title = rawTitle.normalize('NFC')
+    const desc = rawDesc.normalize('NFC')
+    const category = post.category.normalize('NFC')
+    const author = post.author.normalize('NFC')
+    const content = post.content ? post.content.normalize('NFC') : ''
 
     // Title match (highest priority)
     if (title.toLowerCase().includes(q)) {
@@ -41,7 +50,7 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
         results.push({
           ...post,
           matchType: 'title',
-          matchText: title,
+          matchText: rawTitle,
         })
         seen.add(post.slug)
       }
@@ -54,7 +63,7 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
         results.push({
           ...post,
           matchType: 'description',
-          matchText: desc,
+          matchText: rawDesc,
         })
         seen.add(post.slug)
       }
@@ -62,7 +71,7 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
     }
 
     // Category match
-    if (post.category.toLowerCase().includes(q)) {
+    if (category.toLowerCase().includes(q)) {
       if (!seen.has(post.slug)) {
         results.push({
           ...post,
@@ -75,7 +84,7 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
     }
 
     // Author match
-    if (post.author.toLowerCase().includes(q)) {
+    if (author.toLowerCase().includes(q)) {
       if (!seen.has(post.slug)) {
         results.push({
           ...post,
@@ -88,12 +97,12 @@ export function searchPosts(posts: PostMeta[], query: string, lang?: string): Se
     }
 
     // Content body match (fallback search)
-    if (post.content && post.content.toLowerCase().includes(q)) {
+    if (content && content.toLowerCase().includes(q)) {
       if (!seen.has(post.slug)) {
         results.push({
           ...post,
           matchType: 'content',
-          matchText: findContextSnippet(post.content, q),
+          matchText: findContextSnippet(content, q),
         })
         seen.add(post.slug)
       }
@@ -123,13 +132,14 @@ export function getCategories(posts: PostMeta[]): string[] {
  * Highlight matching text (for UI display)
  */
 export function highlightMatch(text: string, query: string): string {
-  const q = query.toLowerCase()
-  const idx = text.toLowerCase().indexOf(q)
+  const normText = text.normalize('NFC')
+  const q = query.normalize('NFC').toLowerCase()
+  const idx = normText.toLowerCase().indexOf(q)
   if (idx === -1) return text
 
   return (
-    text.slice(0, idx) +
-    `<mark>${text.slice(idx, idx + q.length)}</mark>` +
-    text.slice(idx + q.length)
+    normText.slice(0, idx) +
+    `<mark>${normText.slice(idx, idx + q.length)}</mark>` +
+    normText.slice(idx + q.length)
   )
 }

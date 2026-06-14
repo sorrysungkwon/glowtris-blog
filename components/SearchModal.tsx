@@ -87,16 +87,17 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
   if (!isOpen) return null
 
   const highlightText = (text: string | undefined | null, search: string) => {
-    const safeText = text || ''
-    if (!search.trim()) return safeText
-    const idx = safeText.toLowerCase().indexOf(search.toLowerCase())
+    const safeText = (text || '').normalize('NFC')
+    const cleanSearch = search.normalize('NFC')
+    if (!cleanSearch.trim()) return safeText
+    const idx = safeText.toLowerCase().indexOf(cleanSearch.toLowerCase())
     if (idx === -1) return safeText
-    const match = safeText.slice(idx, idx + search.length)
+    const match = safeText.slice(idx, idx + cleanSearch.length)
     return (
       <>
         {safeText.slice(0, idx)}
         <mark className="search-highlight-mark">{match}</mark>
-        {safeText.slice(idx + search.length)}
+        {safeText.slice(idx + cleanSearch.length)}
       </>
     )
   }
