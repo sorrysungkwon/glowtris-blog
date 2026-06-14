@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import type { PostMeta } from '@/lib/posts'
 import { searchPosts } from '@/lib/search'
 
@@ -17,7 +17,6 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
 
   useEffect(() => {
     if (isOpen) {
@@ -48,11 +47,6 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
 
   const results = query.trim() ? searchPosts(posts, query) : []
 
-  const handleSelect = (slug: string) => {
-    onClose()
-    router.push(lang === 'ko' ? `/posts/${slug}?lang=ko` : `/posts/${slug}`)
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (results.length === 0) return
 
@@ -66,7 +60,9 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
       e.preventDefault()
       const targetIdx = selectedIndex > -1 ? selectedIndex : 0
       if (results[targetIdx]) {
-        handleSelect(results[targetIdx].slug)
+        const slug = results[targetIdx].slug
+        onClose()
+        window.location.href = lang === 'ko' ? `/posts/${slug}?lang=ko` : `/posts/${slug}`
       }
     }
   }
@@ -142,10 +138,11 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
             </div>
           ) : (
             results.map((item, idx) => (
-              <div
+              <Link
                 key={item.slug}
+                href={lang === 'ko' ? `/posts/${item.slug}?lang=ko` : `/posts/${item.slug}`}
                 className={`search-modal-item ${selectedIndex === idx ? 'selected' : ''}`}
-                onClick={() => handleSelect(item.slug)}
+                onClick={onClose}
                 onMouseEnter={() => setSelectedIndex(idx)}
               >
                 <div className="search-modal-item-meta">
@@ -162,7 +159,7 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
                     </span>
                   </div>
                 )}
-              </div>
+              </Link>
             ))
           )}
         </div>
