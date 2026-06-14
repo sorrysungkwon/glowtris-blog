@@ -86,7 +86,7 @@ export default function PostGrid({ posts, lang }: Props) {
               type="text"
               className="search-input"
               readOnly
-              placeholder={lang === 'ko' ? '포스트 검색... (⌘K)' : 'Search posts... (⌘K)'}
+              placeholder={lang === 'ko' ? '포스트 검색...' : 'Search posts...'}
               aria-label="Search posts"
               style={{ cursor: 'pointer' }}
             />
