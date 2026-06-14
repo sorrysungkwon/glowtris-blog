@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { PostMeta } from '@/lib/posts'
 import { searchPosts } from '@/lib/search'
+import { formatDate } from '@/lib/utils'
 
 interface Props {
   isOpen: boolean
@@ -150,7 +151,7 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
               >
                 <div className="search-modal-item-meta">
                   <span className="search-modal-item-category">{item.category}</span>
-                  <span className="search-modal-item-date">{item.date}</span>
+                  <span className="search-modal-item-date">{formatDate(item.date)}</span>
                 </div>
                 <div className="search-modal-item-title">
                   {highlightText(lang === 'ko' ? (item.title_ko ?? item.title) : item.title, query)}
