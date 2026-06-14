@@ -18,7 +18,7 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  const results = query.trim() ? searchPosts(posts, query) : []
+  const results = query.trim() ? searchPosts(posts, query, lang) : []
   const resultsCount = results.length
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function SearchModal({ isOpen, onClose, posts, lang }: Props) {
                   <span className="search-modal-item-date">{item.date}</span>
                 </div>
                 <div className="search-modal-item-title">
-                  {highlightText(item.title, query)}
+                  {highlightText(lang === 'ko' ? (item.title_ko ?? item.title) : item.title, query)}
                 </div>
                 {item.matchType !== 'title' && (
                   <div className="search-modal-item-match">

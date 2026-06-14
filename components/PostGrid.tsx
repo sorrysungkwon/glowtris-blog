@@ -34,7 +34,7 @@ export default function PostGrid({ posts, lang }: Props) {
   )
 
   const query = searchQuery.trim()
-  const searched = query ? searchPosts(posts, query) : posts
+  const searched = query ? searchPosts(posts, query, lang) : posts
   const filtered = active === 'ALL' ? searched : searched.filter(p => p.category === active)
 
   // Disable featured layout when a search query is active
