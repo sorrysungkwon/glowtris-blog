@@ -1,4 +1,5 @@
 import { getPost, getSlugs, getAllPostMeta } from '@/lib/posts'
+import DocHighlight from '@/components/DocHighlight'
 import { formatDate } from '@/lib/utils'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
@@ -93,6 +94,8 @@ export default async function PostPage({ params, searchParams }: Props) {
       <article className="mdx">
         <MDXRemote source={post.content} />
       </article>
+
+      <DocHighlight />
 
       <GlowtrisCTA lang={lang} />
 
