@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PostCard from './PostCard'
 import type { PostMeta } from '@/lib/posts'
 import { searchPosts } from '@/lib/search'
+import SearchModal from './SearchModal'
 
 const ALL_CATEGORIES = ['ALL', 'DEV', 'DESIGN', 'UPDATE', 'GUIDE', 'NOTICE', 'STORIES']
 
@@ -15,6 +16,18 @@ interface Props {
 export default function PostGrid({ posts, lang }: Props) {
   const [active, setActive] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const available = ALL_CATEGORIES.filter(
     c => c === 'ALL' || posts.some(p => p.category === c)
@@ -53,7 +66,7 @@ export default function PostGrid({ posts, lang }: Props) {
         </div>
 
         {/* Search bar */}
-        <div className="search-section">
+        <div className="search-section" onClick={() => setIsSearchOpen(true)}>
           <div className="search-input-wrapper">
             <svg
               className="search-icon"
@@ -72,21 +85,12 @@ export default function PostGrid({ posts, lang }: Props) {
             <input
               type="text"
               className="search-input"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={lang === 'ko' ? '포스트 검색...' : 'Search posts...'}
+              readOnly
+              placeholder={lang === 'ko' ? '포스트 검색... (⌘K)' : 'Search posts... (⌘K)'}
               aria-label="Search posts"
+              style={{ cursor: 'pointer' }}
             />
-            {searchQuery && (
-              <button
-                className="search-clear-btn"
-                onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
-                title="Clear search"
-              >
-                ×
-              </button>
-            )}
+            <kbd className="search-shortcut-badge">⌘K</kbd>
           </div>
         </div>
       </div>
@@ -118,6 +122,13 @@ export default function PostGrid({ posts, lang }: Props) {
           </p>
         )}
       </div>
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        posts={posts}
+        lang={lang}
+      />
     </>
   )
 }
