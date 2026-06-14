@@ -90,7 +90,7 @@ export default function PostGrid({ posts, lang }: Props) {
               aria-label="Search posts"
               style={{ cursor: 'pointer' }}
             />
-            <kbd className="search-shortcut-badge">⌘K</kbd>
+            <kbd className="search-shortcut-badge">⌘ K</kbd>
           </div>
         </div>
       </div>
