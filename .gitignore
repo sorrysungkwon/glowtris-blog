@@ -2,10 +2,15 @@ node_modules/
 .next/
 .vercel/
 
-# Sensitive credentials - NEVER commit
+# Secrets — never commit, rsync to new servers
 .env*
 !.env.example
 CREDENTIALS.md
+MONETIZATION.md
+GROWTHPLAN.md
 **/secrets.*
 **/credentials.*
-.vercel
+
+# Local-only artifacts
+*.original.md
+caveman.md
