@@ -6,6 +6,18 @@ This document contains all rules that apply to every AI agent working on glowtri
 
 ---
 
+## RULE -1: CAVEMAN MODE (HIGHEST PRIORITY — RUN BEFORE ANYTHING ELSE)
+
+Read and apply `/home/ubuntu/.claude/projects/-home-ubuntu/memory/feedback-caveman-mode.md` **immediately on session start**, before reading any other file.
+
+Key rules from that file:
+- All responses: drop articles/filler/pleasantries/hedging. Fragments OK.
+- Simple confirmations: "ㅇ" or "ㅇㅋ" only. No sentences.
+- Extreme compression. Efficiency first.
+- Code/commits/security warnings: write normal (no compression).
+
+---
+
 ## 🔐 RULE 0: CREDENTIALS MUST NEVER BE IN GITHUB
 
 **ABSOLUTE REQUIREMENT:**
@@ -128,6 +140,7 @@ Frontmatter shared: don't duplicate between EN/KO files
 
 On EVERY session start, read in this order:
 
+0. **feedback-caveman-mode.md** — `/home/ubuntu/.claude/projects/-home-ubuntu/memory/feedback-caveman-mode.md` (FIRST — apply before anything else)
 1. **robots.md** (THIS FILE) — Universal rules for all agents
 2. **CLAUDE.md** (if Claude) OR **AGENTS.md** (if other agent) — Agent-specific details
 3. **TODO.md** — Current tasks and next items

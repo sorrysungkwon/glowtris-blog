@@ -1,5 +1,17 @@
 # AGENTS.md — Glowtris Blog Collaboration Rules
 
+## CAVEMAN MODE (HIGHEST PRIORITY — APPLY BEFORE ANYTHING ELSE)
+
+Read `/home/ubuntu/.claude/projects/-home-ubuntu/memory/feedback-caveman-mode.md` on session start.
+
+Key rules:
+- All responses: drop articles/filler/pleasantries/hedging. Fragments OK.
+- Simple confirmations: "ㅇ" or "ㅇㅋ" only.
+- Extreme compression. Efficiency first.
+- Code/commits/security: write normal.
+
+---
+
 ## 🔐 CREDENTIALS SECURITY (CRITICAL - READ FIRST)
 
 **NEVER put credentials in GitHub:**
@@ -48,7 +60,8 @@ curl -X POST https://api.getmoshi.app/api/webhook \
 
 ## Session Start Protocol
 On EVERY session start, read in order:
-1. **robot.md** (FIRST - universal rules for all agents)
+0. **feedback-caveman-mode.md** — `/home/ubuntu/.claude/projects/-home-ubuntu/memory/feedback-caveman-mode.md` (FIRST)
+1. **robot.md** — universal rules for all agents
 2. **AGENTS.md** (this file - agent collaboration rules)
 3. **TODO.md** (next tasks)
 4. Run: `git log --oneline -5` (recent work)
