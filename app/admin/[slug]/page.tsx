@@ -54,7 +54,7 @@ function computeSeo(fm: string, contentEn: string, contentKo: string): { checks:
 }
 
 function seoColor(score: number): string {
-  return score >= 90 ? '#22c55e' : score >= 70 ? '#f59e0b' : score >= 50 ? '#f97316' : '#ef4444'
+  return score >= 90 ? 'var(--green)' : score >= 70 ? 'var(--amber)' : score >= 50 ? 'var(--amber)' : 'var(--pink)'
 }
 
 /* ── Frontmatter field helpers — keep raw string as source of truth ─────
@@ -596,7 +596,7 @@ export default function PostEditor() {
         }}>
           {newSlug || slug}
           {newSlug && newSlug !== slug && (
-            <span style={{ color: '#f59e0b', marginLeft: '4px' }}>*</span>
+            <span style={{ color: 'var(--amber)', marginLeft: '4px' }}>*</span>
           )}
         </span>
 
@@ -609,10 +609,10 @@ export default function PostEditor() {
               fontSize: '11px',
               fontWeight: 700,
               padding: '3px 10px',
-              borderRadius: '99px',
+              borderRadius: 'var(--r-full)',
               border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
               background: isDraft ? 'rgba(255,149,0,0.10)' : 'rgba(34,197,94,0.10)',
-              color: isDraft ? '#ff9500' : '#22c55e',
+              color: isDraft ? 'var(--amber)' : 'var(--green)',
               cursor: 'pointer',
               letterSpacing: '0.3px',
               transition: 'all 120ms',
@@ -681,10 +681,10 @@ export default function PostEditor() {
                   fontSize: '10px',
                   fontWeight: 700,
                   padding: '3px 8px',
-                  borderRadius: '99px',
+                  borderRadius: 'var(--r-full)',
                   border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
                   background: isDraft ? 'rgba(255,149,0,0.12)' : 'rgba(34,197,94,0.12)',
-                  color: isDraft ? '#ff9500' : '#22c55e',
+                  color: isDraft ? 'var(--amber)' : 'var(--green)',
                   cursor: 'pointer',
                   flexShrink: 0,
                   letterSpacing: '0.3px',
@@ -734,10 +734,10 @@ export default function PostEditor() {
         style={{
           width: '100%',
           padding: '10px',
-          borderRadius: '8px',
+          borderRadius: 'var(--r-md)',
           border: isDraft ? '1px solid #ff9500' : '1px solid #22c55e',
           background: isDraft ? 'rgba(255,149,0,0.10)' : 'rgba(34,197,94,0.10)',
-          color: isDraft ? '#ff9500' : '#22c55e',
+          color: isDraft ? 'var(--amber)' : 'var(--green)',
           fontWeight: 700,
           fontSize: '13px',
           cursor: 'pointer',
@@ -826,7 +826,7 @@ export default function PostEditor() {
           alignItems: 'flex-start',
           gap: '10px',
           fontSize: '12px',
-          color: '#f59e0b',
+          color: 'var(--amber)',
           lineHeight: 1.5,
         }}>
           <MI icon="auto_fix_high" size={14} />
@@ -839,7 +839,7 @@ export default function PostEditor() {
           </div>
           <button
             onClick={() => setAutoFixWarning([])}
-            style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 0 0 4px', flexShrink: 0 }}
+            style={{ background: 'none', border: 'none', color: 'var(--amber)', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 0 0 4px', flexShrink: 0 }}
           >×</button>
         </div>
       )}
@@ -881,7 +881,7 @@ export default function PostEditor() {
     fontSize: '12.5px',
     background: 'var(--surface)',
     border: '1px solid var(--border)',
-    borderRadius: '6px',
+    borderRadius: 'var(--r-sm)',
     color: 'var(--text-body)',
     outline: 'none',
     fontFamily: 'inherit',
@@ -895,7 +895,7 @@ export default function PostEditor() {
     display: 'block',
     marginBottom: '3px',
   }
-  const descLenColor = (n: number) => (n >= 100 && n <= 160 ? '#22c55e' : n === 0 ? 'var(--text-faint)' : '#f59e0b')
+  const descLenColor = (n: number) => (n >= 100 && n <= 160 ? 'var(--green)' : n === 0 ? 'var(--text-faint)' : 'var(--amber)')
 
   const fmLabelBar = (
     <div className="pane-label">
@@ -909,7 +909,7 @@ export default function PostEditor() {
           fontSize: '10px',
           fontWeight: 700,
           padding: '2px 8px',
-          borderRadius: '99px',
+          borderRadius: 'var(--r-full)',
           border: '1px solid var(--border)',
           background: 'var(--surface)',
           color: 'var(--text-muted)',
@@ -937,7 +937,7 @@ export default function PostEditor() {
           <div>
             <label style={fmLabelStyle}>
               Slug
-              <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', textTransform: 'none', fontWeight: 400, color: newSlug !== slug ? '#f59e0b' : 'var(--text-faint)' }}>
+              <span style={{ marginLeft: '6px', fontFamily: 'var(--font-mono)', textTransform: 'none', fontWeight: 400, color: newSlug !== slug ? 'var(--amber)' : 'var(--text-faint)' }}>
                 {newSlug !== slug ? `(was: ${slug})` : '— URL identifier'}
               </span>
             </label>
@@ -954,7 +954,7 @@ export default function PostEditor() {
               spellCheck={false}
             />
             {slugError && (
-              <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '3px', display: 'block' }}>
+              <span style={{ fontSize: '11px', color: 'var(--pink)', marginTop: '3px', display: 'block' }}>
                 {slugError}
               </span>
             )}
@@ -1022,7 +1022,7 @@ export default function PostEditor() {
             <label style={fmLabelStyle}>Cover gradient</label>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input style={{ ...fmInputStyle, fontFamily: 'var(--font-mono)', fontSize: '11px' }} value={fmField('coverGradient')} onChange={e => updateFm('coverGradient', e.target.value ? fmQuote(e.target.value) : null)} placeholder="linear-gradient(…)" />
-              <div style={{ width: '32px', height: '32px', borderRadius: '6px', flexShrink: 0, border: '1px solid var(--border)', background: fmField('coverGradient') || 'var(--surface-2)' }} />
+              <div style={{ width: '32px', height: '32px', borderRadius: 'var(--r-sm)', flexShrink: 0, border: '1px solid var(--border)', background: fmField('coverGradient') || 'var(--surface-2)' }} />
             </div>
           </div>
 
@@ -1267,7 +1267,7 @@ export default function PostEditor() {
         <div style={{
           background: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: '12px',
+          borderRadius: 'var(--r-lg)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
           width: '300px',
           maxHeight: '480px',
@@ -1292,7 +1292,7 @@ export default function PostEditor() {
             color: failedCrit.length > 0 ? 'var(--text-primary)' : 'var(--text-muted)',
             background: 'var(--surface-2)',
             border: '1px solid var(--border)',
-            borderRadius: '8px',
+            borderRadius: 'var(--r-md)',
             padding: '8px 10px',
           }}>
             {seoSummary}
@@ -1303,7 +1303,7 @@ export default function PostEditor() {
             <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Critical</div>
             {criticalChecks.map(c => (
               <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : '#ef4444', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'cancel'} size={12} /></span>
+                <span style={{ fontSize: '12px', color: c.pass ? 'var(--green)' : 'var(--pink)', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'cancel'} size={12} /></span>
                 <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
               </div>
             ))}
@@ -1314,7 +1314,7 @@ export default function PostEditor() {
             <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '6px' }}>Recommended</div>
             {recChecks.map(c => (
               <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '12px', color: c.pass ? '#22c55e' : 'var(--text-faint)', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'radio_button_unchecked'} size={12} /></span>
+                <span style={{ fontSize: '12px', color: c.pass ? 'var(--green)' : 'var(--text-faint)', flexShrink: 0, marginTop: '1px' }}><MI icon={c.pass ? 'check_circle' : 'radio_button_unchecked'} size={12} /></span>
                 <span style={{ fontSize: '12px', color: c.pass ? 'var(--text-muted)' : 'var(--text-primary)', lineHeight: 1.4 }}>{c.label}</span>
               </div>
             ))}
