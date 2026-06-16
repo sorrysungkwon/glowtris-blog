@@ -105,14 +105,14 @@ function LangSection({
   onCaption: (v: string) => void
   inputStyle: React.CSSProperties
 }) {
-  const accent = lang === 'EN' ? 'var(--cyan)' : '#f59e0b'
+  const accent = lang === 'EN' ? 'var(--cyan)' : 'var(--amber)'
   const accentBg = lang === 'EN' ? 'rgba(37,99,235,0.07)' : 'rgba(245,158,11,0.07)'
   const accentBorder = lang === 'EN' ? 'rgba(37,99,235,0.25)' : 'rgba(245,158,11,0.25)'
 
   return (
     <div style={{
       border: `1px solid ${accentBorder}`,
-      borderRadius: '8px',
+      borderRadius: 'var(--r-md)',
       overflow: 'hidden',
     }}>
       {/* Section header */}
@@ -239,7 +239,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
     fontSize: '12.5px',
     background: 'var(--bg)',
     border: '1px solid var(--border)',
-    borderRadius: '6px',
+    borderRadius: 'var(--r-sm)',
     color: 'var(--text-body)',
     outline: 'none',
     fontFamily: 'inherit',
@@ -260,7 +260,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
       >
         {/* Card */}
         <div
-          style={{ background: 'var(--surface)', borderRadius: '14px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', overflow: 'hidden' }}
+          style={{ background: 'var(--surface)', borderRadius: 'var(--r-xl)', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', overflow: 'hidden' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
@@ -271,7 +271,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
             </span>
             <button
               onClick={onClose}
-              style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-faint)', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
+              style={{ border: 'none', background: 'var(--green)', cursor: 'pointer', color: 'var(--text-faint)', padding: '4px', borderRadius: 'var(--r-xs)', display: 'flex', alignItems: 'center' }}
               title="Close"
             >
               <span className="material-icons-round" style={{ fontSize: '18px' }}>close</span>
@@ -289,7 +289,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                 onClick={() => fileInputRef.current?.click()}
                 style={{
                   border: `2px dashed ${isDragging ? 'var(--cyan)' : 'var(--border-hi)'}`,
-                  borderRadius: '10px',
+                  borderRadius: 'var(--r-lg)',
                   padding: '44px 24px',
                   textAlign: 'center',
                   cursor: 'pointer',
@@ -307,7 +307,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>
                   or click to browse files
                 </p>
-                <span style={{ fontSize: '11px', color: 'var(--text-faint)', background: 'var(--surface-3)', padding: '4px 10px', borderRadius: '99px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-faint)', background: 'var(--surface-3)', padding: '4px 10px', borderRadius: 'var(--r-full)' }}>
                   PNG · JPEG · WebP · AVIF · GIF · max 5 MB
                 </span>
               </div>
@@ -328,12 +328,12 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
             {(phase === 'ready' || phase === 'uploading') && compressed && (
               <>
                 {/* Preview */}
-                <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)', maxHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)', maxHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                   <img src={preview} alt="preview" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block' }} />
                   {phase === 'ready' && (
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '6px', color: '#fff', fontSize: '11px', fontWeight: 600, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: 'var(--r-sm)', color: 'var(--bg)', fontSize: '11px', fontWeight: 600, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
                       <span className="material-icons-round" style={{ fontSize: '12px' }}>swap_horiz</span>
                       Change
@@ -342,7 +342,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                 </div>
 
                 {/* Size info pill */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', background: 'var(--surface-2)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', background: 'var(--surface-2)', borderRadius: 'var(--r-md)', fontSize: '12px', color: 'var(--text-muted)' }}>
                   <span className="material-icons-round" style={{ fontSize: '15px', color: savedPct > 0 ? '#22c55e' : 'var(--text-faint)', flexShrink: 0 }}>
                     {savedPct > 0 ? 'compress' : 'check_circle'}
                   </span>
@@ -350,7 +350,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                     <span>
                       {fmtBytes(originalSize)}
                       <span style={{ color: 'var(--text-faint)', margin: '0 6px' }}>→</span>
-                      <strong style={{ color: '#22c55e' }}>{fmtBytes(compressed.size)}</strong>
+                      <strong style={{ color: 'var(--green)' }}>{fmtBytes(compressed.size)}</strong>
                       <span style={{ color: 'var(--text-faint)', marginLeft: '6px' }}>WebP · {savedPct}% smaller</span>
                     </span>
                   ) : (
@@ -403,13 +403,13 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                       </span>
                       <span style={{ color: progress === 100 ? '#22c55e' : 'var(--text-primary)' }}>{progress}%</span>
                     </div>
-                    <div style={{ height: '8px', background: 'var(--surface-3)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{ height: '8px', background: 'var(--surface-3)', borderRadius: 'var(--r-full)', overflow: 'hidden' }}>
                       <div
                         style={{
                           height: '100%',
                           width: `${progress}%`,
                           background: progress === 100 ? '#22c55e' : 'var(--cyan)',
-                          borderRadius: '99px',
+                          borderRadius: 'var(--r-full)',
                           transition: 'width 0.2s ease, background 0.3s',
                         }}
                       />
@@ -419,7 +419,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
 
                 {/* Error */}
                 {error && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: '8px', fontSize: '12px', color: '#ef4444' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', background: 'color-mix(in srgb, var(--pink) 8%, transparent)', borderRadius: 'var(--r-md)', fontSize: '12px', color: 'var(--pink)' }}>
                     <span className="material-icons-round" style={{ fontSize: '14px', flexShrink: 0 }}>error</span>
                     {error}
                   </div>
@@ -430,13 +430,13 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button
                       onClick={onClose}
-                      style={{ padding: '9px 16px', fontSize: '13px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-body)', cursor: 'pointer', fontWeight: 500 }}
+                      style={{ padding: '9px 16px', fontSize: '13px', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-body)', cursor: 'pointer', fontWeight: 500 }}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleUpload}
-                      style={{ padding: '9px 18px', fontSize: '13px', fontWeight: 700, borderRadius: '8px', border: 'none', background: 'var(--cyan)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ padding: '9px 18px', fontSize: '13px', fontWeight: 700, borderRadius: 'var(--r-md)', border: 'none', background: 'var(--cyan)', color: 'var(--bg)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span className="material-icons-round" style={{ fontSize: '15px' }}>cloud_upload</span>
                       Upload & Insert
@@ -448,7 +448,7 @@ export default function ImageUploadModal({ onInsert, onClose }: Props) {
 
             {/* Top-level error (idle phase) */}
             {error && phase === 'idle' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: '8px', fontSize: '12px', color: '#ef4444' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', background: 'color-mix(in srgb, var(--pink) 8%, transparent)', borderRadius: 'var(--r-md)', fontSize: '12px', color: 'var(--pink)' }}>
                 <span className="material-icons-round" style={{ fontSize: '14px' }}>error</span>
                 {error}
               </div>

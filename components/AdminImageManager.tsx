@@ -158,14 +158,14 @@ export default function AdminImageManager() {
         onClick={() => fileInputRef.current?.click()}
         style={{
           border: '2px dashed var(--border)',
-          borderRadius: '16px',
+          borderRadius: 'var(--r-xl)',
           padding: '40px 20px',
           textAlign: 'center',
           cursor: 'pointer',
           background: dragActive
             ? 'var(--accent-dim, rgba(6, 182, 212, 0.08))'
             : 'var(--surface-raised, rgba(255, 255, 255, 0.02))',
-          borderColor: dragActive ? 'var(--accent, #06b6d4)' : 'var(--border)',
+          borderColor: dragActive ? 'var(--cyan)' : 'var(--border)',
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           display: 'flex',
           flexDirection: 'column',
@@ -185,7 +185,7 @@ export default function AdminImageManager() {
           className="material-icons-round"
           style={{
             fontSize: '40px',
-            color: dragActive ? 'var(--accent, #06b6d4)' : 'var(--text-faint)',
+            color: dragActive ? 'var(--cyan)' : 'var(--text-faint)',
             transition: 'color 0.2s',
           }}
         >
@@ -220,7 +220,7 @@ export default function AdminImageManager() {
             textAlign: 'center',
             padding: '64px 0',
             border: '1px solid var(--border)',
-            borderRadius: '16px',
+            borderRadius: 'var(--r-xl)',
             color: 'var(--text-faint)',
             background: 'var(--surface-raised, rgba(255, 255, 255, 0.01))',
           }}
@@ -253,7 +253,7 @@ export default function AdminImageManager() {
                   display: 'flex',
                   flexDirection: 'column',
                   padding: '12px',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--r-lg)',
                   border: '1px solid var(--border)',
                   background: 'var(--surface-raised, rgba(255,255,255,0.01))',
                   position: 'relative',
@@ -267,7 +267,7 @@ export default function AdminImageManager() {
                     width: '100%',
                     paddingBottom: '65%',
                     position: 'relative',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--r-md)',
                     backgroundColor: 'rgba(0,0,0,0.2)',
                     overflow: 'hidden',
                     marginBottom: '12px',
@@ -293,14 +293,14 @@ export default function AdminImageManager() {
                       top: '8px',
                       right: '8px',
                       padding: '4px 8px',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--r-lg)',
                       fontSize: '10px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
                       background: isUsed ? 'rgba(16, 185, 129, 0.9)' : 'rgba(107, 114, 128, 0.9)',
-                      color: '#fff',
+                      color: 'var(--bg)',
                       backdropFilter: 'blur(4px)',
                       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                     }}
@@ -386,8 +386,8 @@ export default function AdminImageManager() {
                             padding: '2px 6px',
                             background: 'rgba(255,255,255,0.04)',
                             border: '1px solid var(--border)',
-                            borderRadius: '4px',
-                            color: 'var(--text-muted)',
+                            borderRadius: 'var(--r-xs)',
+                            color: 'var(--cyan)',
                             textDecoration: 'none',
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -411,10 +411,10 @@ export default function AdminImageManager() {
                         <div
                           style={{
                             fontSize: '10px',
-                            color: 'var(--red, #ef4444)',
+                            color: 'var(--pink)',
                             background: 'rgba(239, 68, 68, 0.08)',
                             padding: '6px',
-                            borderRadius: '6px',
+                            borderRadius: 'var(--r-sm)',
                             border: '1px solid rgba(239, 68, 68, 0.2)',
                             textAlign: 'center',
                             fontWeight: 500,
@@ -469,7 +469,7 @@ export default function AdminImageManager() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: '4px',
-                          background: isCopiedMd ? '#10b981' : undefined,
+                          background: isCopiedMd ? 'var(--green)' : undefined,
                         }}
                       >
                         <span className="material-icons-round" style={{ fontSize: '12px' }}>
@@ -489,8 +489,8 @@ export default function AdminImageManager() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: '4px',
-                          background: isCopiedUrl ? '#10b981' : undefined,
-                          color: isCopiedUrl ? '#fff' : undefined,
+                          background: isCopiedUrl ? 'var(--green)' : undefined,
+                          color: isCopiedUrl ? 'var(--bg)' : undefined,
                         }}
                       >
                         <span className="material-icons-round" style={{ fontSize: '12px' }}>
@@ -508,7 +508,7 @@ export default function AdminImageManager() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           borderColor: 'rgba(239, 68, 68, 0.2)',
-                          color: 'var(--red, #ef4444)',
+                          color: 'var(--pink)',
                         }}
                         title="Delete Image"
                       >

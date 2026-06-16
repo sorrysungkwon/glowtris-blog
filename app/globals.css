@@ -575,7 +575,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 ::selection {
   background: var(--cyan);
-  color: #fff;
+  color: var(--bg);
 }
 
 .material-icons-round {
@@ -985,7 +985,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   align-items: center;
   padding: 12px 24px;
   background: var(--cyan);
-  color: #000;
+  color: var(--bg);
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.5px;
@@ -1140,11 +1140,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .admin-error {
   padding: 10px 14px;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
+  background: color-mix(in srgb, var(--pink) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pink) 20%, transparent);
   border-radius: var(--r-md);
   font-size: 13px;
-  color: #ef4444;
+  color: var(--pink);
 }
 
 /* Admin buttons — Similarity: all share same base shape/weight */
@@ -1204,14 +1204,14 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 
 .admin-btn-danger {
-  background: rgba(239,68,68,0.08);
-  color: #ef4444;
-  border-color: rgba(239,68,68,0.2);
+  background: color-mix(in srgb, var(--pink) 8%, transparent);
+  color: var(--pink);
+  border-color: color-mix(in srgb, var(--pink) 20%, transparent);
 }
 .admin-btn-danger:hover:not(:disabled) {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
+  background: var(--pink);
+  color: var(--bg);
+  border-color: var(--pink);
 }
 
 .admin-btn-warning {
@@ -1417,7 +1417,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .editor-lang-btn {
   padding: 5px 12px;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   font-size: 12px;
   font-weight: 700;
   background: transparent;
@@ -1458,9 +1458,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border-bottom: 1px solid transparent;
 }
 .editor-notify.error {
-  background: rgba(239,68,68,0.08);
-  color: #ef4444;
-  border-color: rgba(239,68,68,0.15);
+  background: color-mix(in srgb, var(--pink) 8%, transparent);
+  color: var(--pink);
+  border-color: color-mix(in srgb, var(--pink) 15%, transparent);
 }
 .editor-notify.success {
   background: rgba(5,150,105,0.08);
@@ -1950,9 +1950,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   left: 40px;
   width: 60px;
   height: 15px;
-  background: rgba(0, 240, 240, 0.12);
-  border-color: #00f0f0;
-  box-shadow: 0 0 10px rgba(0, 240, 240, 0.4);
+  background: color-mix(in srgb, var(--cyan) 12%, transparent);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 40%, transparent);
   transform: rotate(-15deg);
   animation: fall-rotate-1 6s infinite ease-in-out;
 }
@@ -1962,9 +1962,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   right: 50px;
   width: 45px;
   height: 30px;
-  background: rgba(160, 0, 240, 0.1);
-  border-color: #a000f0;
-  box-shadow: 0 0 10px rgba(160, 0, 240, 0.35);
+  background: color-mix(in srgb, var(--purple) 10%, transparent);
+  border-color: var(--purple);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--purple) 35%, transparent);
   transform: rotate(20deg);
   clip-path: polygon(0% 50%, 33.3% 50%, 33.3% 0%, 66.6% 0%, 66.6% 50%, 100% 50%, 100% 100%, 0% 100%);
   animation: fall-rotate-2 7s infinite ease-in-out;
@@ -1975,9 +1975,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   left: 90px;
   width: 30px;
   height: 30px;
-  background: rgba(240, 240, 0, 0.1);
-  border-color: #f0f000;
-  box-shadow: 0 0 10px rgba(240, 240, 0, 0.3);
+  background: color-mix(in srgb, var(--amber) 10%, transparent);
+  border-color: var(--amber);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--amber) 30%, transparent);
   transform: rotate(10deg);
   animation: fall-rotate-3 8s infinite ease-in-out;
 }
