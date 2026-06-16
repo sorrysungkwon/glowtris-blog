@@ -200,8 +200,21 @@ If rules conflict or are unclear:
 2. Check TODO.md for current work
 3. Report conflict in next commit message or to user
 
+## Rule 11: Docs Synchronization Protocol
+
+When the user asks to "sync docs" or "싱크해줘":
+1. Run `/home/ubuntu/docs/sync-docs.sh` to update symlinks and `_sidebar.md`.
+2. Commit and push the changes in the private docs repository:
+   ```bash
+   cd /home/ubuntu/docs
+   git add .
+   git commit -m "docs: auto-sync update"
+   git push origin master
+   ```
+3. Project-specific docs are symlinked into `/home/ubuntu/docs`. This command only pushes the symlinks and root server docs to the private `glowtris-docs` repo.
+
 ---
 
-**Last Updated**: 2026-06-12  
+**Last Updated**: 2026-06-16  
 **Scope**: glowtris-blog (all agents)  
 **Parent Document**: Sync protocol defined in glowtris memory system
