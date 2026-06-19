@@ -1,0 +1,114 @@
+---
+title: "A Designer's Obsession: Flawlessly Fixing Giscus Iframe Layout Shift (CLS)"
+description: "How a designer's eye caught a 1px error and 0.1s flicker. Fixing iframe layout shifts with CSS Grid overlay and postMessage control."
+date: 2026-06-19
+category: DESIGN
+author: sorrysungkwon
+authorEmoji: 🎨
+readingTime: 6
+coverGradient: "linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)"
+coverEmoji: 🔍
+featured: false
+---
+
+> **TL;DR**
+> - **Problem:** Layout shifts (footer jumping) and an out-of-place spinner when loading the external Giscus widget.
+> - **Solution:** Controlled rendering timing perfectly using a CSS Grid overlap (`grid-area: overlap`) and intercepting `postMessage` events.
+> - **Result:** A 100% seamlessly integrated comment section with zero pixel mismatch or flickering.
+
+---
+
+When building a static or Next.js blog, **Giscus** (based on GitHub Discussions) is often the best choice. It's serverless and supports markdown out of the box.
+
+However, as a designer, there was a glaring issue that bothered my eyes. It was the **screen flickering (Layout Shift) that occurred during the iframe's asynchronous loading**, and the **out-of-place loading spinner** that completely broke my design system.
+
+Most developers would probably say, "The feature works fine, external widgets just behave like that." But for a designer who cannot stand a single pixel or padding value being off, that 0.5-second 'flicker' was an unacceptable disaster.
+
+Today, I'm sharing my 'record of obsession'—how I turned on the browser DevTools, inspected paddings and borders pixel-by-pixel, and architected a 100% flawless integration of Giscus into my blog.
+
+---
+
+## 1. The Fluttering Footer and Layout Shift
+
+When integrating Giscus, developers typically use a **Skeleton UI** to fill the empty space while the iframe is loading.
+
+```tsx
+// ❌ Function-first (and visually annoying) approach
+{isLoading ? <SkeletonUI /> : <Giscus />}
+```
+
+The fatal flaw of this method is that in the split second the components are swapped, the height drops to 0 or shifts, causing **the footer at the bottom of the page to jump up and down**. This completely ruins the UX for users scrolling down after finishing an article.
+
+### ✅ Solution: Flawless CSS Grid Overlap
+
+To solve this, my design approach was not to have the skeleton and iframe 'swap' places, but to **architect them to overlap in the exact same space from the beginning**.
+
+By applying `display: grid` to the parent container, I forced both elements into the same `grid-area`.
+
+```css
+.giscus-grid {
+  display: grid;
+  grid-template-areas: "overlap";
+}
+
+.skeleton-wrapper, .giscus-frame {
+  grid-area: overlap;
+  transition: opacity 0.5s ease-in-out;
+}
+```
+
+This way, even after the iframe finishes loading, the DOM structure doesn't collapse. We simply cross-fade smoothly: the skeleton's `opacity` drops to 0, and the iframe's `opacity` becomes 1. The footer doesn't move a single pixel. As a designer, this is the most satisfying moment.
+
+---
+
+## 2. Removing the GitHub Octocat (Tuning Load Timing)
+
+The layout shift was fixed, but another issue surfaced. As soon as the iframe loaded, the default GitHub loading spinner (the Octocat) flashed briefly before transitioning to the actual comment section.
+
+It completely clashed with my blog's cyber-neon design tone. Furthermore, the gap between the skeleton UI and the actual loaded UI was too jarring.
+
+### ✅ Inspecting Pixels with DevTools
+I directly opened the browser DevTools and measured every single padding, border, and margin value of the `.gsc-comment` inside the Giscus iframe down to the pixel. Then, I tailored my Skeleton UI to **match the actual 0-comment Giscus UI with zero pixel discrepancy**.
+
+### ✅ Timing Control: Intercepting `postMessage`
+When Giscus has the `emitMetadata="1"` setting enabled, it broadcasts its internal state to the parent window via `postMessage`.
+
+Normally, developers assume loading is done as soon as a `resizeHeight` event arrives. But at that exact moment, the data is still loading, so the Octocat spinner appears. To capture the perfect transition timing, I wrote logic to **stubbornly wait until the actual comment data (`discussion` metadata) arrives** before fading out the skeleton.
+
+Now, users don't even get a chance to see the jarring spinner. They simply experience a magical, seamless cross-fade from a perfectly calculated Skeleton UI directly to the real UI.
+
+---
+
+## 3. Reorganizing Mobile Layout Hierarchy
+
+Thought we were done? When checking on mobile (under 500px), the elements in the Giscus header area were a tangled mess. The `[Comment Count]` and `[Sort Dropdown]` were wrapping wildly.
+
+I immediately opened my custom CSS theme (`giscus-dark.css`) and completely overhauled the mobile layout. Unwilling to compromise with a messy `flex` wrap, I introduced **CSS Grid** to strictly enforce the hierarchy.
+
+```css
+@media (max-width: 500px) {
+  .gsc-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 12px 16px !important;
+  }
+  /* Break the internal flex of comment counts and reactions to place them directly on the grid */
+  .gsc-left-header { display: contents !important; }
+  
+  .gsc-comments-count { grid-column: 1 / 2 !important; } /* Top Left */
+  .gsc-right-header   { grid-column: 2 / 3 !important; } /* Top Right */
+  .gsc-reactions      { grid-column: 1 / 3 !important; } /* Bottom Full Width */
+}
+```
+
+Now, on mobile, the comment count sits cleanly on the top left, the sort menu on the top right, and the Reactions stretch perfectly across 100% of the width below them. As a bonus, I cleanly left-aligned the "powered by giscus" text, which was previously floating in the center.
+
+---
+
+## Conclusion
+
+Most visitors will probably never notice all these details.
+
+But to a designer, **'invisible details' are not a subject of compromise, but a measure of perfection.** After checking padding values dozens of times with DevTools, aligning the skeleton pixel-by-pixel, and intercepting iframe communications to control timing, the comment section of this blog has finally melted flawlessly into my design system.
+
+Watching design and code interlock perfectly without compromise—isn't that exactly why we designers can't stop obsessing?
