@@ -9,6 +9,7 @@
     "validate": "npx tsx scripts/validate-posts.ts"
   },
   "dependencies": {
+    "@giscus/react": "^3.1.0",
     "@next/third-parties": "^16.2.9",
     "gray-matter": "^4.0.3",
     "marked": "^18.0.5",

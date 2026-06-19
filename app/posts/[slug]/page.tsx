@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import PostCard from '@/components/PostCard'
 import GlowtrisCTA from '@/components/GlowtrisCTA'
+import GiscusComments from '@/components/GiscusComments'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -98,6 +99,8 @@ export default async function PostPage({ params, searchParams }: Props) {
       <DocHighlight />
 
       <GlowtrisCTA lang={lang} />
+
+      <GiscusComments lang={lang} />
 
       {/* Recommended posts nudge */}
       {postsToShow.length > 0 && (
