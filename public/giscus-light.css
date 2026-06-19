@@ -1,3 +1,5 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+
 main {
   /* Glowtris Light Theme Tokens mapped to Giscus variables */
   --color-canvas-default: transparent; /* Let the blog background show through */

@@ -7,23 +7,22 @@ export default function GiscusComments({ lang }: { lang: string }) {
   const [theme, setTheme] = useState('https://blog.glowtris.com/giscus-dark.css')
 
   useEffect(() => {
-    // Check if body has light-theme class
-    const getThemeUrl = (isLight: boolean) => 
-      `${window.location.origin}/giscus-${isLight ? 'light' : 'dark'}.css`
+    const getThemeUrl = (isDark: boolean) => 
+      `${window.location.origin}/giscus-${isDark ? 'dark' : 'light'}.css`
 
-    const isLight = document.body.classList.contains('light-theme')
-    setTheme(getThemeUrl(isLight))
+    const checkTheme = () => document.documentElement.getAttribute('data-theme') === 'dark'
+    
+    setTheme(getThemeUrl(checkTheme()))
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          const isLightNow = document.body.classList.contains('light-theme')
-          setTheme(getThemeUrl(isLightNow))
+        if (mutation.attributeName === 'data-theme') {
+          setTheme(getThemeUrl(checkTheme()))
         }
       })
     })
 
-    observer.observe(document.body, { attributes: true })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => observer.disconnect()
   }, [])
 
