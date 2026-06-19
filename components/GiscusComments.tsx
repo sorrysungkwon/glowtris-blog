@@ -47,6 +47,14 @@ export default function GiscusComments({ lang }: { lang: string }) {
       if (event.origin !== 'https://giscus.app') return;
       if (!(typeof event.data === 'object' && event.data.giscus)) return;
       
+      const giscusData = event.data.giscus;
+      
+      // Giscus sends preliminary 'resizeHeight' messages while the cat loading spinner is active.
+      // We MUST wait until it actually sends 'discussion' (success) or 'error' (empty/not created).
+      if (!('discussion' in giscusData) && !('error' in giscusData)) {
+        return; // Ignore preliminary messages
+      }
+      
       // Add a slight delay to allow iframe CSS to render completely
       setTimeout(() => setIsLoaded(true), 150);
       clearTimeout(fallbackTimer);
