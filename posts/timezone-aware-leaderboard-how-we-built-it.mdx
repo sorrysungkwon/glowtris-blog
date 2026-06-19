@@ -18,7 +18,7 @@ Then I hopped on a plane, landed in New York, and suddenly I was back in "yester
 
 Did my daily streak break? Nope. Not at all.
 
-## 😱 The Magic of Duolingo
+## The Magic of Duolingo
 
 <figure>
   <img src="https://raw.githubusercontent.com/sorrysungkwon/glowtris-blog/main/public/images/1781395954222-many-faces-of-duo.webp" alt="Dua Lipa (Sorry, it's actually Duolingo)" />
@@ -33,7 +33,7 @@ I needed a leaderboard that resets every midnight... **But whose midnight are we
 
 The answer is **"My midnight."** Regardless of where I am in the world.
 
-## 🔥 The Disaster of UTC Reset
+## The Disaster of UTC Reset
 
 The most one-dimensional approach is wiping the DB entirely at UTC midnight.
 
@@ -41,7 +41,7 @@ But if you do that, players in Seoul will see the leaderboard vanish right at 9 
 
 Should we manage 38 separate leaderboards for every timezone in the world? Server costs would explode, and you'd have the bizarre situation where Seoul players can't compete with their friends in New York.
 
-## 💡 The Solution: Splitting into Date Buckets
+## The Solution: Splitting into Date Buckets
 
 Instead of "wiping" the leaderboard, I changed the architecture to "create a new one per date."
 
@@ -63,7 +63,7 @@ fetch(`/api/leaderboard?date=${localDate}`)
 
 The server simply and blindly serves the leaderboard for that specific date bucket. When midnight passes and the device date changes? The app naturally fetches the next day's bucket. There's absolutely no need to delete old data.
 
-## 🤔 "Wait, couldn't users just fake their date and cheat?"
+## "Wait, couldn't users just fake their date and cheat?"
 
 Absolutely. Trusting the client 100% is suicidal. A user could manipulate the script to send yesterday's date and illegally post high scores on past leaderboards.
 
@@ -81,13 +81,13 @@ function safeClientDate(raw) {
 
 The largest timezone offset on Earth is +14 hours (Kiribati). This means no legitimate user can ever send a local date that differs from current UTC by more than 24 hours. Valid global users pass through smoothly, while malicious manipulations get instantly blocked.
 
-## 🏃‍♂️ Setting the Server TTL to 52 Hours
+## ‍️ Setting the Server TTL to 52 Hours
 
 We can't let these daily Redis buckets pile up forever, so they need a TTL (Time-To-Live). I initially set it to 26 hours, which almost ended in a bloodbath.
 
 The time difference between the start of the day in the earliest timezone (UTC+14) and the end of the day in the latest timezone (UTC-12) is a massive **50 hours**. So, to be safe, I set the TTL to 52 hours.
 
-## ✅ Conclusion and Checklist
+## Conclusion and Checklist
 
 The server shouldn't arrogantly force its UTC time on users. It should simply respect the user's local device time.
 
@@ -98,4 +98,4 @@ If you're building a global service, just remember these 3 things:
 2. Accept the client's local date, but only within a ±24 hour UTC window.
 3. Set your Redis expiration to at least 50 hours.
 
-Have you ever had to tear your server code apart because of timezone nightmares? Share your traumatic timezone stories in the comments! (Please tell me I'm not the only one... 😅)
+Have you ever had to tear your server code apart because of timezone nightmares? Share your traumatic timezone stories in the comments! (Please tell me I'm not the only one... )
