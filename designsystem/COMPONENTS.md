@@ -271,6 +271,32 @@ All transitions use `--ease-out` at `--t-fast` (120ms) or `--t-mid` (200ms).
   <pre class="language-js"><code>...</code></pre>
   <button class="copy-code-btn" aria-label="Copy code">
     <svg class="copy-icon">...</svg>
-  </button>
 </div>
+```
+
+### 11.3 Seamless Iframe Skeleton Overlay (Giscus Comments)
+**Purpose**: Prevents layout shift (footer jump) and provides a smooth transition when loading asynchronous third-party iframes (like Giscus).
+**Strategy**: Use CSS Grid to stack the skeleton and iframe on the exact same grid cell (`grid-area: overlap`).
+
+#### HTML / CSS Pattern
+```html
+<div class="giscus-grid">
+  <div class="skeleton-wrapper" style="opacity: 0;">
+    <!-- Fake UI matching the iframe's loaded layout -->
+    <div class="skeleton-header">...</div>
+    <div class="skeleton-comment">...</div>
+  </div>
+  <iframe class="giscus-frame" style="opacity: 1;"></iframe>
+</div>
+```
+
+```css
+.giscus-grid {
+  display: grid;
+  grid-template-areas: "overlap";
+}
+.skeleton-wrapper, .giscus-frame {
+  grid-area: overlap;
+  transition: opacity 0.5s ease;
+}
 ```
