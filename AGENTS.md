@@ -86,6 +86,11 @@ If sync issues occur between Claude and other agents:
 
 ## Post Writing Guidelines
 - **Mandatory Lead Summary (Simplicity Principle)**: All blog posts must have a summary/lead at the very beginning, similar to a news article lead. This follows the "Simplicity" principle from the book *Made to Stick* (focus on the core message first).
+- **Standard Publishing Flow**:
+  1. **Drafting (KO first)**: AI writes the Korean draft and saves it to the `drafts` branch with `draft: true` in the frontmatter. An empty EN placeholder is created to pass validation.
+  2. **Review**: The user reviews and edits the draft via the Admin dashboard (`Drafts` tab).
+  3. **Translation & SEO**: Upon user approval, AI generates the English translation, updates the slug to be SEO-friendly, and optimizes the Title/Description for SEO.
+  4. **Deployment**: AI removes the `draft: true` flag and pushes to the `main` branch for Vercel auto-deployment.
 
 ---
 **Last Updated**: 2026-06-19  
