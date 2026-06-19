@@ -86,27 +86,31 @@ export default function GiscusComments({ lang }: { lang: string }) {
   }, [])
 
   return (
-    <div className="giscus-wrapper relative min-h-[400px]" style={{ marginTop: '4rem' }}>
-      {/* Display Skeleton until Giscus fires load event */}
-      {!isLoaded && <SkeletonUI />}
-      
-      {/* Keep Giscus in DOM to load, but hide visually until ready to prevent partial renders */}
-      <div className={`giscus-fade ${isLoaded ? 'giscus-loaded' : 'giscus-loading'}`}>
-        <Giscus
-          id="comments"
-          repo="sorrysungkwon/glowtris-blog"
-          repoId="R_kgDOSy2Pqw"
-          category="Show and tell"
-          categoryId="DIC_kwDOSy2Pq84C_ep8"
-          mapping="pathname"
-          strict="0"
-          term="Welcome to @giscus/react component!"
-          reactionsEnabled="1"
-          emitMetadata="1"
-          inputPosition="top"
-          theme={theme}
-          lang={lang}
-        />
+    <div style={{ marginTop: '4rem' }}>
+      <div className="giscus-grid">
+        {/* Skeleton maintains minimum height to prevent footer jump */}
+        <div className={`giscus-grid-item ${isLoaded ? 'giscus-invisible' : 'giscus-visible'}`}>
+          <SkeletonUI />
+        </div>
+        
+        {/* Giscus iframe loads and fades in, overlapping perfectly */}
+        <div className={`giscus-grid-item ${isLoaded ? 'giscus-visible' : 'giscus-invisible'}`}>
+          <Giscus
+            id="comments"
+            repo="sorrysungkwon/glowtris-blog"
+            repoId="R_kgDOSy2Pqw"
+            category="Show and tell"
+            categoryId="DIC_kwDOSy2Pq84C_ep8"
+            mapping="pathname"
+            strict="0"
+            term="Welcome to @giscus/react component!"
+            reactionsEnabled="1"
+            emitMetadata="1"
+            inputPosition="top"
+            theme={theme}
+            lang={lang}
+          />
+        </div>
       </div>
     </div>
   )

@@ -2390,21 +2390,24 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border: 1px solid var(--border);
 }
 
-.giscus-fade {
+.giscus-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+.giscus-grid-item {
+  grid-area: 1 / 1 / 2 / 2;
   width: 100%;
   transition: opacity 0.5s ease;
 }
-.giscus-loaded {
-  opacity: 1;
-  display: block;
-}
-.giscus-loading {
+.giscus-invisible {
   opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -10;
   pointer-events: none;
+  z-index: 0;
+}
+.giscus-visible {
+  opacity: 1;
+  z-index: 10;
 }
 
 
