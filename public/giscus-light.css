@@ -205,8 +205,8 @@ main {
     padding: 12px !important;
     border-radius: 12px !important;
   }
-  .gsc-reply {
-    padding: 12px !important;
+  .gsc-reply > .flex > .w-full {
+    padding: 10px 12px !important;
   }
   .gsc-replies {
     padding-left: 12px !important; /* Tighter thread indentation */
