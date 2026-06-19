@@ -124,10 +124,9 @@ main {
 /* Threading lines (Continuity) */
 .gsc-replies {
   border-left: 2px solid rgba(37,99,235,0.15) !important; /* Subtle brand thread line */
-  margin-left: 24px !important;
-  padding-left: 20px !important;
-  margin-top: -8px !important; /* Pull closer to parent */
-  padding-top: 16px !important;
+  padding-left: 16px !important; /* Space between the line and the child comments */
+  /* Removed forced margin-left so Giscus native avatar alignment works */
+  margin-top: -4px !important; 
 }
 
 /* Nested Comments (Hierarchy & Figure-Ground) */
@@ -137,7 +136,8 @@ main {
   box-shadow: none !important; /* Remove heavy shadow to show it's a child */
   border-radius: 12px !important;
   margin-bottom: 12px !important;
-  padding: 16px !important; /* Ensure it has inner spacing like a card */
+  padding: 12px 16px !important;
+  box-sizing: border-box !important;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
 }
 .gsc-reply:hover {
