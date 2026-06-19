@@ -40,6 +40,8 @@ export default function GiscusComments({ lang }: { lang: string }) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
+    let fallbackTimer: NodeJS.Timeout;
+
     // Listen for Giscus load event to hide Skeleton
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://giscus.app') return;
@@ -47,10 +49,20 @@ export default function GiscusComments({ lang }: { lang: string }) {
       
       // Add a slight delay to allow iframe CSS to render completely
       setTimeout(() => setIsLoaded(true), 150);
+      clearTimeout(fallbackTimer);
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+
+    // Fallback: If Giscus fails to send a message (or event is missed), force load after 3.5s
+    fallbackTimer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 3500);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -94,7 +106,6 @@ export default function GiscusComments({ lang }: { lang: string }) {
           inputPosition="top"
           theme={theme}
           lang={lang}
-          loading="lazy"
         />
       </div>
     </div>
