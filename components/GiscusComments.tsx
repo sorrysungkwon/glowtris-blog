@@ -90,7 +90,7 @@ export default function GiscusComments({ lang }: { lang: string }) {
           strict="0"
           term="Welcome to @giscus/react component!"
           reactionsEnabled="1"
-          emitMetadata="0"
+          emitMetadata="1"
           inputPosition="top"
           theme={theme}
           lang={lang}
