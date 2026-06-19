@@ -6,6 +6,7 @@ Modern tech blog platform for glowtris.com with bilingual (EN/KO) support and we
 
 - 🌍 **Bilingual**: English and Korean posts with language toggle
 - ✏️ **Web Editor**: Live markdown editing with split-pane preview, draft history
+- 💬 **Comments**: Integrated GitHub Discussions (Giscus) with custom seamless UI
 - 🎨 **Modern Design**: Tech blog aesthetic, light/dark mode toggle
 - 🚀 **Auto-Deploy**: Git-based workflow, instant Vercel deployment
 - 🔐 **Admin Auth**: Token-based authentication (30-day expiration, multi-device support)

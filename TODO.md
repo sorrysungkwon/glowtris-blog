@@ -1,6 +1,18 @@
 # Glowtris Blog TODO
 
-## Current Phase: Image System & Image Manager Complete ✅ — Next: Search UI & Discovery
+## Current Phase: Comments Integration Complete ✅ — Next: Content & Discovery
+
+---
+
+### ✅ Completed (Session 2026-06-19)
+
+#### 1. Giscus Comments Integration & Polish
+- [x] Integrate `@giscus/react` for GitHub discussions-based comments on posts.
+- [x] Design custom Giscus themes (`giscus-dark.css`, `giscus-light.css`) using native blog CSS variables to match the design system.
+- [x] Implement Twitter-style continuous vertical thread lines for comment replies with absolute positioning and center alignment.
+- [x] Create a Skeleton UI loader (`SkeletonUI`) using pure CSS animations to prevent Layout Shift.
+- [x] Use CSS Grid (`.giscus-grid`) to overlap Skeleton and iframe for seamless fading transitions without footer jumping.
+- [x] Optimize loading trigger by bypassing GitHub's native loading spinner and waiting specifically for the `discussion` metadata payload from the iframe message.
 
 ---
 
