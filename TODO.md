@@ -13,6 +13,8 @@
 - [x] Create a Skeleton UI loader (`SkeletonUI`) using pure CSS animations to prevent Layout Shift.
 - [x] Use CSS Grid (`.giscus-grid`) to overlap Skeleton and iframe for seamless fading transitions without footer jumping.
 - [x] Optimize loading trigger by bypassing GitHub's native loading spinner and waiting specifically for the `discussion` metadata payload from the iframe message.
+- [x] Refine mobile typography and alignment: left-align 'powered by giscus' footer.
+- [x] Restructure mobile header hierarchy with CSS Grid (`[Count] [Sort]` top row, `[Reactions]` bottom row) for flawless responsive UI.
 
 ---
 
