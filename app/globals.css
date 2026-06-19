@@ -2325,5 +2325,87 @@ button { font-family: inherit; cursor: pointer; border: none; }
   }
 }
 
+/* ─── Skeleton UI & Loaders ─────────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.skeleton-wrapper {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  width: 100%;
+}
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+@media (max-width: 500px) {
+  .skeleton-header { flex-direction: column; align-items: flex-start; }
+}
+.skeleton-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.skeleton-box {
+  background: var(--surface-3);
+  border-radius: var(--r-md);
+}
+.skeleton-text-sm { height: 24px; width: 96px; }
+.skeleton-text-md { height: 32px; width: 112px; border-radius: var(--r-full); }
+.skeleton-input {
+  height: 120px;
+  width: 100%;
+  border-radius: var(--r-xl);
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+}
+.skeleton-comment {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.skeleton-avatar {
+  height: 40px;
+  width: 40px;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+}
+.skeleton-comment-body { flex: 1; }
+.skeleton-comment-name { height: 20px; width: 120px; margin-bottom: 12px; }
+.skeleton-comment-box {
+  height: 112px;
+  width: 100%;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border);
+}
+.skeleton-comment-box-sm {
+  height: 80px;
+  width: 100%;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border);
+}
+
+.giscus-fade {
+  width: 100%;
+  transition: opacity 0.5s ease;
+}
+.giscus-loaded {
+  opacity: 1;
+  display: block;
+}
+.giscus-loading {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -10;
+  pointer-events: none;
+}
+
 
 
