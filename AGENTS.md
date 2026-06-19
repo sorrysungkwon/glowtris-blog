@@ -84,7 +84,10 @@ If sync issues occur between Claude and other agents:
 - Never modify environment variables without explicit request
 - Git operations logged for audit trail
 
+## Post Writing Guidelines
+- **Mandatory Lead Summary (Simplicity Principle)**: All blog posts must have a summary/lead at the very beginning, similar to a news article lead. This follows the "Simplicity" principle from the book *Made to Stick* (focus on the core message first).
+
 ---
-**Last Updated**: 2026-06-06  
-**Maintained By**: Claude  
+**Last Updated**: 2026-06-19  
+**Maintained By**: Claude & Antigravity  
 **Sync with**: CLAUDE.md for Claude-specific rules
