@@ -127,8 +127,8 @@ main {
 .gsc-replies {
   background-color: transparent !important; /* Remove native inset background */
   border: none !important; /* Remove native borders */
-  border-left: 2px solid rgba(0,200,255,0.15) !important; /* Subtle neon thread line */
-  padding-left: 16px !important; /* Space between the line and the child comments */
+  padding-left: 16px !important; /* Space on left */
+  padding-right: 16px !important; /* Symmetric space on right */
   /* Removed forced margin-left so Giscus native avatar alignment works */
   margin-top: -4px !important; 
   border-radius: 0 !important;
@@ -181,6 +181,7 @@ main {
   }
   .gsc-replies {
     padding-left: 12px !important; /* Tighter thread indentation */
+    padding-right: 12px !important; /* Symmetric padding on right */
   }
 
   /* Adjust typography for mobile reading */
