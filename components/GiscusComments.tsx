@@ -7,29 +7,16 @@ const SkeletonUI = () => (
   <div className="skeleton-wrapper">
     <div className="skeleton-header">
       <div className="skeleton-header-left">
-        <div className="skeleton-box skeleton-text-sm"></div>
-        <div className="skeleton-box skeleton-text-sm"></div>
+        <div className="skeleton-box skeleton-comments-count"></div>
+        <div className="skeleton-box skeleton-reaction-btn"></div>
       </div>
-      <div className="skeleton-box skeleton-text-md"></div>
+      <div className="skeleton-box skeleton-sort-btn"></div>
     </div>
     
-    <div className="skeleton-box skeleton-input"></div>
-    
-    <div>
-      <div className="skeleton-comment">
-        <div className="skeleton-box skeleton-avatar"></div>
-        <div className="skeleton-comment-body">
-          <div className="skeleton-box skeleton-comment-name"></div>
-          <div className="skeleton-box skeleton-comment-box"></div>
-        </div>
-      </div>
-      
-      <div className="skeleton-comment">
-        <div className="skeleton-box skeleton-avatar"></div>
-        <div className="skeleton-comment-body">
-          <div className="skeleton-box skeleton-comment-name" style={{ width: '90px' }}></div>
-          <div className="skeleton-box skeleton-comment-box-sm"></div>
-        </div>
+    <div className="skeleton-input-area">
+      <div className="skeleton-box skeleton-input-avatar"></div>
+      <div className="skeleton-input-body">
+        <div className="skeleton-box skeleton-textarea"></div>
       </div>
     </div>
   </div>

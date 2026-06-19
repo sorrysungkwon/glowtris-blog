@@ -2334,12 +2334,17 @@ button { font-family: inherit; cursor: pointer; border: none; }
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   width: 100%;
 }
+.skeleton-box {
+  background: var(--surface-3);
+}
+
+/* 1. Header Area */
 .skeleton-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 20px;
+  padding-bottom: 24px;
   margin-bottom: 24px;
   gap: 16px;
 }
@@ -2353,7 +2358,6 @@ button { font-family: inherit; cursor: pointer; border: none; }
   .skeleton-header-left {
     width: 100%;
     justify-content: space-between;
-    gap: 0;
   }
 }
 .skeleton-header-left {
@@ -2361,42 +2365,29 @@ button { font-family: inherit; cursor: pointer; border: none; }
   align-items: center;
   gap: 16px;
 }
-.skeleton-box {
-  background: var(--surface-3);
-  border-radius: var(--r-md);
-}
-.skeleton-text-sm { height: 24px; width: 96px; }
-.skeleton-text-md { height: 32px; width: 112px; border-radius: var(--r-full); }
-.skeleton-input {
-  height: 120px;
-  width: 100%;
-  border-radius: var(--r-xl);
-  margin-bottom: 32px;
-  border: 1px solid var(--border);
-}
-.skeleton-comment {
+.skeleton-comments-count { height: 18px; width: 72px; border-radius: var(--r-xs); }
+.skeleton-reaction-btn { height: 28px; width: 36px; border-radius: var(--r-full); }
+.skeleton-sort-btn { height: 28px; width: 84px; border-radius: var(--r-sm); }
+
+/* 2. Input Area */
+.skeleton-input-area {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px; /* matches gsc-comment-box margin-bottom */
 }
-.skeleton-avatar {
-  height: 40px;
-  width: 40px;
+.skeleton-input-avatar {
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-full);
   flex-shrink: 0;
 }
-.skeleton-comment-body { flex: 1; }
-.skeleton-comment-name { height: 20px; width: 120px; margin-bottom: 12px; }
-.skeleton-comment-box {
-  height: 112px;
-  width: 100%;
-  border-radius: var(--r-xl);
-  border: 1px solid var(--border);
+.skeleton-input-body {
+  flex: 1;
 }
-.skeleton-comment-box-sm {
-  height: 80px;
+.skeleton-textarea {
+  height: 148px;
   width: 100%;
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   border: 1px solid var(--border);
 }
 
