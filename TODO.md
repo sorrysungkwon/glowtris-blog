@@ -46,6 +46,7 @@
 
 ### 🔲 Phase 2 — Content & Discovery
 
+- [ ] **Admin Editor UI Fix**: Split `Title` and `Description` input fields into separate EN/KO versions (currently they share state and overwrite each other upon saving).
 - [ ] Blog posts: write initial posts for launch (EN + KO, see post guidelines in memory)
 - [x] Search UI: wire `lib/search.ts` into a frontend search component
 - [x] Recommendation system: show related posts by category at bottom of post page
