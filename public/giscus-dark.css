@@ -119,11 +119,39 @@ main {
 .gsc-header { color: #f0f0ff !important; }
 .gsc-author { color: #00c8ff !important; font-weight: 600 !important; }
 
-/* Threading lines */
+/* =========================================
+   NESTED REPLIES & THREADING POLISH
+   ========================================= */
+
+/* Threading lines (Continuity) */
 .gsc-replies {
-  border-left: 2px solid rgba(255,255,255,0.06) !important;
-  margin-left: 20px !important;
-  padding-left: 16px !important;
+  border-left: 2px solid rgba(0,200,255,0.15) !important; /* Subtle neon thread line */
+  margin-left: 24px !important;
+  padding-left: 20px !important;
+  margin-top: -8px !important; /* Pull closer to parent */
+  padding-top: 16px !important;
+}
+
+/* Nested Comments (Hierarchy & Figure-Ground) */
+.gsc-reply .gsc-comment {
+  background-color: rgba(255,255,255,0.015) !important; /* Flatter background */
+  border: 1px solid rgba(255,255,255,0.03) !important;
+  box-shadow: none !important; /* Remove heavy shadow to show it's a child */
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+}
+.gsc-reply .gsc-comment:hover {
+  transform: translateX(2px) !important; /* Slide right instead of lifting up */
+  border-color: rgba(0,200,255,0.2) !important;
+  box-shadow: none !important;
+}
+
+/* Nested Reply Input Box */
+.gsc-reply-box .gsc-comment-box {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px dashed rgba(0,200,255,0.2) !important;
+  border-radius: 12px !important;
 }
 
 /* =========================================
