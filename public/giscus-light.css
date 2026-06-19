@@ -218,6 +218,11 @@ main {
     font-size: 15px !important;
     line-height: 1.65 !important;
   }
+
+  /* Left align the "powered by giscus" footer text */
+  .text-center {
+    text-align: left !important;
+  }
 }
 
 /* Nested Reply Input Box */
