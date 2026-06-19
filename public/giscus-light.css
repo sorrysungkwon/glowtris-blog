@@ -5,42 +5,34 @@ main {
   /* Glowtris Light Theme Tokens */
   --color-canvas-default: transparent;
   --color-canvas-overlay: #ffffff;
-  --color-canvas-inset: #f0f0f8;
-  --color-canvas-subtle: #f0f0f8;
+  --color-canvas-inset: rgba(240,240,248,0.5);
+  --color-canvas-subtle: rgba(240,240,248,0.5);
   
-  --color-border-default: rgba(0,0,0,0.10);
+  --color-border-default: rgba(0,0,0,0.12);
   --color-border-muted: rgba(0,0,0,0.06);
   
   --color-fg-default: #0d0d14;
-  --color-fg-muted: #6b7280;
-  --color-fg-subtle: #a0a6b4;
+  --color-fg-muted: #4b5563;
+  --color-fg-subtle: #9ca3af;
   
   --color-btn-text: #0d0d14;
   --color-btn-bg: #ffffff;
-  --color-btn-border: rgba(0,0,0,0.10);
+  --color-btn-border: rgba(0,0,0,0.12);
   --color-btn-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  --color-btn-inset-shadow: 0 0 transparent;
-  --color-btn-hover-bg: #f0f0f8;
+  --color-btn-inset-shadow: inset 0 -1px 0 rgba(0,0,0,0.04);
+  --color-btn-hover-bg: #f8f8fc;
   --color-btn-hover-border: rgba(37,99,235,0.40);
-  --color-btn-active-bg: #e8e8f4;
+  --color-btn-active-bg: #f0f0f8;
   --color-btn-active-border: rgba(37,99,235,0.40);
-  --color-btn-selected-bg: #e8e8f4;
+  --color-btn-selected-bg: rgba(37,99,235,0.08);
   
   --color-btn-primary-text: #ffffff;
   --color-btn-primary-bg: #2563eb;
-  --color-btn-primary-border: #2563eb;
-  --color-btn-primary-shadow: 0 2px 8px rgba(37,99,235,0.2);
-  --color-btn-primary-inset-shadow: 0 0 transparent;
+  --color-btn-primary-border: transparent;
+  --color-btn-primary-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  --color-btn-primary-inset-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
   --color-btn-primary-hover-bg: #1d4ed8;
-  --color-btn-primary-hover-border: #1d4ed8;
-  --color-btn-primary-selected-bg: #1e40af;
-  --color-btn-primary-selected-shadow: 0 0 transparent;
-  --color-btn-primary-disabled-text: rgba(255,255,255,0.5);
-  --color-btn-primary-disabled-bg: rgba(37,99,235,0.3);
-  --color-btn-primary-disabled-border: transparent;
-  
-  --color-neutral-muted: rgba(0,0,0,0.06);
-  --color-neutral-subtle: rgba(0,0,0,0.03);
+  --color-btn-primary-hover-border: transparent;
   
   --color-accent-fg: #2563eb;
   --color-accent-emphasis: #2563eb;
@@ -50,43 +42,84 @@ main {
   --color-success-fg: #059669;
   --color-danger-fg: #db2777;
   
-  --color-primer-shadow-focus: 0 0 0 3px rgba(37,99,235,0.40);
+  --color-primer-shadow-focus: 0 0 0 3px rgba(37,99,235,0.3);
   
   color-scheme: light;
   font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-/* Perfect alignment with Glowtris Components */
-.gsc-comment-box {
-  background-color: #ffffff !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+/* =========================================
+   PREMIUM GLOWTRIS POLISH (LIGHT)
+   ========================================= */
+
+/* Add smooth micro-animations globally */
+.gsc-comment, .gsc-comment-box, .gsc-button, .gsc-reactions-button {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease,
+              background-color 0.2s ease !important;
 }
 
+/* Comment Box (Input area) */
+.gsc-comment-box {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f8fc 100%) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02) !important;
+  padding: 4px !important;
+}
+.gsc-comment-box:focus-within {
+  border-color: rgba(37,99,235,0.4) !important;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.1), 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+
+/* Individual Comments */
 .gsc-comment {
   border: 1px solid rgba(0,0,0,0.06) !important;
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   background-color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+  margin-bottom: 16px !important;
+}
+.gsc-comment:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(37,99,235,0.3) !important;
+  box-shadow: 0 12px 32px rgba(37,99,235,0.08), 0 4px 12px rgba(0,0,0,0.04) !important;
 }
 
-.gsc-button {
+/* Primary Button (Submit) - Modern Gradient */
+.gsc-comment-box-buttons .gsc-button--primary {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.25) !important;
+}
+.gsc-comment-box-buttons .gsc-button--primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.4) !important;
+  filter: brightness(1.1) !important;
+}
+
+/* Buttons & Reactions */
+.gsc-button, .gsc-reactions-button {
   border-radius: 8px !important;
 }
-
-.gsc-reactions-button {
-  border-radius: 8px !important;
+.gsc-button:hover, .gsc-reactions-button:hover {
+  transform: translateY(-1px) !important;
 }
 
-.gsc-reactions-count {
-  color: #6b7280 !important;
-}
+/* Text Refinements */
+.gsc-reactions-count { color: #6b7280 !important; font-weight: 500 !important; }
+.gsc-comments-count { color: #0d0d14 !important; font-weight: 700 !important; letter-spacing: -0.02em !important; }
+.gsc-header { color: #0d0d14 !important; }
+.gsc-author { color: #2563eb !important; font-weight: 600 !important; }
 
-.gsc-comments-count {
-  color: #0d0d14 !important;
-}
-
-.gsc-header {
-  color: #0d0d14 !important;
+/* Threading lines */
+.gsc-replies {
+  border-left: 2px solid rgba(0,0,0,0.05) !important;
+  margin-left: 20px !important;
+  padding-left: 16px !important;
 }
