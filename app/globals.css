@@ -2344,7 +2344,17 @@ button { font-family: inherit; cursor: pointer; border: none; }
   gap: 16px;
 }
 @media (max-width: 500px) {
-  .skeleton-header { flex-direction: column; align-items: flex-start; }
+  .skeleton-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 12px; 
+    padding-bottom: 16px; 
+  }
+  .skeleton-header-left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0;
+  }
 }
 .skeleton-header-left {
   display: flex;
