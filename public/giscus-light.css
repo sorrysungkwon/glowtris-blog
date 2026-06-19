@@ -131,17 +131,18 @@ main {
 }
 
 /* Nested Comments (Hierarchy & Figure-Ground) */
-.gsc-reply .gsc-comment {
+.gsc-reply {
   background-color: #f8f8fc !important; /* Flatter background */
   border: 1px solid rgba(0,0,0,0.04) !important;
   box-shadow: none !important; /* Remove heavy shadow to show it's a child */
   border-radius: 12px !important;
   margin-bottom: 12px !important;
+  padding: 16px !important; /* Ensure it has inner spacing like a card */
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
 }
-.gsc-reply .gsc-comment:hover {
+.gsc-reply:hover {
   transform: translateX(2px) !important; /* Slide right instead of lifting up */
   border-color: rgba(37,99,235,0.2) !important;
-  box-shadow: none !important;
 }
 
 /* Nested Reply Input Box */
