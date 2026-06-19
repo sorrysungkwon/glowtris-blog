@@ -1,7 +1,8 @@
 ---
 title: "Whose midnight counts? Building a timezone-aware leaderboard"
+title_ko: "서울에서 자정에 게임을 하고 비행기를 탔다. 스트릭은 깨졌을까?"
 description: "Duolingo keeps your streak alive even when you land in a timezone from yesterday. I wanted the same for Glowtris — here’s how I built it."
-description_ko: "서울에서 비행기를 타고 하루 전 시간대인 뉴욕에 내려도 듀오링고 랭킹은 그대로다. 그 비결을 글로우트리스 리더보드에 똑같이 적용해봤다."
+description_ko: "비행기를 타고 뉴욕에 내려도 듀오링고 스트릭은 그대로 유지됩니다. 이 미친 타임존 처리 마법을 글로우트리스 리더보드에 똑같이 구현하면서 배운 실전 노하우."
 date: 2026-06-05
 category: DEV
 author: sorrysungkwon
@@ -9,82 +10,92 @@ authorEmoji: 📅
 readingTime: 5
 coverGradient: "linear-gradient(135deg, #ff7700 0%, #ff0080 100%)"
 coverEmoji: "✈️"
-title_ko: "‘자정’이 어디 기준이에요? - 글로벌 리더보드를 만들면서 배운 것"
 ---
-## Ever use Duolingo?
+
+I played Tetris like crazy at midnight in Seoul.
+
+Then I hopped on a plane, landed in New York, and suddenly I was back in "yesterday."
+
+Did my daily streak break? Nope. Not at all.
+
+## 😱 The Magic of Duolingo
 
 <figure>
-  <img src="https://raw.githubusercontent.com/sorrysungkwon/glowtris-blog/main/public/images/1781395954222-many-faces-of-duo.webp" alt="Dua lipa (it's a joke, It's duolingo)" />
-  <figcaption>Dua lipa (it's a joke, It's duolingo)<span className="figcredit"> Source: https://www.uvureview.com/valley-life/kidnapping-bird-gone-viral-duolingo/</span></figcaption>
+  <img src="https://raw.githubusercontent.com/sorrysungkwon/glowtris-blog/main/public/images/1781395954222-many-faces-of-duo.webp" alt="Dua Lipa (Sorry, it's actually Duolingo)" />
+  <figcaption>Dua Lipa (actually Duolingo)<span className="figcredit"> Source: https://www.uvureview.com/valley-life/kidnapping-bird-gone-viral-duolingo/</span></figcaption>
 </figure>
 
-I do every day. One day I flew to NYC - completely different timezone - and my streak was still intact. My league ranking hadn’t moved. Nothing reset.
+I play Duolingo every single day. But one day, I flew to New York and realized my leaderboard ranking hadn't changed. My streak was perfectly intact! My timezone had completely flipped, yet everything was fine.
 
-I kept thinking about it. How?
+I ran into the exact same dilemma when building the "Daily Leaderboard" for Glowtris.
 
-Then I ran into the exact same problem building the daily leaderboard for Glowtris. It resets at midnight. But whose midnight? Seoul’s? New York’s? UTC?
+I needed a leaderboard that resets every midnight... **But whose midnight are we talking about?** Seoul's midnight? New York's midnight? UTC midnight?
 
-The answer is - Yours. Wherever you are.
+The answer is **"My midnight."** Regardless of where I am in the world.
 
-## The obvious approach (that doesn’t work)
+## 🔥 The Disaster of UTC Reset
 
-The simplest solution is a cron job that wipes the leaderboard at UTC midnight every day.
+The most one-dimensional approach is wiping the DB entirely at UTC midnight.
 
-I literally wrote this:
+But if you do that, players in Seoul will see the leaderboard vanish right at 9 AM when they are actively playing. Players in New York will log in after work at 7 PM, only to have the leaderboard wipe right in front of their eyes. It completely kills the thrill of a competitive daily leaderboard.
+
+Should we manage 38 separate leaderboards for every timezone in the world? Server costs would explode, and you'd have the bizarre situation where Seoul players can't compete with their friends in New York.
+
+## 💡 The Solution: Splitting into Date Buckets
+
+Instead of "wiping" the leaderboard, I changed the architecture to "create a new one per date."
+
+```text
+glowtris-daily-2026-06-04  ← Yesterday
+glowtris-daily-2026-06-05  ← Today (Seoul)
+glowtris-daily-2026-06-06  ← Today (New York)
+```
+
+When a user connects, their device sends its **local timezone date** to the server.
 
 ```javascript
-// ❌ DON'T DO THIS
-const wipeLeaderboard = async () => {
-  await redis.del('glowtris-daily-leaderboard')
-}
-
-// Run at UTC midnight
-schedule.scheduleJob('0 0 * * *', wipeLeaderboard)
-```
-
-But that means Seoul players see a reset at 9am. New York players see one at 7pm the day before. Nobody gets an actual midnight reset. It just resets at some arbitrary UTC moment that means nothing to anyone.
-
-What about running a cron per timezone? That’s 38 IANA timezones, each needing its own leaderboard. Possible, but messy - and suddenly your Seoul board has no New York players on it.
-
-There’s a cleaner way.
-
-## Data Buckets
-
-Instead of ‘wiping’ the leaderboard, just make a new one every day.
-
-```glowtris-daily-2026-06-04  ← yesterday
-glowtris-daily-2026-06-05  ← today for Seoul
-glowtris-daily-2026-06-06  ← today for New York
-```
-
-When you load the leaderboard, your device sends your local date.
-
-``` const d = new Date()
+const d = new Date()
 const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 
+// User: "I'm in Korea, and it's June 5th right now!"
 fetch(`/api/leaderboard?date=${localDate}`)
 ```
 
-The server returns whichever bucket matches. When midnight hits for you, your local date changes — and you see a fresh, empty board. The old one isn’t deleted. It just stops being shown.
+The server simply and blindly serves the leaderboard for that specific date bucket. When midnight passes and the device date changes? The app naturally fetches the next day's bucket. There's absolutely no need to delete old data.
 
-## “Can’t you just send a fake date?”
+## 🤔 "Wait, couldn't users just fake their date and cheat?"
 
-Yes, technically. You could send yesterday’s date and post to an old board.
+Absolutely. Trusting the client 100% is suicidal. A user could manipulate the script to send yesterday's date and illegally post high scores on past leaderboards.
 
-So the server checks: the maximum legitimate timezone offset is UTC+14 (parts of Kiribati). That means any date more than one day away from UTC today gets rejected. Every real timezone passes. Anything suspicious doesn’t.
+So, I added a single line of validation logic on the server.
 
-## How long to keep the data
+```javascript
+function safeClientDate(raw) {
+  const utc = new Date().toISOString().slice(0, 10)
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return utc
+  
+  // Cut off any date that is more than 24 hours away from current UTC
+  return Math.abs(new Date(raw) - new Date(utc)) <= 86400000 ? raw : utc
+}
+```
 
-Redis keys need to expire eventually. I originally set 26 hours — fine for UTC-only, not enough for timezone-aware dates.
+The largest timezone offset on Earth is +14 hours (Kiribati). This means no legitimate user can ever send a local date that differs from current UTC by more than 24 hours. Valid global users pass through smoothly, while malicious manipulations get instantly blocked.
 
-A key for *2026-06-06* might first be written by a UTC+14 user at 10:00 UTC on June 5th, and last written by a UTC-12 user at 12:00 UTC on June 8th. That’s about 50 hours apart. So I set TTL to 52 hours — enough for everyone’s day to finish, then it quietly expires.
+## 🏃‍♂️ Setting the Server TTL to 52 Hours
 
----
+We can't let these daily Redis buckets pile up forever, so they need a TTL (Time-To-Live). I initially set it to 26 hours, which almost ended in a bloodbath.
 
-## That’s it
+The time difference between the start of the day in the earliest timezone (UTC+14) and the end of the day in the latest timezone (UTC-12) is a massive **50 hours**. So, to be safe, I set the TTL to 52 hours.
 
-The server doesn't force its own timezone on you. It simply trusts the local date your device provides.
+## ✅ Conclusion and Checklist
 
-You play in Seoul just before midnight. Fly to New York. Fourteen hours pass locally, and you are back in yesterday. Since your device sends yesterday's date, you continue competing on yesterday's leaderboard without losing your streak.
+The server shouldn't arrogantly force its UTC time on users. It should simply respect the user's local device time.
 
-The server doesn’t care about its own clock. It makes sure midnight is always midnight for you.
+Because of this, when I play in Seoul and land in New York, my phone tells the server it's "yesterday," seamlessly attaching me back to yesterday's leaderboard bucket to keep my streak alive.
+
+If you're building a global service, just remember these 3 things:
+1. Don't wipe leaderboards; split them into date buckets.
+2. Accept the client's local date, but only within a ±24 hour UTC window.
+3. Set your Redis expiration to at least 50 hours.
+
+Have you ever had to tear your server code apart because of timezone nightmares? Share your traumatic timezone stories in the comments! (Please tell me I'm not the only one... 😅)
