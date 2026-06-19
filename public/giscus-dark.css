@@ -135,19 +135,34 @@ main {
 }
 
 /* Nested Comments (Hierarchy & Figure-Ground) */
+/* 1. Reset gsc-reply to let native timeline & avatar float outside the card */
 .gsc-reply {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+/* 2. Colorize native thread line to connect avatars */
+.gsc-tl-line {
+  background-color: rgba(255,255,255,0.08) !important;
+  width: 2px !important;
+}
+
+/* 3. Apply card styling ONLY to the content wrapper (bubble) */
+.gsc-reply > .flex > .w-full {
   background-color: rgba(255,255,255,0.015) !important; /* Flatter background */
   border: 1px solid rgba(255,255,255,0.03) !important;
-  box-shadow: none !important; /* Remove heavy shadow to show it's a child */
   border-radius: 12px !important;
-  margin-bottom: 12px !important;
   padding: 12px 16px !important; 
   box-sizing: border-box !important;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
 }
-.gsc-reply:hover {
+
+.gsc-reply > .flex > .w-full:hover {
   transform: translateX(2px) !important; /* Slide right instead of lifting up */
-  border-color: rgba(0,200,255,0.2) !important;
+  border-color: rgba(255,255,255,0.1) !important; /* Neutral highlight */
 }
 
 /* =========================================
@@ -193,9 +208,9 @@ main {
 
 /* Nested Reply Input Box */
 .gsc-reply-box .gsc-comment-box {
-  background: transparent !important;
+  background-color: rgba(255,255,255,0.02) !important;
   box-shadow: none !important;
-  border: 1px dashed rgba(0,200,255,0.2) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
   border-radius: 12px !important;
 }
 
