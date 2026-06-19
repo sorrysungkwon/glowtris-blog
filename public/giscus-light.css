@@ -140,12 +140,28 @@ main {
   box-shadow: none !important;
   padding: 0 !important;
   margin-bottom: 16px !important;
+  position: relative !important; /* Crucial for absolute timeline line */
 }
 
-/* 2. Colorize native thread line to connect avatars */
+/* 2. Twitter-style thread line: drops exactly from the center of the avatar */
 .gsc-tl-line {
-  background-color: rgba(0,0,0,0.08) !important;
+  position: absolute !important;
+  top: 34px !important; /* Start below the 30px avatar */
+  bottom: -16px !important; /* Connect all the way to the next reply */
+  left: 14px !important; /* 15px (center of 30px avatar) - 1px (half of 2px width) */
   width: 2px !important;
+  background-color: rgba(0,0,0,0.08) !important;
+  z-index: 0 !important;
+}
+/* Hide the line on the last reply so it doesn't hang in empty space */
+.gsc-reply:last-child > .gsc-tl-line {
+  display: none !important;
+}
+
+/* Ensure avatar and content sit above the timeline line */
+.gsc-reply > .flex {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 /* 3. Apply card styling ONLY to the content wrapper (bubble) */
