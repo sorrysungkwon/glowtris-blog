@@ -1,0 +1,76 @@
+main {
+  /* Glowtris Dark Theme Tokens mapped to Giscus variables */
+  --color-canvas-default: transparent; /* Let the blog background show through */
+  --color-canvas-overlay: #0e0e20;
+  --color-canvas-inset: #141428;
+  --color-canvas-subtle: #141428;
+  
+  --color-border-default: rgba(255,255,255,0.11);
+  --color-border-muted: rgba(255,255,255,0.06);
+  
+  --color-fg-default: #f0f0ff;
+  --color-fg-muted: rgba(240,240,255,0.50);
+  --color-fg-subtle: rgba(240,240,255,0.28);
+  
+  --color-btn-text: #f0f0ff;
+  --color-btn-bg: #0e0e20;
+  --color-btn-border: rgba(255,255,255,0.11);
+  --color-btn-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  --color-btn-inset-shadow: 0 0 transparent;
+  --color-btn-hover-bg: #141428;
+  --color-btn-hover-border: rgba(0,200,255,0.35);
+  --color-btn-active-bg: #1c1c34;
+  --color-btn-active-border: rgba(0,200,255,0.35);
+  --color-btn-selected-bg: #1c1c34;
+  
+  --color-btn-primary-text: #080814;
+  --color-btn-primary-bg: #00c8ff;
+  --color-btn-primary-border: #00c8ff;
+  --color-btn-primary-shadow: 0 2px 8px rgba(0,200,255,0.2);
+  --color-btn-primary-inset-shadow: 0 0 transparent;
+  --color-btn-primary-hover-bg: #33d3ff;
+  --color-btn-primary-hover-border: #33d3ff;
+  --color-btn-primary-selected-bg: #00a0cc;
+  --color-btn-primary-selected-shadow: 0 0 transparent;
+  --color-btn-primary-disabled-text: rgba(8,8,20,0.5);
+  --color-btn-primary-disabled-bg: rgba(0,200,255,0.3);
+  --color-btn-primary-disabled-border: transparent;
+  
+  --color-neutral-muted: rgba(255,255,255,0.06);
+  --color-neutral-subtle: rgba(255,255,255,0.03);
+  
+  --color-accent-fg: #00c8ff;
+  --color-accent-emphasis: #00c8ff;
+  --color-accent-muted: rgba(0, 200, 255, 0.4);
+  --color-accent-subtle: rgba(0, 200, 255, 0.1);
+  
+  --color-success-fg: #34d399;
+  --color-danger-fg: #f472b6;
+  
+  --color-primer-shadow-focus: 0 0 0 3px rgba(0,200,255,0.35);
+  
+  /* Fonts */
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Base overrides for better gestalt */
+.gsc-comment-box {
+  background-color: #0e0e20 !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.gsc-comment {
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 12px !important;
+  background-color: #0e0e20 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+.gsc-button {
+  border-radius: 6px !important;
+}
+
+.gsc-reactions-button {
+  border-radius: 6px !important;
+}

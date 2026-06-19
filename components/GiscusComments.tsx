@@ -4,18 +4,21 @@ import Giscus from '@giscus/react'
 import { useEffect, useState } from 'react'
 
 export default function GiscusComments({ lang }: { lang: string }) {
-  const [theme, setTheme] = useState('dark_dimmed')
+  const [theme, setTheme] = useState('https://blog.glowtris.com/giscus-dark.css')
 
   useEffect(() => {
     // Check if body has light-theme class
+    const getThemeUrl = (isLight: boolean) => 
+      `${window.location.origin}/giscus-${isLight ? 'light' : 'dark'}.css`
+
     const isLight = document.body.classList.contains('light-theme')
-    setTheme(isLight ? 'light' : 'dark_dimmed')
+    setTheme(getThemeUrl(isLight))
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
           const isLightNow = document.body.classList.contains('light-theme')
-          setTheme(isLightNow ? 'light' : 'dark_dimmed')
+          setTheme(getThemeUrl(isLightNow))
         }
       })
     })
