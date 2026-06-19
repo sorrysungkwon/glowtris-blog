@@ -39,7 +39,7 @@ export default function GiscusComments({ lang }: { lang: string }) {
         term="Welcome to @giscus/react component!"
         reactionsEnabled="1"
         emitMetadata="0"
-        inputPosition="bottom"
+        inputPosition="top"
         theme={theme}
         lang={lang}
         loading="lazy"

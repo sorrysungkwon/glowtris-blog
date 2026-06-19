@@ -123,3 +123,39 @@ main {
   margin-left: 20px !important;
   padding-left: 16px !important;
 }
+
+/* =========================================
+   GESTALT & ALIGNMENT FIXES
+   ========================================= */
+
+/* Fix misalignment between "0 reactions" and the reaction button, especially on wrapping */
+.gsc-header {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding-bottom: 20px !important;
+  margin-bottom: 24px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.gsc-left-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  flex-wrap: wrap !important;
+}
+
+.gsc-reactions {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+/* Tighter gap between header and the comment input box (inputPosition="top") */
+.gsc-comments > .gsc-header + .gsc-comment-box {
+  margin-top: 0 !important;
+  margin-bottom: 32px !important;
+}
