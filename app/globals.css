@@ -2358,14 +2358,28 @@ button { font-family: inherit; cursor: pointer; border: none; }
   .skeleton-header-left {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .skeleton-reactions-row {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: -4px;
   }
 }
 .skeleton-header-left {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
+}
+.skeleton-reactions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .skeleton-comments-count { height: 18px; width: 72px; border-radius: var(--r-xs); }
+.skeleton-reaction-pill { height: 28px; width: 48px; border-radius: var(--r-full); }
 .skeleton-reaction-btn { height: 28px; width: 36px; border-radius: var(--r-full); }
 .skeleton-sort-btn { height: 28px; width: 84px; border-radius: var(--r-sm); }
 

@@ -8,7 +8,11 @@ const SkeletonUI = () => (
     <div className="skeleton-header">
       <div className="skeleton-header-left">
         <div className="skeleton-box skeleton-comments-count"></div>
-        <div className="skeleton-box skeleton-reaction-btn"></div>
+        <div className="skeleton-reactions-row">
+          <div className="skeleton-box skeleton-reaction-pill"></div>
+          <div className="skeleton-box skeleton-reaction-pill"></div>
+          <div className="skeleton-box skeleton-reaction-btn"></div>
+        </div>
       </div>
       <div className="skeleton-box skeleton-sort-btn"></div>
     </div>
