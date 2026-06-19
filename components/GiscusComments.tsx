@@ -29,14 +29,15 @@ export default function GiscusComments({ lang }: { lang: string }) {
       <Giscus
         id="comments"
         repo="sorrysungkwon/glowtris-blog"
-        repoId="R_kgDOSyI_qw"
-        category="Comments"
-        categoryId="DIC_kwDOSyI_q84Cm_z3"
+        repoId="R_kgDOSy2Pqw"
+        category="Show and tell"
+        categoryId="DIC_kwDOSy2Pq84C_ep8"
         mapping="pathname"
+        strict="0"
         term="Welcome to @giscus/react component!"
         reactionsEnabled="1"
         emitMetadata="0"
-        inputPosition="top"
+        inputPosition="bottom"
         theme={theme}
         lang={lang}
         loading="lazy"
