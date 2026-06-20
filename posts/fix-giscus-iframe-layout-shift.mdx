@@ -11,7 +11,6 @@ coverEmoji: 🔍
 featured: false
 title_ko: "어느 디자이너의 집착: Giscus 댓글창 Layout Shift(CLS) 완벽 해결기"
 description_ko: "남들은 안 보는 1px의 오차와 0.1초의 깜빡임. Iframe 로딩 시 발생하는 푸터 널뛰기와 이질감을 디자이너의 눈으로 잡아내고 CSS Grid로 완벽하게 통제한 과정."
-tldr: >-
   While Giscus is an excellent comment system, its asynchronous iframe loading
   often causes annoying layout shifts and visual flickering. By layering a
   skeleton loader using CSS Grid and intercepting postMessage events, we can
@@ -24,6 +23,7 @@ tldr_ko: >-
   Grid를 활용한 스켈레톤 UI를 겹치고 postMessage 이벤트를 가로채어 렌더링 타이밍을 완벽하게
   통제했습니다. 그 결과, 단 1px의 깜빡임이나 오차 없이 블로그 디자인에 완전히 녹아드는
   댓글창을 구현할 수 있었습니다.
+tldr: "> - **Problem:** Layout shifts (footer jumping) and an out-of-place spinner when loading the external Giscus widget."
 ---
 ---
 
