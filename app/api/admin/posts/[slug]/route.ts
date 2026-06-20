@@ -8,6 +8,8 @@ import { compile } from '@mdx-js/mdx'
 import { requireAuth } from '@/lib/auth'
 import { fetchRawFile, putFile, deleteFile } from '@/lib/github'
 
+export const dynamic = 'force-dynamic'
+
 const postsDir = path.join(process.cwd(), 'posts')
 const isProduction = process.env.NODE_ENV === 'production'
 

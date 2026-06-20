@@ -245,8 +245,9 @@ export default function PostEditor() {
     async function loadPost() {
       try {
         const token = localStorage.getItem('admin_token')
-        const res = await fetch(`/api/admin/posts/${slug}`, {
+        const res = await fetch(`/api/admin/posts/${slug}?t=${Date.now()}`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          cache: 'no-store',
         })
         if (res.ok) {
           const loaded = await res.json()
