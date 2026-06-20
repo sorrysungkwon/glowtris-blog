@@ -1,31 +1,21 @@
+import GameEmbed from './GameEmbed'
+
 type Props = { lang?: string }
 
 export default function GlowtrisCTA({ lang = 'en' }: Props) {
   const isKo = lang === 'ko'
 
   return (
-    <div className="glowtris-cta">
-      <div className="glowtris-cta-inner">
-        <div className="glowtris-cta-left">
-          <span className="glowtris-cta-label">
-            {isKo ? 'Glowtris에 대하여' : 'About Glowtris'}
-          </span>
-          <p className="glowtris-cta-title">Glowtris</p>
-          <p className="glowtris-cta-desc">
-            {isKo
-              ? '브라우저에서 무료로 즐기는 네온 블록 퍼즐 게임. 매일 새로운 데일리 챌린지, 글로벌 리더보드, 스프린트 모드.'
-              : 'A free neon block-stacking game in your browser. Daily challenges, global leaderboard, sprint mode — no download needed.'}
-          </p>
-        </div>
-        <a
-          href="https://glowtris.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="glowtris-cta-btn"
-        >
-          {isKo ? '지금 플레이 →' : 'Play now →'}
-        </a>
-      </div>
+    <div className="cta-embed-container">
+      <h3 className="cta-embed-title" style={{ marginTop: '2rem', marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)' }}>
+        {isKo ? '👇 여기서 바로 플레이 해보세요!' : '👇 Play Glowtris right here!'}
+      </h3>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+        {isKo 
+          ? '브라우저에서 무료로 즐기는 네온 블록 퍼즐 게임. 데일리 챌린지에 도전해보세요.' 
+          : 'A free neon block-stacking game in your browser. Try the daily challenges!'}
+      </p>
+      <GameEmbed />
     </div>
   )
 }

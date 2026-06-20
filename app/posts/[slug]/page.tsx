@@ -9,6 +9,11 @@ import PostCard from '@/components/PostCard'
 import GlowtrisCTA from '@/components/GlowtrisCTA'
 import GiscusComments from '@/components/GiscusComments'
 import ShareButton from '@/components/ShareButton'
+import GameEmbed from '@/components/GameEmbed'
+
+const components = {
+  GameEmbed,
+}
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -167,7 +172,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       </header>
 
       <article className="mdx">
-        <MDXRemote source={post.content} />
+        <MDXRemote source={post.content} components={components} />
       </article>
 
       <DocHighlight />
