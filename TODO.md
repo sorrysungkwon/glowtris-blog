@@ -1,6 +1,14 @@
 # Glowtris Blog TODO
 
-## Current Phase: Phase 2 Complete ✅ — Next: Phase 3 (TBD)
+## Current Phase: Phase 3 Complete ✅ — SEO & Sharing Optimization
+
+---
+
+### ✅ Phase 3 Completed (Session 2026-06-20)
+- [x] Create dynamic `sitemap.xml` with bilingual `alternates`/`hreflang` routes for SEO.
+- [x] Create automated `rss.xml` feed endpoint pulling all blog posts.
+- [x] Implement dynamic OpenGraph thumbnail generation (`/og`) via `@vercel/og` matching the blog's design system.
+- [x] Map OpenGraph thumbnails to all blog posts globally.
 
 ---
 

@@ -11,6 +11,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(post.date),
     changeFrequency: 'monthly',
     priority: post.featured ? 0.9 : 0.7,
+    alternates: {
+      languages: {
+        en: `${BASE_URL}/posts/${post.slug}`,
+        ko: `${BASE_URL}/posts/${post.slug}?lang=ko`,
+        'x-default': `${BASE_URL}/posts/${post.slug}`,
+      },
+    },
   }))
 
   return [
@@ -19,6 +26,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
+      alternates: {
+        languages: {
+          en: BASE_URL,
+          ko: `${BASE_URL}/?lang=ko`,
+          'x-default': BASE_URL,
+        },
+      },
     },
     ...postEntries,
   ]

@@ -39,6 +39,14 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         description,
         type: 'article',
         publishedTime: post.date,
+        images: [
+          {
+            url: `https://blog.glowtris.com/og?title=${encodeURIComponent(title)}&category=${encodeURIComponent(post.category)}&date=${encodeURIComponent(formatDate(post.date))}&readTime=${post.readingTime}&author=${encodeURIComponent(post.author)}&gradient=${encodeURIComponent(post.coverGradient || '')}&emoji=${encodeURIComponent(post.coverEmoji || '✨')}`,
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
       },
     }
   } catch {

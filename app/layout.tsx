@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'Glowtris Blog — Indie Game Dev Log',
     description: 'Behind-the-scenes dev log for Glowtris — a free browser block-stacking game.',
     url: 'https://blog.glowtris.com',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+    images: [{ url: '/og?title=Glowtris+Blog&category=HOME', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     types: {
-      'application/rss+xml': 'https://blog.glowtris.com/feed.xml',
+      'application/rss+xml': 'https://blog.glowtris.com/rss.xml',
     },
     languages: {
       'en': 'https://blog.glowtris.com',
