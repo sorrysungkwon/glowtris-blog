@@ -195,7 +195,7 @@ export default async function PostPage({ params, searchParams }: Props) {
 
       {tldrContent && (
         <div className="tldr-block">
-          <strong>{lang === 'ko' ? '세 줄 요약' : 'Summary'}</strong>
+          <strong>{lang === 'ko' ? '내용 요약' : 'Summary'}</strong>
           <p>{tldrContent}</p>
         </div>
       )}
