@@ -193,8 +193,24 @@ export async function POST(
     const { content: sanitizedKo, fixes: fixesKo } = sanitizeMDXContent(content_ko || '')
     const allFixes = [...fixesEn.map(f => `EN: ${f}`), ...fixesKo.map(f => `KO: ${f}`)]
 
+    // Map title_ko/description_ko to title/description for the KO file
+    let koFrontmatter = frontmatter
+    try {
+      const { data } = matter(`---\n${frontmatter}\n---`)
+      if (data.title_ko) {
+        koFrontmatter = koFrontmatter.replace(/^title:.*$/m, `title: ${JSON.stringify(data.title_ko)}`)
+      }
+      if (data.description_ko) {
+        koFrontmatter = koFrontmatter.replace(/^description:.*$/m, `description: ${JSON.stringify(data.description_ko)}`)
+      }
+      koFrontmatter = koFrontmatter.replace(/^title_ko:.*$\n?/m, '')
+      koFrontmatter = koFrontmatter.replace(/^description_ko:.*$\n?/m, '')
+    } catch (e) {
+      // Ignored: validation catches it later
+    }
+
     const enContent = `---\n${frontmatter}\n---\n${sanitizedEn}`
-    const koContent = sanitizedKo?.trim() ? `---\n${frontmatter}\n---\n${sanitizedKo}` : null
+    const koContent = sanitizedKo?.trim() ? `---\n${koFrontmatter}\n---\n${sanitizedKo}` : null
 
     // ── Validate frontmatter ─────────────────────────────────────────
     try {
