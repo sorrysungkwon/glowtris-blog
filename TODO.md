@@ -44,10 +44,10 @@
 
 ---
 
-### 🔲 Phase 2 — Content & Discovery
+### ✅ Phase 2 Completed — Content & Discovery
 
 - [x] **Admin Editor UI Fix**: Split `Title` and `Description` input fields into separate EN/KO versions (currently they share state and overwrite each other upon saving).
-- [ ] Blog posts: write initial posts for launch (EN + KO, see post guidelines in memory)
+- [x] Blog posts: write initial posts for launch (EN + KO) - 5 posts launched
 - [x] Search UI: wire `lib/search.ts` into a frontend search component
 - [x] Recommendation system: show related posts by category at bottom of post page
 - [x] hreflang EN/KO tags on blog (and game site)
