@@ -2510,18 +2510,29 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* TL;DR Block */
 .tldr-block {
-  background: var(--surface-hover);
+  background: var(--surface-2);
   border: 2px solid var(--primary);
   padding: 1.25rem 1.5rem;
   margin: 1.5rem 0 2.5rem;
   border-radius: var(--r-xl);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
+
+[data-theme="dark"] .tldr-block {
+  background: var(--surface-2);
+  border-color: var(--cyan);
+  box-shadow: 0 8px 32px rgba(0, 229, 255, 0.15), 0 0 0 1px rgba(0, 229, 255, 0.05) inset;
+}
+
 .tldr-block strong {
   display: block;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   color: var(--primary);
+}
+
+[data-theme="dark"] .tldr-block strong {
+  color: var(--cyan);
 }
 .tldr-block p {
   margin: 0;
