@@ -8,7 +8,7 @@ export function formatDate(dateStr: string): string {
 export function fixKoreanMarkdownBold(text: string): string {
   if (!text) return text;
   // Match code blocks to skip them, or **bold** immediately followed by a Korean particle
-  return text.replace(/(```[\s\S]*?```|`[^`]+`)|(\*\*([^*]+)\*\*(?=[가-힣]))/g, (match, code, boldPattern, boldText) => {
+  return text.replace(/(```[\s\S]*?```|`[^`]+`)|(\*\*([^*\n]+)\*\*(?=[가-힣]))/g, (match, code, boldPattern, boldText) => {
     if (code) return code; // Skip code blocks
     return `<strong>${boldText}</strong>`;
   });
