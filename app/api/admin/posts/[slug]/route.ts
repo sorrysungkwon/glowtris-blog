@@ -154,20 +154,43 @@ export async function GET(
       }
       const content_ko = koRaw ? splitPost(koRaw).content : ''
 
-      return NextResponse.json({ frontmatter, content_en, content_ko, branch: fromBranch })
+      let finalFrontmatter = frontmatter
+      if (koRaw) {
+        try {
+          const koParsed = matter(koRaw)
+          const enParsed = matter(`---\n${frontmatter}\n---`)
+          if (koParsed.data.title && !enParsed.data.title_ko) {
+            finalFrontmatter += `\ntitle_ko: ${JSON.stringify(koParsed.data.title)}`
+          }
+          if (koParsed.data.description && !enParsed.data.description_ko) {
+            finalFrontmatter += `\ndescription_ko: ${JSON.stringify(koParsed.data.description)}`
+          }
+        } catch (e) {}
+      }
+
+      return NextResponse.json({ frontmatter: finalFrontmatter, content_en, content_ko, branch: fromBranch })
     } else {
       const enRaw = fs.readFileSync(path.join(postsDir, `${slug}.mdx`), 'utf8')
       const { frontmatter, content: content_en } = splitPost(enRaw)
+      let finalFrontmatter = frontmatter
 
       let content_ko = ''
       try {
         const koRaw = fs.readFileSync(path.join(postsDir, 'ko', `${slug}.mdx`), 'utf8')
         content_ko = splitPost(koRaw).content
+        const koParsed = matter(koRaw)
+        const enParsed = matter(`---\n${frontmatter}\n---`)
+        if (koParsed.data.title && !enParsed.data.title_ko) {
+          finalFrontmatter += `\ntitle_ko: ${JSON.stringify(koParsed.data.title)}`
+        }
+        if (koParsed.data.description && !enParsed.data.description_ko) {
+          finalFrontmatter += `\ndescription_ko: ${JSON.stringify(koParsed.data.description)}`
+        }
       } catch {
         // No KO version
       }
 
-      return NextResponse.json({ frontmatter, content_en, content_ko })
+      return NextResponse.json({ frontmatter: finalFrontmatter, content_en, content_ko })
     }
   } catch {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 })
