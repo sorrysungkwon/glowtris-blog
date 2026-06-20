@@ -134,6 +134,22 @@ export default async function PostPage({ params, searchParams }: Props) {
     ]
   }
 
+  const faqData = lang === 'ko' ? (post.faq_ko || post.faq) : post.faq
+  const faqLd = faqData && faqData.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqData.map((item: any) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  } : null
+
+  const tldrContent = lang === 'ko' ? (post.tldr_ko || post.description_ko || post.description) : (post.tldr || post.description)
+
   return (
     <div className="post-page">
       <script
@@ -144,6 +160,12 @@ export default async function PostPage({ params, searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {faqLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
+      )}
 
       <Link href={backHref} className="post-back">← All posts</Link>
 
@@ -170,6 +192,13 @@ export default async function PostPage({ params, searchParams }: Props) {
           <ShareButton title={titleStr} text={descriptionStr} lang={lang} />
         </div>
       </header>
+
+      {tldrContent && (
+        <div className="tldr-block">
+          <strong>{lang === 'ko' ? '📝 세 줄 요약 (TL;DR)' : '📝 TL;DR'}</strong>
+          <p>{tldrContent}</p>
+        </div>
+      )}
 
       <article className="mdx">
         <MDXRemote source={post.content} components={components} />

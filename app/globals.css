@@ -2507,3 +2507,24 @@ button { font-family: inherit; cursor: pointer; border: none; }
     transform: scale(0.72);
   }
 }
+
+/* TL;DR Block */
+.tldr-block {
+  background: var(--surface-hover);
+  border-left: 4px solid var(--primary);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0 2.5rem;
+  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+}
+.tldr-block strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+}
+.tldr-block p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}

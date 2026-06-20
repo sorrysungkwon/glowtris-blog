@@ -24,6 +24,10 @@ export interface PostMeta {
   featured?: boolean
   draft?: boolean
   content?: string
+  tldr?: string
+  tldr_ko?: string
+  faq?: { question: string; answer: string }[]
+  faq_ko?: { question: string; answer: string }[]
 }
 
 export interface Post extends PostMeta {
