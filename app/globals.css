@@ -2500,5 +2500,10 @@ button { font-family: inherit; cursor: pointer; border: none; }
   display: block;
 }
 @media (max-width: 768px) {
-  .game-embed-iframe-container { height: 500px; }
+  .game-embed-iframe-container { height: 460px; }
+  .game-embed-iframe {
+    width: 138.88%; /* 100 / 0.72 */
+    height: 138.88%;
+    transform: scale(0.72);
+  }
 }
