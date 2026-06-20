@@ -9,25 +9,14 @@ readingTime: 6
 coverGradient: "linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)"
 coverEmoji: 🔍
 featured: false
-tldr: >-
-  While Giscus is an excellent comment system, its asynchronous iframe loading
-  often causes annoying layout shifts and visual flickering. By layering a
-  skeleton loader using CSS Grid and intercepting postMessage events, we can
-  perfectly control exactly when the widget appears. The result is a
-  seamlessly integrated comment section that loads beautifully without any
-  layout jumping.
-tldr_ko: >-
-  외부 위젯인 Giscus는 훌륭한 댓글 시스템이지만, 비동기 로딩으로 인해 발생하는 레이아웃
-  밀림(Layout Shift)과 이질적인 스피너가 몰입을 방해하곤 합니다. 이를 해결하기 위해 CSS
-  Grid를 활용한 스켈레톤 UI를 겹치고 postMessage 이벤트를 가로채어 렌더링 타이밍을 완벽하게
-  통제했습니다. 그 결과, 단 1px의 깜빡임이나 오차 없이 블로그 디자인에 완전히 녹아드는
-  댓글창을 구현할 수 있었습니다.
+tldr: "Problem: Layout shifts (footer jumping) and an out-of-place spinner when loading the external Giscus widget.\nSolution: Controlled rendering timing perfectly using a CSS Grid overlap (`grid-area: overlap`) and intercepting `postMessage` events.\nResult: A 100% seamlessly integrated comment section with zero pixel mismatch or flickering."
+tldr_ko: "- 문제: 외부 위젯(Giscus) 로딩 시 발생하는 널뛰기 현상(Layout Shift)과 이질적인 스피너 노출.\n- 해결: CSS Grid 겹치기(`grid-area: overlap`) 기법과 `postMessage` 이벤트 가로채기로 렌더링 타이밍 완벽 통제.\n- 결과: 단 1px의 오차나 깜빡임 없이 디자인 시스템에 100% 동화된 댓글창 구현 완료."
 ---
 ---
 
-정적 블로그나 Next.js 블로그를 만들 때 GitHub Discussions 기반의 <strong>Giscus</strong>는 최고의 선택입니다. 서버도 필요 없고, 마크다운도 지원하니까요. 
+정적 블로그나 Next.js 블로그를 만들 때 GitHub Discussions 기반의 **Giscus**는 최고의 선택입니다. 서버도 필요 없고, 마크다운도 지원하니까요. 
 
-하지만 디자이너인 제 눈을 심하게 거슬리게 하는 문제가 있었습니다. 바로 <strong>Iframe 비동기 로딩 시 발생하는 화면 꿀렁거림(Layout Shift)</strong>과 내 디자인 시스템과 전혀 어울리지 않는 <strong>이질적인 로딩 스피너</strong>였습니다.
+하지만 디자이너인 제 눈을 심하게 거슬리게 하는 문제가 있었습니다. 바로 **Iframe 비동기 로딩 시 발생하는 화면 꿀렁거림(Layout Shift)**과 내 디자인 시스템과 전혀 어울리지 않는 **이질적인 로딩 스피너**였습니다.
 
 보통 개발자들이라면 "기능 잘 돌아가네, 원래 외부 위젯이 다 그렇지 뭐" 하고 넘어갔겠지만, 픽셀 하나, 패딩 값 하나 어긋나는 꼴을 못 보는 디자이너에게 이 0.5초의 '펄럭임'은 용납할 수 없는 재앙이었습니다. 
 
@@ -37,18 +26,18 @@ tldr_ko: >-
 
 ## 1. 펄럭이는 푸터(Footer), Layout Shift의 원인
 
-보통 개발자들은 Giscus를 붙일 때, Iframe이 로딩되는 시간 동안 빈 공간이 생기는 걸 막기 위해 흔히 <strong>스켈레톤 UI(Skeleton UI)</strong>를 띄워둡니다.
+보통 개발자들은 Giscus를 붙일 때, Iframe이 로딩되는 시간 동안 빈 공간이 생기는 걸 막기 위해 흔히 **스켈레톤 UI(Skeleton UI)**를 띄워둡니다.
 
 ```tsx
 // ❌ 기능만 생각한 (그리고 눈에 거슬리는) 방식
 {isLoading ? <SkeletonUI /> : <Giscus />}
 ```
 
-이 방식의 치명적인 단점은 컴포넌트가 교체되는 그 짧은 찰나에 높이(height)가 0이 되거나 틀어지면서 <strong>페이지 하단의 푸터가 위로 휙 올라왔다 다시 내려가는 현상</strong>이 발생한다는 점입니다. 스크롤을 내리며 글의 여운을 느끼던 유저의 UX를 완전히 박살 내는 주범이죠.
+이 방식의 치명적인 단점은 컴포넌트가 교체되는 그 짧은 찰나에 높이(height)가 0이 되거나 틀어지면서 **페이지 하단의 푸터가 위로 휙 올라왔다 다시 내려가는 현상**이 발생한다는 점입니다. 스크롤을 내리며 글의 여운을 느끼던 유저의 UX를 완전히 박살 내는 주범이죠.
 
 ### 해결책: CSS Grid를 이용한 완벽한 겹치기 (Overlap Fade)
 
-이 문제를 해결하기 위해 고안한 방법은 스켈레톤과 Iframe이 서로 자리를 '교대'하는 게 아니라, <strong>애초에 같은 공간에 겹쳐 있도록 설계</strong>하는 것이었습니다.
+이 문제를 해결하기 위해 고안한 방법은 스켈레톤과 Iframe이 서로 자리를 '교대'하는 게 아니라, **애초에 같은 공간에 겹쳐 있도록 설계**하는 것이었습니다.
 
 부모 컨테이너에 `display: grid`를 주고, 두 요소를 같은 `grid-area`에 욱여넣도록 했습니다.
 
@@ -75,12 +64,12 @@ tldr_ko: >-
 제 블로그의 사이버 틱한 네온 디자인 톤앤매너와 너무 따로 놀았습니다. 게다가 로딩 전 스켈레톤 UI와 로딩 후 실제 UI의 간극이 너무 컸습니다. 
 
 ### 개발자 도구를 켜서 픽셀을 뜯어내다
-직접 브라우저 DevTools를 열고 Giscus Iframe 내부의 `.gsc-comment` 패딩 값과 보더, 마진 값을 픽셀 단위로 모조리 찍어봤습니다. 그리고 제 스켈레톤 UI를 <strong>실제 댓글이 0개 달렸을 때의 Giscus UI와 1px의 오차도 없이 동일하게</strong> 그리도록 맞췄습니다.
+직접 브라우저 DevTools를 열고 Giscus Iframe 내부의 `.gsc-comment` 패딩 값과 보더, 마진 값을 픽셀 단위로 모조리 찍어봤습니다. 그리고 제 스켈레톤 UI를 **실제 댓글이 0개 달렸을 때의 Giscus UI와 1px의 오차도 없이 동일하게** 그리도록 맞췄습니다.
 
 ### 타이밍 제어: `postMessage` 가로채기
 Giscus는 `emitMetadata="1"` 설정을 켜면 Iframe 내부 상태를 `postMessage`로 부모 창에 쏴줍니다. 
 
-보통은 `resizeHeight` 이벤트만 오면 로딩이 끝났다고 판단해버리지만, 이때는 아직 데이터 로딩 중이라 고양이 스피너가 뜹니다. 저는 완벽한 전환 타이밍을 잡기 위해 <strong>실제 댓글 데이터인 `discussion` 메타데이터가 도착할 때까지</strong> 끈질기게 기다렸다가 스켈레톤을 페이드 아웃 시키도록 로직을 짰습니다.
+보통은 `resizeHeight` 이벤트만 오면 로딩이 끝났다고 판단해버리지만, 이때는 아직 데이터 로딩 중이라 고양이 스피너가 뜹니다. 저는 완벽한 전환 타이밍을 잡기 위해 **실제 댓글 데이터인 `discussion` 메타데이터가 도착할 때까지** 끈질기게 기다렸다가 스켈레톤을 페이드 아웃 시키도록 로직을 짰습니다.
 
 이제 유저는 이질적인 스피너를 볼 틈도 없이, 완벽하게 계산된 스켈레톤 UI에서 실제 UI로 스르륵 전환되는 마법을 경험하게 됩니다.
 
@@ -90,7 +79,7 @@ Giscus는 `emitMetadata="1"` 설정을 켜면 Iframe 내부 상태를 `postMessa
 
 끝난 줄 알았죠? 모바일(500px 이하)에서 확인해 보니 이번엔 Giscus 헤더 영역 요소들이 엉망으로 엉켜 있었습니다. `[댓글 수]`와 `[정렬 드롭다운]`이 중구난방으로 줄 바꿈이 되더군요.
 
-당장 커스텀 CSS 테마(`giscus-dark.css`)를 열고 모바일 레이아웃을 전면 뜯어고쳤습니다. `flex`로 대충 넘어가려는 걸 용납할 수 없어서 <strong>CSS Grid</strong>를 도입해 위계를 확실하게 잡았습니다.
+당장 커스텀 CSS 테마(`giscus-dark.css`)를 열고 모바일 레이아웃을 전면 뜯어고쳤습니다. `flex`로 대충 넘어가려는 걸 용납할 수 없어서 **CSS Grid**를 도입해 위계를 확실하게 잡았습니다.
 
 ```css
 @media (max-width: 500px) {
@@ -116,6 +105,6 @@ Giscus는 `emitMetadata="1"` 설정을 켜면 Iframe 내부 상태를 `postMessa
 
 아마 대부분의 방문자는 이 모든 디테일을 눈치채지 못할 겁니다. 
 
-하지만 디자이너에게 <strong>'보이지 않는 디테일'은 타협의 대상이 아니라 완성도의 척도</strong>라고 생각합니다. 개발자 도구로 수십 번 패딩 값을 찍어보며 픽셀 단위로 스켈레톤을 맞추고, Iframe 통신을 뜯어내 타이밍을 조절한 끝에, 이 블로그의 댓글창은 드디어 제 디자인 시스템의 일부로 완벽하게 녹아들었습니다.
+하지만 디자이너에게 **'보이지 않는 디테일'은 타협의 대상이 아니라 완성도의 척도**라고 생각합니다. 개발자 도구로 수십 번 패딩 값을 찍어보며 픽셀 단위로 스켈레톤을 맞추고, Iframe 통신을 뜯어내 타이밍을 조절한 끝에, 이 블로그의 댓글창은 드디어 제 디자인 시스템의 일부로 완벽하게 녹아들었습니다.
 
 디자인과 코드가 타협하지 않고 완벽하게 맞물려 돌아가는 걸 보는 것, 그게 바로 우리 디자이너들이 집착을 멈출 수 없는 이유 아닐까요?
