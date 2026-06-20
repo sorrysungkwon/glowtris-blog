@@ -75,7 +75,7 @@ export default function GiscusComments({ lang }: { lang: string }) {
 
   useEffect(() => {
     const getThemeUrl = (isDark: boolean) => 
-      `${window.location.origin}/giscus-${isDark ? 'dark' : 'light'}.css`
+      `https://blog.glowtris.com/giscus-${isDark ? 'dark' : 'light'}.css`
 
     const checkTheme = () => document.documentElement.getAttribute('data-theme') === 'dark'
     
