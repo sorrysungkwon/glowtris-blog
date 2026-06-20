@@ -69,6 +69,7 @@ glowtris-blog/
 - **Auto-render**: Markdown preview on right pane (same language as editing)
 - **Max-width**: Editor constrained to 1280px
 - **Auto-deploy**: Git push triggers Vercel
+- **Mandatory SEO Frontmatter**: All new posts MUST include `tldr` (or `tldr_ko`) and `faq` (or `faq_ko`) fields for Google FAQPage schema and TL;DR block injection.
 
 ## Important Constraints
 - Read-only preview must match edited language (not opposite)

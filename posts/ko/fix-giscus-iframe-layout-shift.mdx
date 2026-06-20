@@ -11,6 +11,18 @@ readingTime: 6
 coverGradient: 'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)'
 coverEmoji: "\U0001F50D"
 featured: false
+tldr_ko: >-
+  Giscus 댓글 창이 늦게 로딩되면서 발생하는 CLS(레이아웃 밀림 현상)를 해결하기 위해 CSS Grid와 스켈레톤 UI를 도입했습니다.
+  스켈레톤이 공간을 미리 확보하고, 로딩이 완료되면 자연스럽게 페이드인 됩니다.
+faq_ko:
+  - question: Giscus 사용 시 CLS가 발생하는 이유는 무엇인가요?
+    answer: >-
+      Giscus는 비동기로 로드되는 iframe이므로 초기 높이를 알 수 없습니다. 렌더링이 완료된 후 높이가 갑자기 커지면서 주변
+      레이아웃을 밀어내는 현상이 발생합니다.
+  - question: iframe의 CLS를 어떻게 방지할 수 있나요?
+    answer: >-
+      스켈레톤 UI가 미리 자리를 차지하게 한 뒤, iframe의 onLoad 이벤트를 감지하여 부드럽게 페이드인(Fade-in) 되도록
+      CSS Grid로 겹치면 해결됩니다.
 ---
 
 > **TL;DR (핵심 요약)**

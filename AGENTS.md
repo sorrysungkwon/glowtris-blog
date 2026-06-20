@@ -85,6 +85,7 @@ If sync issues occur between Claude and other agents:
 - Git operations logged for audit trail
 
 ## Post Writing Guidelines
+- **Mandatory SEO Schema Injection (FAQ & TL;DR)**: ALL blog posts MUST include `tldr` (or `tldr_ko`) and `faq` (or `faq_ko`) fields in their MDX frontmatter. The `tldr` is a ~50-word summary used for Google Position Zero, and `faq` is a list of `{ question, answer }` objects injected as `FAQPage` JSON-LD schema for Google accordions. This rule applies unconditionally to both Korean and English posts.
 - **Mandatory Lead Summary (Simplicity Principle)**: All blog posts must have a summary/lead at the very beginning, similar to a news article lead. This follows the "Simplicity" principle from the book *Made to Stick* (focus on the core message first).
 - **Standard Publishing Flow**:
   1. **Drafting (KO first)**: AI writes the Korean draft and saves it to the `drafts` branch with `draft: true` in the frontmatter. An empty EN placeholder is created to pass validation.

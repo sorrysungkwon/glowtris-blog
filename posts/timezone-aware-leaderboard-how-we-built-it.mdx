@@ -10,6 +10,22 @@ authorEmoji: "\U0001F4C5"
 readingTime: 5
 coverGradient: 'linear-gradient(135deg, #ff7700 0%, #ff0080 100%)'
 coverEmoji: ✈️
+tldr: >-
+  Building a global daily leaderboard requires handling timezones correctly so
+  that 'midnight' resets fairly for everyone. We used UTC as the absolute source
+  of truth and shifted the presentation layer based on the user's local browser
+  timezone.
+faq:
+  - question: Why is handling timezones difficult in daily leaderboards?
+    answer: >-
+      Because midnight happens at different times across the world. If the
+      server resets at UTC midnight, players in Asia might see their scores
+      reset in the middle of the afternoon.
+  - question: How to implement a fair daily leaderboard?
+    answer: >-
+      Store all timestamps in UTC on the server. On the client side, calculate
+      the remaining time until the next local midnight using the browser's
+      timezone.
 ---
 
 > **TL;DR:** To reset a leaderboard at each user's local midnight regardless of their timezone, don't wipe your database. Instead, create 'date-based buckets' and serve them based on the client's local date, validated within a ±24-hour UTC window.

@@ -11,6 +11,20 @@ readingTime: 6
 coverGradient: 'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)'
 coverEmoji: "\U0001F50D"
 featured: false
+tldr: >-
+  To fix Cumulative Layout Shift (CLS) caused by Giscus loading asynchronously,
+  we implemented a CSS Grid overlay. A skeleton loader is displayed immediately,
+  and the iframe smoothly fades in once it completes loading.
+faq:
+  - question: What causes CLS with Giscus comments?
+    answer: >-
+      Giscus runs in an iframe that loads asynchronously. Because its initial
+      height is unknown, it pushes content down when it finally renders, causing
+      a layout shift.
+  - question: How do you prevent iframe layout shift?
+    answer: >-
+      You can use a skeleton loader overlay and CSS Grid. The skeleton holds the
+      space, and the iframe fades in once loaded using the onLoad event.
 ---
 
 > **TL;DR**
