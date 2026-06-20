@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const fontBold = await fetch(new URL('/fonts/Pretendard-Bold.woff', req.url)).then((res) => res.arrayBuffer())
 
     // Parse parameters
-    const title = searchParams.get('title')?.slice(0, 80) || 'Glowtris Blog'
+    const title = searchParams.get('title') || 'Glowtris Blog'
     const category = searchParams.get('category') || 'TECH'
     const date = searchParams.get('date') || ''
     const readTime = searchParams.get('readTime') || ''
@@ -83,6 +83,11 @@ export async function GET(req: NextRequest) {
                 letterSpacing: '-0.03em',
                 textShadow: '0 4px 24px rgba(0,0,0,0.3)',
                 wordBreak: 'keep-all',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               {title}
