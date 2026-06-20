@@ -1091,6 +1091,16 @@ export default function PostEditor() {
             <span>Preview · {lang === 'en' ? 'English' : 'Korean'}</span>
           </div>
           <div className="pane-preview">
+            {(() => {
+              const t = lang === 'ko' ? (fmField('tldr_ko') || fmField('description_ko') || fmField('description')) : (fmField('tldr') || fmField('description'));
+              if (!t) return null;
+              return (
+                <div className="tldr-block" style={{ marginBottom: '2rem' }}>
+                  <strong>📝 세 줄 요약 (TL;DR)</strong>
+                  <p>{t}</p>
+                </div>
+              );
+            })()}
             <article
               className="mdx"
               dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
@@ -1167,6 +1177,16 @@ export default function PostEditor() {
 
         {activeTab === 'preview' && (
           <div className="pane-preview" style={{ minHeight: '100%' }}>
+            {(() => {
+              const t = lang === 'ko' ? (fmField('tldr_ko') || fmField('description_ko') || fmField('description')) : (fmField('tldr') || fmField('description'));
+              if (!t) return null;
+              return (
+                <div className="tldr-block" style={{ marginBottom: '2rem' }}>
+                  <strong>📝 세 줄 요약 (TL;DR)</strong>
+                  <p>{t}</p>
+                </div>
+              );
+            })()}
             <article
               className="mdx"
               dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
