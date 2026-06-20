@@ -1,6 +1,6 @@
 # Glowtris Blog TODO
 
-## Current Phase: Comments Integration Complete ✅ — Next: Content & Discovery
+## Current Phase: Phase 2 Complete ✅ — Next: Phase 3 (TBD)
 
 ---
 
