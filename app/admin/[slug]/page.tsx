@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { marked } from 'marked'
 import MarkdownToolbar from '@/components/MarkdownToolbar'
 import type { BilingualImageFields } from '@/components/ImageUploadModal'
+import { fixKoreanMarkdownBold } from '@/lib/utils'
 
 function MI({ icon, size = 14 }: { icon: string; size?: number }) {
   return (
@@ -1130,7 +1131,7 @@ export default function PostEditor() {
             })()}
             <article
               className="mdx"
-              dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
+              dangerouslySetInnerHTML={{ __html: marked(fixKoreanMarkdownBold(content || '')) as string }}
             />
             {!content.trim() && (
               <p className="pane-preview-empty">
@@ -1216,7 +1217,7 @@ export default function PostEditor() {
             })()}
             <article
               className="mdx"
-              dangerouslySetInnerHTML={{ __html: marked(content || '') as string }}
+              dangerouslySetInnerHTML={{ __html: marked(fixKoreanMarkdownBold(content || '')) as string }}
             />
             {!content.trim() && (
               <p className="pane-preview-empty">No {lang === 'en' ? 'English' : 'Korean'} content yet</p>
