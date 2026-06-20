@@ -1,39 +1,38 @@
-import type { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next'
 import { getAllPostMeta } from '@/lib/posts'
 
-const BASE_URL = 'https://blog.glowtris.com'
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await getAllPostMeta()
-
-  const postEntries: MetadataRoute.Sitemap = posts.map(post => ({
-    url: `${BASE_URL}/posts/${post.slug}`,
+  const postsEn = await getAllPostMeta('en')
+  const postsKo = await getAllPostMeta('ko')
+  
+  const postEntriesEn = postsEn.map((post) => ({
+    url: `https://blog.glowtris.com/posts/${post.slug}`,
     lastModified: new Date(post.date),
-    changeFrequency: 'monthly',
-    priority: post.featured ? 0.9 : 0.7,
-    alternates: {
-      languages: {
-        en: `${BASE_URL}/posts/${post.slug}`,
-        ko: `${BASE_URL}/posts/${post.slug}?lang=ko`,
-        'x-default': `${BASE_URL}/posts/${post.slug}`,
-      },
-    },
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
+  const postEntriesKo = postsKo.map((post) => ({
+    url: `https://blog.glowtris.com/posts/${post.slug}?lang=ko`,
+    lastModified: new Date(post.date),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
   }))
 
   return [
     {
-      url: BASE_URL,
+      url: 'https://blog.glowtris.com',
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 1,
-      alternates: {
-        languages: {
-          en: BASE_URL,
-          ko: `${BASE_URL}/?lang=ko`,
-          'x-default': BASE_URL,
-        },
-      },
+      priority: 1.0,
     },
-    ...postEntries,
+    {
+      url: 'https://blog.glowtris.com/?lang=ko',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1.0,
+    },
+    ...postEntriesEn,
+    ...postEntriesKo,
   ]
 }

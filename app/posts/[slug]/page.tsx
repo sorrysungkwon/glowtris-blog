@@ -77,9 +77,69 @@ export default async function PostPage({ params, searchParams }: Props) {
   const isSameCategory = sameCat.length > 0
   const titleStr = lang === 'ko' ? (post.title_ko || post.title) : post.title
   const descriptionStr = lang === 'ko' ? (post.description_ko || post.description) : post.description
+  const postUrl = `https://blog.glowtris.com/posts/${slug}${lang === 'ko' ? '?lang=ko' : ''}`
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: titleStr,
+    description: descriptionStr,
+    image: `https://blog.glowtris.com/og?title=${encodeURIComponent(titleStr)}&category=${encodeURIComponent(post.category)}`,
+    datePublished: new Date(post.date).toISOString(),
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Glowtris Blog',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://blog.glowtris.com/icon-512.png'
+      }
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl
+    }
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://blog.glowtris.com'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: post.category,
+        item: `https://blog.glowtris.com/?category=${post.category}`
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: titleStr,
+        item: postUrl
+      }
+    ]
+  }
 
   return (
     <div className="post-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+
       <Link href={backHref} className="post-back">← All posts</Link>
 
       <div className="post-hero" style={{ background: post.coverGradient }}>
