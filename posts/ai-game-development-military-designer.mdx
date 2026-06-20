@@ -1,87 +1,68 @@
 ---
-title: 'Why I''m Writing This, and Who It''s For'
-description: >-
-  I'm a designer in the military who built a game with AI. Here's the honest
-  story of how it happened, what broke, and why it matters.
-date: 2026-06-07T00:00:00.000Z
+title: Why I'm Writing This, and Who It's For
+title_ko: "글로트리스 블로그, 누군가의 바이브코딩 성장 기록"
+description: "I'm a designer in the military who built a game with AI. Here's the honest story of how it happened, what broke, and why it matters."
+description_ko: "군대에 있는 디자이너가 아이패드와 휴대폰으로 AI를 이용해 브라우저 게임을 만들었습니다. 그리고 Reddit에 올리자마자 테트리스 커뮤니티에서 산산조각이 났죠. 그 과정에서 배운 것들, 망한 것들, 그리고 왜 그게 오히려 중요했는지에 대한 솔직한 이야기입니다."
+date: 2026-06-07
 category: STORIES
 author: sorrysungkwon
-authorEmoji: "\U0001FA96"
+authorEmoji: 🪖
 readingTime: 3
-coverGradient: 'linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)'
-coverEmoji: "\U0001F4DD"
+coverGradient: "linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)"
+coverEmoji: "📝"
 featured: true
-tldr: >-
-  Transitioning from a military designer to an AI game developer required
-  shifting from rigid, top-down execution to a more iterative, vibe-based coding
-  workflow. AI bridges the gap between design vision and technical
-  implementation.
-faq:
-  - question: How does military design differ from game UI design?
-    answer: >-
-      Military design focuses on rigid, standardized systems for extreme
-      clarity, while game UI often requires dynamic, engaging, and atmospheric
-      elements.
-  - question: Can a non-technical designer build games with AI?
-    answer: >-
-      Yes, by leveraging tools like Claude, designers can use their visual
-      intuition to guide the AI's coding process without writing the code
-      themselves.
 ---
-I am a designer with 7 years of experience. I've hustled through New York and Seoul, perfectly mastering color theory and typography along the way.
 
-But I am absolutely hopeless at coding. I have no idea what a pointer is, I can't comprehend `async/await`, and I am completely clueless as to why `npm install` blows up randomly.
+I'm a designer. Seven years of it — Seoul, New York, color theory, typography, Design systems and what is a "good design" for the works. But coding? That's a different planet. I don't understand pointers. I can't explain `async/await`. And don't ask me why `npm install` breaks sometimes, because I genuinely have no idea. I just... guess.
 
-Yet, I built an entire browser-based Tetris game, **[Glowtris](https://glowtris.com)**, completely from scratch using Claude.
-
-## How in the World is This Possible?
+Yet I built [Glowtris](https://glowtris.com). A full browser Tetris game. Basically from scratch. By talking to Claude. oh and this beautiful blog and blog's editor too.
 
 <figure>
-  <img src="https://raw.githubusercontent.com/sorrysungkwon/glowtris-blog/main/public/images/1781272645240-glowtris-blog-editor.webp" alt="Glowtris Editor" />
-  <figcaption>The Glowtris Editor - Helping you write viral articles by tracking real-time SEO metrics.</figcaption>
+  <img src="https://raw.githubusercontent.com/sorrysungkwon/glowtris-blog/main/public/images/1781272645240-glowtris-blog-editor.webp" alt="The Glowtris editor image" />
+  <figcaption>The Glowtris editor tracks SEO metrics in real time, helping you write content that actually spreads.</figcaption>
 </figure>
 
-About three weeks ago, completely sick of the monotony of military life, I opened Claude during my late-night study time and bluntly asked:
-*"Can you build a Tetris game that runs in the browser?"*
 
-Claude zoned out for 20 minutes, and then suddenly spat out **something that actually worked.**
+I can't code. Never have. And here's the thing—that turned out to be exactly what I needed.
 
-- One week to build the game core and stand up a server.
-- One week to post it on Reddit, get utterly destroyed by feedback, and fix bugs.
-- One week for design, branding, and infrastructure setup.
+## What happened in a month
 
-In just a month, a fully deployable game was suddenly staring back at me. My role in all of this was dead simple: look at the code Claude spit out and point fingers saying, "This is broken, that color looks weird."
+I asked Claude: "Can we build a Tetris game in the browser?"
 
-Claude was the hands, and I was the eyes.
+He said yes. So we did it. A week for the engine. Another week fixing everything that broke. Another for design, branding, DevOps hell. A month later, the game shipped.
 
-## Vibe Coding: Between Miracles and Disasters
+My part was stupid simple: look at what Claude made. Say if it's right or broken. Describe what to change. That was literally it.
 
-Unfortunately, this blog isn't a friendly tutorial or an answer sheet.
+He was the hands. I was the eyes. And somehow, it worked.
 
-Instead, it's closer to an **incorrect answer notebook** documenting "I tried this, it completely blew up, and I stayed up for days barely managing to fix it."
+## This blog is a record
 
-Here’s what you’ll find on this blog:
-- The spectacular death of my attempt to migrate the game engine to PixiJS.
-- The totally hacked-together, yet brilliantly functional, Redis bucket workaround for my leaderboards.
-- The time I built a blog without understanding Vercel's read-only filesystem and had to nuke it entirely.
+Not a tutorial. Not best practices. Just: "I tried this, it exploded, here's what I learned." And I want to share my own experiences to help people just like me. 
 
-## Who the Hell Should Read This Dumpster Fire?
+The real problems I hit. Design decisions that actually stuck. Engineering disasters and how we survived them. Why PixiJS on Safari is a special circle of hell. Why Redis buckets ended up elegant. Why Vercel's read-only filesystem was a pain that saved us.
 
-**1. Designers who want a taste of coding**
-Vibe coding doesn't require you to understand 100% of the code. You just need a functioning mouth to accurately describe "what you want."
+And mostly—how I didn't know what I was doing. Still don't. But built it anyway.
 
-**2. People whose servers crash every time they try to build something**
-A magical world where AI codes everything for you? Dream on. Ultimately, human beings have to face specific, nasty errors. If my documented disasters save you even one day of banging your head against the wall, I'll call that a success.
+## Who this is for
 
-**3. Those who feel lonely coding by themselves**
-Enlisting in the military late in life, I spent my late-night study time staring blankly at a monitor in the cyber-knowledge room. Nobody asked what I was building. It's lonely and daunting, but I kept building anyway. If you're in a similar situation, I hope this blog offers a small comfort.
+**Designers who want to code**
 
-## ‍️ Why I Keep Building
+You're stuck. You've been stuck for years. Somehow you convinced yourself that coding is for people who understand recursion or binary trees or whatever. It's not. I don't understand recursion. Claude explained it to me once. I'm fine. You don't need to understand everything—you just need to describe what you want.
 
-Building things when you don't know what you're doing is brutally hard. Doing it alone is even harder.
-But it turns out, it's not impossible.
+**People making something that keeps breaking**
 
-I hope you look at my trial and error and chuckle, thinking, "Oh? He got stuck there too? Guess I'm not the only idiot."
+There's no magic here. No secret sauce. Just concrete problems with concrete solutions. Problems you've probably hit too. Maybe our approach helps. Maybe it just makes you feel less insane for hitting the same wall.
 
-Because even a coding-hopeless designer like me pulled it off. You can do it too.
-Are you currently agonizing over some broken code alone? Drop your desperate survival stories in the comments! 
+**People who think they're the only ones**
+
+I built this in a military barracks. At night, in my bunk, PC on desk(and that's too slow to make a game). No one around me had any idea what I was doing. No one asked about progress. But I kept building anyway. Maybe you're somewhere like that. This is for you.
+
+## Why I'm writing this
+
+Building something is hard. Building it without knowing what you're doing is harder. Building it alone is the hardest.
+
+But it's not impossible.
+
+Everything here is something I actually built, actually fought with, actually got working. I'm being careful with these words because maybe—just maybe—you'll read it and go "oh shit, that was me too." And then you'll keep going. 
+
+Because you're not the only one.
