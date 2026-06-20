@@ -1,35 +1,17 @@
 ---
-title: '어느 디자이너의 집착: Giscus 댓글창 Layout Shift(CLS) 완벽 해결기'
-description: >-
-  남들은 안 보는 1px의 오차와 0.1초의 깜빡임. Iframe 로딩 시 발생하는 푸터 널뛰기와 이질감을 디자이너의 눈으로 잡아내고 CSS
-  Grid로 완벽하게 통제한 과정.
-date: 2026-06-19T00:00:00.000Z
+title: "어느 디자이너의 집착: Giscus 댓글창 Layout Shift(CLS) 완벽 해결기"
+description: "남들은 안 보는 1px의 오차와 0.1초의 깜빡임. Iframe 로딩 시 발생하는 푸터 널뛰기와 이질감을 디자이너의 눈으로 잡아내고 CSS Grid로 완벽하게 통제한 과정."
+date: 2026-06-19
 category: DESIGN
 author: sorrysungkwon
-authorEmoji: "\U0001F3A8"
+authorEmoji: 🎨
 readingTime: 6
-coverGradient: 'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)'
-coverEmoji: "\U0001F50D"
+coverGradient: "linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)"
+coverEmoji: 🔍
 featured: false
-tldr_ko: >-
-  Giscus 댓글 창이 늦게 로딩되면서 발생하는 CLS(레이아웃 밀림 현상)를 해결하기 위해 CSS Grid와 스켈레톤 UI를 도입했습니다.
-  스켈레톤이 공간을 미리 확보하고, 로딩이 완료되면 자연스럽게 페이드인 됩니다.
-faq_ko:
-  - question: Giscus 사용 시 CLS가 발생하는 이유는 무엇인가요?
-    answer: >-
-      Giscus는 비동기로 로드되는 iframe이므로 초기 높이를 알 수 없습니다. 렌더링이 완료된 후 높이가 갑자기 커지면서 주변
-      레이아웃을 밀어내는 현상이 발생합니다.
-  - question: iframe의 CLS를 어떻게 방지할 수 있나요?
-    answer: >-
-      스켈레톤 UI가 미리 자리를 차지하게 한 뒤, iframe의 onLoad 이벤트를 감지하여 부드럽게 페이드인(Fade-in) 되도록
-      CSS Grid로 겹치면 해결됩니다.
+tldr: "**TL;DR**\n- **Problem:** Layout shifts (footer jumping) and an out-of-place spinner when loading the external Giscus widget.\n- **Solution:** Controlled rendering timing perfectly using a CSS Grid overlap (`grid-area: overlap`) and intercepting `postMessage` events.\n- **Result:** A 100% seamlessly integrated comment section with zero pixel mismatch or flickering."
+tldr_ko: "\n**TL;DR (핵심 요약)**\n- **문제:** 외부 위젯(Giscus) 로딩 시 발생하는 널뛰기 현상(Layout Shift)과 이질적인 스피너 노출.\n- **해결:** CSS Grid 겹치기(`grid-area: overlap`) 기법과 `postMessage` 이벤트 가로채기로 렌더링 타이밍 완벽 통제.\n- **결과:** 단 1px의 오차나 깜빡임 없이 디자인 시스템에 100% 동화된 댓글창 구현 완료."
 ---
-
-> **TL;DR (핵심 요약)**
-> - **문제:** 외부 위젯(Giscus) 로딩 시 발생하는 널뛰기 현상(Layout Shift)과 이질적인 스피너 노출.
-> - **해결:** CSS Grid 겹치기(`grid-area: overlap`) 기법과 `postMessage` 이벤트 가로채기로 렌더링 타이밍 완벽 통제.
-> - **결과:** 단 1px의 오차나 깜빡임 없이 디자인 시스템에 100% 동화된 댓글창 구현 완료.
-
 ---
 
 정적 블로그나 Next.js 블로그를 만들 때 GitHub Discussions 기반의 **Giscus**는 최고의 선택입니다. 서버도 필요 없고, 마크다운도 지원하니까요. 
