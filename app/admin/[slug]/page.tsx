@@ -997,20 +997,7 @@ export default function PostEditor() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             <div>
               <label style={fmLabelStyle}>Date</label>
-              <div style={{ position: 'relative', width: '100%', height: '34px' }}>
-                <div style={{ ...fmInputStyle, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', boxSizing: 'border-box', pointerEvents: 'none' }}>
-                  {(() => {
-                    const d = fmField('date');
-                    if (!d) return 'Select date';
-                    try {
-                      return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                    } catch {
-                      return d;
-                    }
-                  })()}
-                </div>
-                <input type="date" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', WebkitAppearance: 'none' }} value={fmField('date')} onChange={e => updateFm('date', e.target.value)} />
-              </div>
+              <input type="date" style={{ ...fmInputStyle, WebkitAppearance: 'none', height: '34px', boxSizing: 'border-box' }} value={fmField('date')} onChange={e => updateFm('date', e.target.value)} />
             </div>
             <div>
               <label style={fmLabelStyle}>Category</label>
