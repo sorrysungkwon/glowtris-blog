@@ -11,13 +11,15 @@ export default function GameEmbed() {
         </div>
         <div className="game-embed-url">glowtris.com</div>
       </div>
-      <iframe
-        src="https://glowtris.com"
-        className="game-embed-iframe"
-        title="Glowtris Game"
-        loading="lazy"
-        sandbox="allow-scripts allow-same-origin"
-      />
+      <div className="game-embed-iframe-container">
+        <iframe
+          src="https://glowtris.com"
+          className="game-embed-iframe"
+          title="Glowtris Game"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      </div>
     </div>
   )
 }
