@@ -1,15 +1,15 @@
 ---
-title: "Whose midnight counts? Building a timezone-aware leaderboard"
-title_ko: "서울에서 자정에 게임을 하고 비행기를 탔다. 스트릭은 깨졌을까?"
-description: "Duolingo keeps your streak alive even when you land in a timezone from yesterday. I wanted the same for Glowtris — here’s how I built it."
-description_ko: "비행기를 타고 뉴욕에 내려도 듀오링고 스트릭은 그대로 유지됩니다. 이 미친 타임존 처리 마법을 글로우트리스 리더보드에 똑같이 구현하면서 배운 실전 노하우."
-date: 2026-06-05
+title: '글로우트리스 리더보드 타임존 처리 완벽 가이드: 자정 리셋 로직'
+description: >-
+  비행기를 타고 타임존이 바뀌어도 스트릭은 유지되어야 한다! 듀오링고의 타임존 처리 마법을 벤치마킹하여 개발한 날짜 기반 리더보드 구현 실전
+  노하우.
+date: 2026-06-05T00:00:00.000Z
 category: DEV
 author: sorrysungkwon
-authorEmoji: 📅
+authorEmoji: "\U0001F4C5"
 readingTime: 5
-coverGradient: "linear-gradient(135deg, #ff7700 0%, #ff0080 100%)"
-coverEmoji: "✈️"
+coverGradient: 'linear-gradient(135deg, #ff7700 0%, #ff0080 100%)'
+coverEmoji: ✈️
 ---
 
 > **요약:** 전 세계 어디서든 유저의 '로컬 자정'을 기준으로 리더보드를 리셋하려면, 기존 데이터를 지우는 대신 '날짜별 버킷(Bucket)'을 만들고 클라이언트의 현지 날짜를 서버가 검증(±24시간 이내)하여 보여주는 방식이 가장 안전하고 효율적입니다.

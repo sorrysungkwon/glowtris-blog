@@ -1,15 +1,15 @@
 ---
-title: "Whose midnight counts? Building a timezone-aware leaderboard"
-title_ko: "서울에서 자정에 게임을 하고 비행기를 탔다. 스트릭은 깨졌을까?"
-description: "Duolingo keeps your streak alive even when you land in a timezone from yesterday. I wanted the same for Glowtris — here’s how I built it."
-description_ko: "비행기를 타고 뉴욕에 내려도 듀오링고 스트릭은 그대로 유지됩니다. 이 미친 타임존 처리 마법을 글로우트리스 리더보드에 똑같이 구현하면서 배운 실전 노하우."
-date: 2026-06-05
+title: 'Building a Timezone-Aware Leaderboard: The Midnight Reset Logic'
+description: >-
+  How to handle user timezones for daily streaks, just like Duolingo. The
+  complete backend logic for building a timezone-aware leaderboard for Glowtris.
+date: 2026-06-05T00:00:00.000Z
 category: DEV
 author: sorrysungkwon
-authorEmoji: 📅
+authorEmoji: "\U0001F4C5"
 readingTime: 5
-coverGradient: "linear-gradient(135deg, #ff7700 0%, #ff0080 100%)"
-coverEmoji: "✈️"
+coverGradient: 'linear-gradient(135deg, #ff7700 0%, #ff0080 100%)'
+coverEmoji: ✈️
 ---
 
 > **TL;DR:** To reset a leaderboard at each user's local midnight regardless of their timezone, don't wipe your database. Instead, create 'date-based buckets' and serve them based on the client's local date, validated within a ±24-hour UTC window.
