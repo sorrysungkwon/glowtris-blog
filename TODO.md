@@ -9,6 +9,7 @@
 - [x] Create automated `rss.xml` feed endpoint pulling all blog posts.
 - [x] Implement dynamic OpenGraph thumbnail generation (`/og`) via `@vercel/og` matching the blog's design system.
 - [x] Map OpenGraph thumbnails to all blog posts globally.
+- [x] Build `<ShareButton>` component using native Web Share API (with clipboard fallback) and insert it perfectly into the post metadata row.
 
 ---
 
