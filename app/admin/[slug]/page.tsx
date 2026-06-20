@@ -1096,7 +1096,7 @@ export default function PostEditor() {
               if (!t) return null;
               return (
                 <div className="tldr-block" style={{ marginBottom: '2rem' }}>
-                  <strong>📝 세 줄 요약 (TL;DR)</strong>
+                  <strong>{lang === 'ko' ? '세 줄 요약' : 'Summary'}</strong>
                   <p>{t}</p>
                 </div>
               );
@@ -1182,7 +1182,7 @@ export default function PostEditor() {
               if (!t) return null;
               return (
                 <div className="tldr-block" style={{ marginBottom: '2rem' }}>
-                  <strong>📝 세 줄 요약 (TL;DR)</strong>
+                  <strong>{lang === 'ko' ? '세 줄 요약' : 'Summary'}</strong>
                   <p>{t}</p>
                 </div>
               );
