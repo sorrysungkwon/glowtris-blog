@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import PostCard from '@/components/PostCard'
 import GlowtrisCTA from '@/components/GlowtrisCTA'
 import GiscusComments from '@/components/GiscusComments'
+import ShareButton from '@/components/ShareButton'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -74,6 +75,7 @@ export default async function PostPage({ params, searchParams }: Props) {
   const otherPosts = allPosts.filter(p => p.category !== post.category && p.slug !== slug)
   const postsToShow = [...sameCat, ...otherPosts].slice(0, 3)
   const isSameCategory = sameCat.length > 0
+  const titleStr = lang === 'ko' ? (post.title_ko || post.title) : post.title
 
   return (
     <div className="post-page">
@@ -87,16 +89,19 @@ export default async function PostPage({ params, searchParams }: Props) {
       </div>
 
       <header className="post-header">
-        <h1>{lang === 'ko' ? (post.title_ko || post.title) : post.title}</h1>
+        <h1>{titleStr}</h1>
         <div className="post-meta-row">
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <span>{post.authorEmoji}</span>
-            <span>{post.author}</span>
-          </span>
-          <span className="dot">·</span>
-          <span>{formatDate(post.date)}</span>
-          <span className="dot">·</span>
-          <span>{post.readingTime} {readUnit}</span>
+          <div className="post-meta-left">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span>{post.authorEmoji}</span>
+              <span>{post.author}</span>
+            </span>
+            <span className="dot">·</span>
+            <span>{formatDate(post.date)}</span>
+            <span className="dot">·</span>
+            <span>{post.readingTime} {readUnit}</span>
+          </div>
+          <ShareButton title={titleStr} lang={lang} />
         </div>
       </header>
 
