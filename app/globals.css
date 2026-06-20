@@ -2511,10 +2511,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* TL;DR Block */
 .tldr-block {
   background: var(--surface-hover);
-  border-left: 4px solid var(--primary);
+  border: 2px solid var(--primary);
   padding: 1.25rem 1.5rem;
   margin: 1.5rem 0 2.5rem;
-  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  border-radius: var(--r-xl);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 .tldr-block strong {
   display: block;
