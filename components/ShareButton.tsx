@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-export default function ShareButton({ title, lang = 'en' }: { title: string, lang?: string }) {
+export default function ShareButton({ title, text, lang = 'en' }: { title: string, text?: string, lang?: string }) {
   const [copied, setCopied] = useState(false)
   const [canShare, setCanShare] = useState(false)
 
@@ -19,6 +19,7 @@ export default function ShareButton({ title, lang = 'en' }: { title: string, lan
       try {
         await navigator.share({
           title,
+          text,
           url,
         })
         return

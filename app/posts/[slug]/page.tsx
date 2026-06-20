@@ -76,6 +76,7 @@ export default async function PostPage({ params, searchParams }: Props) {
   const postsToShow = [...sameCat, ...otherPosts].slice(0, 3)
   const isSameCategory = sameCat.length > 0
   const titleStr = lang === 'ko' ? (post.title_ko || post.title) : post.title
+  const descriptionStr = lang === 'ko' ? (post.description_ko || post.description) : post.description
 
   return (
     <div className="post-page">
@@ -101,7 +102,7 @@ export default async function PostPage({ params, searchParams }: Props) {
             <span className="dot">·</span>
             <span>{post.readingTime} {readUnit}</span>
           </div>
-          <ShareButton title={titleStr} lang={lang} />
+          <ShareButton title={titleStr} text={descriptionStr} lang={lang} />
         </div>
       </header>
 
