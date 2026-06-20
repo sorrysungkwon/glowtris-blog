@@ -985,6 +985,14 @@ export default function PostEditor() {
             </label>
             <textarea style={{ ...fmInputStyle, resize: 'vertical', minHeight: '48px' }} rows={2} value={fmField('description_ko')} onChange={e => updateFm('description_ko', e.target.value ? fmQuote(e.target.value) : null)} placeholder="한국어 SEO 설명" />
           </div>
+          <div>
+            <label style={fmLabelStyle}>TL;DR (EN) <span style={{fontSize: '10px', color: 'var(--text-secondary)'}}>(Optional. Uses description if empty)</span></label>
+            <textarea style={{ ...fmInputStyle, resize: 'vertical', minHeight: '64px' }} rows={3} value={fmField('tldr')} onChange={e => updateFm('tldr', e.target.value ? fmQuote(e.target.value) : null)} placeholder="Brief summary displayed at the top of the post" />
+          </div>
+          <div>
+            <label style={fmLabelStyle}>TL;DR (KO) <span style={{fontSize: '10px', color: 'var(--text-secondary)'}}>(Optional. Uses description_ko if empty)</span></label>
+            <textarea style={{ ...fmInputStyle, resize: 'vertical', minHeight: '64px' }} rows={3} value={fmField('tldr_ko')} onChange={e => updateFm('tldr_ko', e.target.value ? fmQuote(e.target.value) : null)} placeholder="한국어 세 줄 요약 (빈칸이면 한국어 SEO 설명 사용)" />
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             <div>
