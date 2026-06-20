@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
             fontFamily: 'sans-serif',
           }}
         >
-          {/* Top Row: Brand & Category */}
+          {/* Top Row: Category & Logo */}
           <div
             style={{
               display: 'flex',
@@ -41,9 +41,6 @@ export async function GET(req: NextRequest) {
               width: '100%',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', color: 'rgba(255,255,255,0.8)' }}>
-              Glowtris
-            </div>
             <div
               style={{
                 display: 'flex',
@@ -58,6 +55,9 @@ export async function GET(req: NextRequest) {
               }}
             >
               {category}
+            </div>
+            <div style={{ display: 'flex' }}>
+              <img src={new URL('/logo-blog-white.png', req.url).href} alt="Glowtris Logo" height="36" />
             </div>
           </div>
 
