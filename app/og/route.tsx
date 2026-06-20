@@ -88,29 +88,6 @@ export async function GET(req: NextRequest) {
               {title}
             </div>
           </div>
-
-          {/* Bottom Row: Meta Info */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: 'auto',
-              borderTop: '2px solid rgba(255,255,255,0.15)',
-              paddingTop: '32px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 28, color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
-              {author}
-            </div>
-            {(date || readTime) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: 24, color: 'rgba(255,255,255,0.7)', fontWeight: 400 }}>
-                {date && <span>{date}</span>}
-                {date && readTime && <span>•</span>}
-                {readTime && <span>{readTime} min read</span>}
-              </div>
-            )}
-          </div>
         </div>
       ),
       {
