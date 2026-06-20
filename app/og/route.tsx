@@ -7,6 +7,10 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
 
+    // Fetch fonts
+    const fontRegular = await fetch(new URL('/fonts/Pretendard-Regular.woff', req.url)).then((res) => res.arrayBuffer())
+    const fontBold = await fetch(new URL('/fonts/Pretendard-Bold.woff', req.url)).then((res) => res.arrayBuffer())
+
     // Parse parameters
     const title = searchParams.get('title')?.slice(0, 80) || 'Glowtris Blog'
     const category = searchParams.get('category') || 'TECH'
@@ -29,7 +33,7 @@ export async function GET(req: NextRequest) {
             padding: '80px',
             background: gradient, // Can be a color or gradient string
             color: 'white',
-            fontFamily: 'sans-serif',
+            fontFamily: '"Pretendard", sans-serif',
           }}
         >
           {/* Top Row: Category & Logo */}
@@ -50,7 +54,7 @@ export async function GET(req: NextRequest) {
                 background: 'rgba(255,255,255,0.15)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 fontSize: 24,
-                fontWeight: 800,
+                fontWeight: 700,
                 letterSpacing: '0.1em',
               }}
             >
@@ -74,10 +78,11 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 fontSize: 72,
-                fontWeight: 900,
-                lineHeight: 1.1,
+                fontWeight: 700,
+                lineHeight: 1.2,
                 letterSpacing: '-0.03em',
                 textShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                wordBreak: 'keep-all',
               }}
             >
               {title}
@@ -95,11 +100,11 @@ export async function GET(req: NextRequest) {
               paddingTop: '32px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 28, color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: 28, color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
               {author}
             </div>
             {(date || readTime) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: 24, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: 24, color: 'rgba(255,255,255,0.7)', fontWeight: 400 }}>
                 {date && <span>{date}</span>}
                 {date && readTime && <span>•</span>}
                 {readTime && <span>{readTime} min read</span>}
@@ -111,6 +116,20 @@ export async function GET(req: NextRequest) {
       {
         width: 1200,
         height: 630,
+        fonts: [
+          {
+            name: 'Pretendard',
+            data: fontRegular,
+            weight: 400,
+            style: 'normal',
+          },
+          {
+            name: 'Pretendard',
+            data: fontBold,
+            weight: 700,
+            style: 'normal',
+          },
+        ],
       }
     )
   } catch (e: any) {
