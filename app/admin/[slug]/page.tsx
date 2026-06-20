@@ -136,6 +136,8 @@ interface DraftHistoryItem {
   data: PostData
 }
 
+const EMOJI_LIST = ['📝', '🎨', '🎮', '🕹️', '👾', '🚀', '🛠️', '⚙️', '🔍', '💡', '🔥', '✨', '🛡️', '📦', '🎉', '🪖', '🧠', '🎧', '⚡', '🏆', '📈', '🌐', '💻', '🔮', '🎯', '🧪', '🐛', '📱']
+
 const CATEGORY_GRADIENTS: Record<string, string[]> = {
   DEV: [
     'linear-gradient(135deg, #00c8ff 0%, #0040ff 100%)',
@@ -191,6 +193,7 @@ export default function PostEditor() {
   const [isMobile, setIsMobile] = useState(false)
   const [seoOpen, setSeoOpen] = useState(false)
   const [fmMode, setFmMode] = useState<'form' | 'raw'>('form')
+  const [emojiPickerTarget, setEmojiPickerTarget] = useState<'author' | 'cover' | null>(null)
   const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   function handleSlugChange(val: string) {
@@ -876,15 +879,25 @@ export default function PostEditor() {
     setData(d => ({ ...d, frontmatter: setFmField(d.frontmatter, name, value) }))
 
   const fmInputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '7px 10px',
-    fontSize: '12.5px',
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--r-sm)',
-    color: 'var(--text-body)',
-    outline: 'none',
-    fontFamily: 'inherit',
+    width: '100%', padding: '6px 10px', fontSize: '13px', 
+    border: '1px solid var(--border)', borderRadius: '4px',
+    backgroundColor: 'var(--surface)', color: 'var(--text-primary)',
+    outline: 'none', transition: 'border 0.2s',
+    boxSizing: 'border-box'
+  }
+  
+  const emojiPickerContainerStyle: React.CSSProperties = {
+    position: 'absolute', top: '100%', left: '0', marginTop: '4px',
+    backgroundColor: 'var(--surface)', border: '1px solid var(--border)',
+    borderRadius: '8px', padding: '8px', display: 'grid',
+    gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px',
+    zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    width: '240px'
+  }
+  const emojiPickerButtonStyle: React.CSSProperties = {
+    background: 'transparent', border: 'none', fontSize: '20px',
+    cursor: 'pointer', padding: '4px', borderRadius: '4px', textAlign: 'center',
+    transition: 'background 0.2s'
   }
   const fmLabelStyle: React.CSSProperties = {
     fontSize: '10px',
@@ -1016,13 +1029,27 @@ export default function PostEditor() {
               <label style={fmLabelStyle}>Author</label>
               <input style={fmInputStyle} value={fmField('author')} onChange={e => updateFm('author', e.target.value)} />
             </div>
-            <div>
+            <div style={{ position: 'relative' }}>
               <label style={fmLabelStyle}>Author emoji</label>
-              <input style={fmInputStyle} value={fmField('authorEmoji')} onChange={e => updateFm('authorEmoji', e.target.value ? fmQuote(e.target.value) : null)} placeholder="🪖" />
+              <input style={{ ...fmInputStyle, cursor: 'pointer' }} readOnly value={fmField('authorEmoji')} onClick={() => setEmojiPickerTarget(emojiPickerTarget === 'author' ? null : 'author')} placeholder="🪖" />
+              {emojiPickerTarget === 'author' && (
+                <div style={emojiPickerContainerStyle}>
+                  {EMOJI_LIST.map(e => (
+                    <button key={e} type="button" style={emojiPickerButtonStyle} onClick={() => { updateFm('authorEmoji', fmQuote(e)); setEmojiPickerTarget(null); }}>{e}</button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div>
+            <div style={{ position: 'relative' }}>
               <label style={fmLabelStyle}>Cover emoji</label>
-              <input style={fmInputStyle} value={fmField('coverEmoji')} onChange={e => updateFm('coverEmoji', e.target.value ? fmQuote(e.target.value) : null)} placeholder="📝" />
+              <input style={{ ...fmInputStyle, cursor: 'pointer' }} readOnly value={fmField('coverEmoji')} onClick={() => setEmojiPickerTarget(emojiPickerTarget === 'cover' ? null : 'cover')} placeholder="📝" />
+              {emojiPickerTarget === 'cover' && (
+                <div style={emojiPickerContainerStyle}>
+                  {EMOJI_LIST.map(e => (
+                    <button key={e} type="button" style={emojiPickerButtonStyle} onClick={() => { updateFm('coverEmoji', fmQuote(e)); setEmojiPickerTarget(null); }}>{e}</button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
