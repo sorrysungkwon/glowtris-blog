@@ -14,8 +14,8 @@
   /* Text hierarchy — 4 levels for clear proximity grouping */
   --text-primary:  #0d0d14;
   --text-body:     #2d2d3d;
-  --text-muted:    #6b7280;
-  --text-faint:    #a0a6b4;
+  --text-muted:    #4b5563;
+  --text-faint:    #6b7280;
 
   /* Brand palette */
   --cyan:   #2563eb;
@@ -84,8 +84,8 @@
 
   --text-primary: #f0f0ff;
   --text-body:    rgba(240, 240, 255, 0.88);
-  --text-muted:   rgba(240, 240, 255, 0.50);
-  --text-faint:   rgba(240, 240, 255, 0.28);
+  --text-muted:   rgba(240, 240, 255, 0.65);
+  --text-faint:   rgba(240, 240, 255, 0.45);
 
   --cyan:   #00c8ff;
   --purple: #a855f7;
@@ -2540,3 +2540,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   line-height: 1.6;
   color: var(--text-secondary);
 }
+
+/* Safari <16px zoom fix & Mobile A11y */
+input, textarea, select { font-size: 16px; }
+a, button { touch-action: manipulation; }

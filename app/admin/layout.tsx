@@ -1,7 +1,7 @@
 import type { Viewport } from 'next'
 
 export const viewport: Viewport = {
-  maximumScale: 1,
+
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

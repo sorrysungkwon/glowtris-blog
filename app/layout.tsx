@@ -8,7 +8,7 @@ import './globals.css'
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+
 }
 
 export const metadata: Metadata = {
@@ -131,6 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="nav-link"
+                  aria-label="Play Glowtris"
                 >
                   <span className="nav-play-text">Play the game ↗</span>
                   <span className="nav-play-icon material-icons-round" aria-hidden="true" title="Play Glowtris" style={{ fontSize: '16px' }}>sports_esports</span>
