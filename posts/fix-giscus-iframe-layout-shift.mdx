@@ -12,7 +12,7 @@ featured: false
 title_ko: "어느 디자이너의 집착: Giscus 댓글창 Layout Shift(CLS) 완벽 해결기"
 description_ko: "남들은 안 보는 1px의 오차와 0.1초의 깜빡임. Iframe 로딩 시 발생하는 푸터 널뛰기와 이질감을 디자이너의 눈으로 잡아내고 CSS Grid로 완벽하게 통제한 과정."
 tldr: "Problem: Layout shifts (footer jumping) and an out-of-place spinner when loading the external Giscus widget.\nSolution: Controlled rendering timing perfectly using a CSS Grid overlap (`grid-area: overlap`) and intercepting `postMessage` events.\nResult: A 100% seamlessly integrated comment section with zero pixel mismatch or flickering."
-tldr_ko: "\n**TL;DR (핵심 요약)**\n- **문제:** 외부 위젯(Giscus) 로딩 시 발생하는 널뛰기 현상(Layout Shift)과 이질적인 스피너 노출.\n- **해결:** CSS Grid 겹치기(`grid-area: overlap`) 기법과 `postMessage` 이벤트 가로채기로 렌더링 타이밍 완벽 통제.\n- **결과:** 단 1px의 오차나 깜빡임 없이 디자인 시스템에 100% 동화된 댓글창 구현 완료."
+tldr_ko: "- 문제: 외부 위젯(Giscus) 로딩 시 발생하는 널뛰기 현상(Layout Shift)과 이질적인 스피너 노출.\n- 해결: CSS Grid 겹치기(`grid-area: overlap`) 기법과 `postMessage` 이벤트 가로채기로 렌더링 타이밍 완벽 통제.\n- 결과: 단 1px의 오차나 깜빡임 없이 디자인 시스템에 100% 동화된 댓글창 구현 완료."
 ---
 ---
 
