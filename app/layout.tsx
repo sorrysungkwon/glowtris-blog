@@ -3,7 +3,41 @@ import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import LangToggle from '@/components/LangToggle'
 import { GoogleTagManager } from '@next/third-parties/google'
+import { Orbitron } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['700', '900'],
+  variable: '--font-brand',
+  display: 'swap',
+})
+
+const pretendard = localFont({
+  src: [
+    {
+      path: '../public/fonts/Pretendard-Regular.woff',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/Pretendard-Bold.woff',
+      weight: '700',
+      style: 'normal',
+    }
+  ],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const materialIcons = localFont({
+  src: '../public/fonts/MaterialIconsRound.woff2',
+  variable: '--font-material',
+  display: 'block',
+  weight: '400',
+  style: 'normal',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -77,7 +111,7 @@ const googleTranslateCrashPatch = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${orbitron.variable} ${pretendard.variable} ${materialIcons.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <script dangerouslySetInnerHTML={{ __html: googleTranslateCrashPatch }} />
@@ -104,11 +138,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "about": { "@type": "VideoGame", "name": "Glowtris", "url": "https://glowtris.com" }
           }
         ])}} />
-                                <link
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-          rel="stylesheet"
-        />
-              </head>
+      </head>
       <body>
         <header className="site-header">
           <div className="container">
