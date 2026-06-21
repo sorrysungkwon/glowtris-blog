@@ -14,22 +14,7 @@ const orbitron = Orbitron({
   display: 'swap',
 })
 
-const pretendard = localFont({
-  src: [
-    {
-      path: '../public/fonts/Pretendard-Regular.woff',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/Pretendard-Bold.woff',
-      weight: '700',
-      style: 'normal',
-    }
-  ],
-  variable: '--font-body',
-  display: 'swap',
-})
+
 
 const materialIcons = localFont({
   src: '../public/fonts/MaterialIconsRound.woff2',
@@ -111,8 +96,9 @@ const googleTranslateCrashPatch = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${orbitron.variable} ${pretendard.variable} ${materialIcons.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${orbitron.variable} ${materialIcons.variable}`}>
       <head>
+        <link rel="stylesheet" as="style" crossOrigin="anonymous" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <script dangerouslySetInnerHTML={{ __html: googleTranslateCrashPatch }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
