@@ -5,12 +5,12 @@
 ---
 
 ### 🚀 Phase 4 — SEO & Growth Hacking (Fusion Panel Plan)
-- [ ] **1. Clean up Hreflang (Game):** Remove the invalid `hreflang="ko"` tag from `index.html` in the game codebase since it causes duplicate content penalties.
-- [ ] **2. Dwell Time Exploit (Game Embed):**
+- [x] **1. Clean up Hreflang (Game):** Remove the invalid `hreflang="ko"` tag from `index.html` in the game codebase since it causes duplicate content penalties.
+- [x] **2. Dwell Time Exploit (Game Embed):**
   - *General Pattern:* Upgrade `<GlowtrisCTA />` at the end of every post to embed the actual playable game `<iframe>` to capture users who finish reading.
   - *Special Pattern:* Create a `<GameEmbed />` MDX component to insert into the *middle* of highly relevant posts (e.g., UI devlogs) to catch early drop-offs and artificially inflate Dwell Time to 10+ minutes.
-- [ ] **3. Advanced Schema (Blog):** Inject `FAQPage` JSON-LD schema and a 50-word TL;DR (Featured Snippet bait) block at the top of tutorial/devlog posts.
-- [ ] **4. Programmatic SEO (Game):** Create 4 separate landing pages (e.g., `/sprint.html`, `/play/unblocked`) pointing to the same game engine but optimized for high-volume, low-competition keywords.
+- [x] **3. Advanced Schema (Blog):** Inject `FAQPage` JSON-LD schema and a 50-word TL;DR (Featured Snippet bait) block at the top of tutorial/devlog posts.
+- [x] **4. Programmatic SEO (Game):** Create 4 separate landing pages (e.g., `/sprint.html`, `/play/unblocked`) pointing to the same game engine but optimized for high-volume, low-competition keywords.
 - [ ] **5. High-DA Backlinks:** Submit the game to aggregators (itch.io, CrazyGames, Poki) and open-source a small technical module on GitHub for powerful backlink juice.
 
 ---
