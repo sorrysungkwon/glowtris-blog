@@ -101,8 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" as="style" crossOrigin="anonymous" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <script dangerouslySetInnerHTML={{ __html: googleTranslateCrashPatch }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
-          {
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": [{
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "Glowtris Blog",
@@ -145,8 +144,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "inLanguage": "ko",
             "author": { "@type": "Person", "name": "sorrysungkwon" },
             "about": { "@type": "VideoGame", "name": "글로우트리스", "url": "https://glowtris.com/?lang=ko" }
-          }
-        ])}} />
+          } ]})}} />
       </head>
       <body>
         <header className="site-header">
