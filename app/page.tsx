@@ -29,9 +29,49 @@ export default async function Home({ searchParams }: Props) {
   const { lang = 'en' } = await searchParams
   const posts = await getAllPostMeta(lang)
 
+  const rootFaqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: lang === 'ko' ? '글로우트리스 블로그는 어떤 곳인가요?' : 'What is the Glowtris Blog?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: lang === 'ko' ? '무료 웹 브라우저 블록 퍼즐 게임인 글로우트리스(Glowtris)의 개발 과정, 아키텍처 의사결정, 프론트엔드 최적화 등 인디 게임 개발의 여정을 기록하는 공간입니다.' : 'It is a space where we record the journey of indie game development, including Glowtris development processes, architecture decisions, and frontend optimizations.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: lang === 'ko' ? '글로우트리스 게임은 어떻게 플레이하나요?' : 'How do I play Glowtris?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: lang === 'ko' ? '다운로드나 설치, 회원가입 없이 PC나 모바일 웹 브라우저에서 glowtris.com 에 접속하시면 곧바로 무료로 플레이하실 수 있습니다.' : 'You can play for free immediately by visiting glowtris.com in your web browser, with no downloads, installations, or sign-ups required.'
+        }
+      }
+    ]
+  }
+
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `https://blog.glowtris.com/posts/${post.slug}${lang === 'ko' ? '?lang=ko' : ''}`
+    }))
+  }
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(rootFaqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+      />
       {/* Hero — Gestalt: continuity, figure-ground */}
       <section className="hero">
         <HeroNodes />
