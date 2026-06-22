@@ -113,7 +113,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "url": "https://blog.glowtris.com",
             "inLanguage": "en",
             "author": { "@type": "Person", "name": "sorrysungkwon" },
-            "about": { "@type": "SoftwareApplication", "name": "Glowtris", "url": "https://glowtris.com" }
+            "about": {
+              "@type": "SoftwareApplication",
+              "name": "Glowtris",
+              "url": "https://glowtris.com",
+              "applicationCategory": "GameApplication",
+              "operatingSystem": "Any",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "124"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            }
           } ]})}} />
       </head>
       <body>
