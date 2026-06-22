@@ -107,9 +107,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "@type": "WebSite",
             "name": "Glowtris Blog",
             "url": "https://blog.glowtris.com",
+            "inLanguage": "en",
             "potentialAction": {
               "@type": "SearchAction",
               "target": "https://blog.glowtris.com/?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "글로우트리스 블로그",
+            "url": "https://blog.glowtris.com/?lang=ko",
+            "inLanguage": "ko",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://blog.glowtris.com/?lang=ko&search={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           },
@@ -119,9 +132,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "name": "Glowtris Blog",
             "description": "Indie game dev log for Glowtris — a free browser block-stacking game.",
             "url": "https://blog.glowtris.com",
+            "inLanguage": "en",
             "author": { "@type": "Person", "name": "sorrysungkwon" },
-            "inLanguage": ["en", "ko"],
             "about": { "@type": "VideoGame", "name": "Glowtris", "url": "https://glowtris.com" }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "글로우트리스 블로그",
+            "description": "무료 웹 브라우저 블록 퍼즐 게임 글로우트리스(Glowtris)의 인디 게임 개발 일지입니다.",
+            "url": "https://blog.glowtris.com/?lang=ko",
+            "inLanguage": "ko",
+            "author": { "@type": "Person", "name": "sorrysungkwon" },
+            "about": { "@type": "VideoGame", "name": "글로우트리스", "url": "https://glowtris.com/?lang=ko" }
           }
         ])}} />
       </head>
