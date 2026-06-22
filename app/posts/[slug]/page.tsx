@@ -134,7 +134,24 @@ export default async function PostPage({ params, searchParams }: Props) {
     ]
   }
 
-  const faqData = lang === 'ko' ? (post.faq_ko || post.faq) : post.faq
+  let faqData = lang === 'ko' ? (post.faq_ko || post.faq) : post.faq
+  if (!faqData || faqData.length === 0) {
+    // Automatically generate FAQ data from H2/H3 headings
+    const headingsRegex = /(?:^|\n)(#{2,3})\s+(.*)\n+([^#\n][\s\S]*?)(?=\n#{2,3}\s|$)/g
+    const matches = [...post.content.matchAll(headingsRegex)]
+    if (matches.length > 0) {
+      faqData = matches.map(m => {
+        const question = m[2].trim()
+        const block = m[3].trim()
+        // Extract the first paragraph
+        const firstPara = block.split(/\n\s*\n/)[0]
+        // Clean basic markdown
+        const answer = firstPara.replace(/\[(.*?)\]\(.*?\)/g, '$1').replace(/[*_`]/g, '').trim()
+        return { question, answer }
+      }).filter(item => item.answer.length > 10)
+    }
+  }
+
   const faqLd = faqData && faqData.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
